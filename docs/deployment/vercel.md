@@ -7,12 +7,14 @@ and Vercel project do not need to change.
 
 ## Automatic deployment
 
-The separate `Deploy marketing to Vercel` workflow runs after a successful `CI marketing`
-workflow for a push to `main`. It checks out the commit that passed CI and checks
-that it is still the current `main` before publishing. It can also be run
-manually from `main`. Pilot releases use their own CD and cannot be blocked by
-a landing deployment failure. Deployments to `marketing-production` are queued
-without interrupting a running publication.
+`CI marketing` runs its jobs only after a pull request is merged into `main`.
+Pushing commits, opening or updating a PR, and closing a PR without merging it
+do not execute those jobs. After all validations pass, CI calls the reusable
+`Deploy marketing to Vercel` workflow. Both workflows check out the exact merged
+commit, and CD confirms that it is still the current `main` before publishing.
+Pilot releases use their own CD and cannot be blocked by a landing deployment
+failure. Deployments to `marketing-production` are queued without interrupting
+a running publication.
 
 ## Vercel and GitHub configuration
 
