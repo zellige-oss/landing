@@ -3,9 +3,7 @@ name: CI marketing
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
-  workflow_dispatch:
+    types: [closed]
 
 permissions:
   contents: read
@@ -17,11 +15,13 @@ concurrency:
 jobs:
   marketing:
     name: Landing lint, types, build and checks
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -41,7 +41,7 @@ jobs:
 
   required:
     name: Marketing CI required
-    if: ${{ always() }}
+    if: ${{ always() && github.event.pull_request.merged == true }}
     needs: [marketing]
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -59,3 +59,11 @@ jobs:
               raise SystemExit("Required validations did not pass: " + ", ".join(failed))
           print("All required validations passed.")
           PYTHON
+
+  publish:
+    name: Deploy validated landing
+    needs: [required]
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    uses: ./.github/workflows/deploy-marketing.yml
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
