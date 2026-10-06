@@ -36,7 +36,7 @@ jobs:
         working-directory: marketing
       - name: Check the prerendered page and the packaged artifact
         run: |
-          node --test tests/marketing.test.mjs tests/marketing-build.test.mjs tests/pattern-geometry.test.mjs tests/deployment-scope.test.mjs
+          node --test tests/marketing.test.mjs tests/marketing-build.test.mjs tests/pattern-geometry.test.mjs tests/deployment-scope.test.mjs tests/release-head.test.mjs
           node deploy/build-marketing.mjs
 
   required:

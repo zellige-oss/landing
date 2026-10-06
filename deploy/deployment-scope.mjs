@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 export function affects(target, paths) {
   const shared = new Set(['deploy/deployment-scope.mjs']);
   const specific = {
-    marketing: new Set(['deploy/build-marketing.mjs', 'deploy/vercel-marketing.json', '.github/workflows/deploy-marketing.yml']),
+    marketing: new Set(['deploy/build-marketing.mjs', 'deploy/release-head.mjs', 'deploy/vercel-marketing.json', '.github/workflows/deploy-marketing.yml']),
   };
   const prefixes = { marketing: ['marketing/'] };
   if (!specific[target]) throw new Error('Unknown deployment target');

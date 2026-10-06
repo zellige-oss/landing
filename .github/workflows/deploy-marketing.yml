@@ -58,7 +58,7 @@ jobs:
           npm run build
       - name: Verify the built page and the public deployment boundary
         if: steps.scope.outputs.changed == 'true'
-        run: node --test tests/marketing.test.mjs tests/marketing-build.test.mjs
+        run: node --test tests/marketing.test.mjs tests/marketing-build.test.mjs tests/release-head.test.mjs
       - name: Package the static landing
         if: steps.scope.outputs.changed == 'true'
         run: node deploy/build-marketing.mjs
@@ -72,8 +72,9 @@ jobs:
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_TELEMETRY_DISABLED: "1"
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          latest_sha="$(git -C "$GITHUB_WORKSPACE" ls-remote origin "refs/heads/$APPROVED_BRANCH" | cut -f1)"
+          latest_sha="$(node "$GITHUB_WORKSPACE/deploy/release-head.mjs")"
           if [ "$latest_sha" != "$APPROVED_SHA" ]; then
             echo "A newer branch commit superseded this landing release."
             exit 0
