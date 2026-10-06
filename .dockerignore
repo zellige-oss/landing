@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+.runtime
+.output
+marketing/node_modules
+marketing/dist
+marketing/.ssr
+marketing/.brand

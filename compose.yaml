@@ -1,0 +1,20 @@
+# Local static website; loopback only.
+name: zellige-landing
+services:
+  marketing:
+    build:
+      context: .
+      dockerfile: deploy/marketing.Dockerfile
+    image: zellige-marketing:local
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18788:8080"
+    read_only: true
+    tmpfs:
+      - /config:size=4m,uid=10001,gid=10001,mode=0700
+      - /data:size=4m,uid=10001,gid=10001,mode=0700
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    mem_limit: 64m
+    cpus: 0.5

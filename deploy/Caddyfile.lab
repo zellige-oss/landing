@@ -1,0 +1,13 @@
+# Merge this site into the existing private proxy after reviewing live binds.
+zellige.lab.kzzazzk.tech {
+    bind 100.108.41.61 10.204.87.1
+    import cloudflare_tls
+    @unexpected_host not host zellige.lab.kzzazzk.tech
+    respond @unexpected_host 404
+    reverse_proxy 127.0.0.1:18788
+}
+
+https://:443 {
+    bind 10.204.87.1
+    respond 404
+}
