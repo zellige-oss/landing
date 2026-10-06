@@ -7,11 +7,15 @@ and Vercel project do not need to change.
 
 ## Automatic deployment
 
-`CI marketing` runs its jobs only after a pull request is merged into `main`.
-Pushing commits, opening or updating a PR, and closing a PR without merging it
-do not execute those jobs. After all validations pass, CI calls the reusable
-`Deploy marketing to Vercel` workflow. Both workflows check out the exact merged
-commit, and CD confirms that it is still the current `main` before publishing.
+`CI marketing` runs once for every push to `main`, including direct commits and
+pull request merges. Opening or updating a PR does not trigger it. CI runs the
+landing checks and requires SonarQube Cloud's Quality Gate for that exact commit.
+The Sonar job waits for the existing automatic analysis and checks its immutable
+analysis ID; an older passing result cannot approve the pushed revision. A failed
+gate, missing analysis, or unavailable Sonar service blocks deployment.
+After all validations pass, CI calls the reusable `Deploy marketing to Vercel` workflow.
+Both workflows check out the exact pushed commit, and CD confirms that it is
+still the current `main` before publishing.
 Pilot releases use their own CD and cannot be blocked by a landing deployment
 failure. Deployments to `marketing-production` are queued without interrupting
 a running publication.

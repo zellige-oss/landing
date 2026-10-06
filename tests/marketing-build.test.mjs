@@ -133,16 +133,17 @@ test('all paths inherit the existing landing security headers', async () => {
   ]);
 });
 
-test('landing CD waits for merged main PR validation and checks the same commit', async () => {
+test('landing CD waits for main push validation and checks the same commit', async () => {
   const workflow = await readFile(join(repositoryRoot, '.github/workflows/deploy-marketing.yml'), 'utf8');
   const ci = await readFile(join(repositoryRoot, '.github/workflows/ci-marketing.yml'), 'utf8');
-  assert.match(ci, /on:\n\s+pull_request:\n\s+branches: \[main\]\n\s+types: \[closed\]/);
-  assert.match(ci, /publish:\n\s+name: Deploy validated landing\n\s+needs: \[required\]\n\s+if: github\.event\.pull_request\.merged == true && github\.event\.pull_request\.base\.ref == 'main'\n\s+uses: \.\/\.github\/workflows\/deploy-marketing\.yml/);
+  assert.match(ci, /on:\n\s+push:\n\s+branches: \[main\]/);
+  assert.match(ci, /publish:\n\s+name: Deploy validated landing\n\s+needs: \[required\]\n\s+if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'\n\s+uses: \.\/\.github\/workflows\/deploy-marketing\.yml/);
+  assert.match(ci, /required:\n\s+name: Marketing CI required\n\s+if: \$\{\{ always\(\) \}\}\n\s+needs: \[marketing, sonar\]/);
   assert.match(workflow, /on:\n\s+workflow_call:/);
-  assert.match(workflow, /if: github\.event\.pull_request\.merged == true && github\.event\.pull_request\.base\.ref == 'main'/);
+  assert.match(workflow, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
   for (const config of [ci, workflow]) {
-    assert.doesNotMatch(config, /^\s{2}(?:push|workflow_run|workflow_dispatch):/m);
-    assert.match(config, /ref: \$\{\{ github\.event\.pull_request\.merge_commit_sha \}\}/);
+    assert.doesNotMatch(config, /^\s{2}(?:pull_request|workflow_run|workflow_dispatch):/m);
+    assert.match(config, /ref: \$\{\{ github\.sha \}\}/);
   }
   assert.match(workflow, /if \[ "\$latest_sha" != "\$APPROVED_SHA" \]/);
   assert.match(workflow, /^\s+VERCEL_ORG_ID: \$\{\{ vars\.VERCEL_ORG_ID \}\}$/m);
