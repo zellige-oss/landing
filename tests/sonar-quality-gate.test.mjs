@@ -1,9 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { waitForQualityGate } from '../deploy/sonar-quality-gate.mjs';
+import { safeDiagnostic, waitForQualityGate } from '../deploy/sonar-quality-gate.mjs';
 
 const revision = 'a'.repeat(40);
 const oldRevision = 'b'.repeat(40);
+
+test('external diagnostics cannot inject lines or workflow command escapes into logs', () => {
+  const diagnostic = safeDiagnostic('API failure\r\n::warning::forged%0A\u2028next');
+  assert.doesNotMatch(diagnostic, /[\r\n\u2028%]/);
+  assert.equal(safeDiagnostic('Sonar Quality Gate ERROR: new_security_rating.'), 'Sonar Quality Gate ERROR: new_security_rating.');
+});
 
 function harness(responses) {
   let time = 0;

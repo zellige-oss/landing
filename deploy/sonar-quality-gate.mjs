@@ -1,6 +1,10 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import { pathToFileURL } from 'node:url';
 
+export function safeDiagnostic(message) {
+  return String(message).replace(/[^a-zA-Z0-9 .,:_-]/g, '');
+}
+
 // Automatic analysis stays in SonarCloud; CI waits for this exact commit's gate.
 export async function waitForQualityGate({
   project,
@@ -69,7 +73,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     });
     console.log(`Sonar Quality Gate ${result.status} for ${result.revision}.`);
   } catch (error) {
-    console.error(`::error::${error.message}`);
+    console.error(`::error::${safeDiagnostic(error.message)}`);
     process.exitCode = 1;
   }
 }
