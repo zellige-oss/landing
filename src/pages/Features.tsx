@@ -1,4 +1,5 @@
 import { Bot, MessagesSquare, Workflow } from "lucide-react";
+import { ProviderLogos } from "@/components/ProviderLogos";
 import { LayerGlyph } from "@/components/Trio";
 import { useT } from "@/i18n";
 import type { FeatureIcon } from "@/i18n/messages";
@@ -55,6 +56,8 @@ export function Features() {
         <h3 className="font-serif text-[28px] leading-tight text-gold italic sm:text-[32px]">{t.features.api.title}</h3>
         <div className="grid gap-4 text-[15px] leading-[1.75] text-muted-foreground sm:text-base">
           {t.features.api.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          <ProviderLogos label={t.features.api.providers} />
+          <p className="text-xs text-muted-foreground/80">{t.features.api.trademarks}</p>
         </div>
       </div>
     </section>

@@ -82,8 +82,10 @@ const es = {
       paragraphs: [
         "Una suscripción es un cristal opaco: ves el servicio, pero no lo que hay detrás. No sabes cuánto puedes usar de verdad, los límites no se publican con claridad y pueden cambiar de un día para otro sin que te des cuenta.",
         "Una API, en cambio, publica su precio: tanto por cada token de entrada y tanto por cada token de salida. Sabes qué pagas y por qué. En Zellige creemos que el futuro va por ahí, así que conectas tus modelos con tus propias claves de API.",
-        "Aun así, si ya pagas una suscripción, podrás aprovecharla: Zellige te dejará iniciar sesión con OAuth en los grandes proveedores de IA.",
+        "Aun así, si ya pagas una suscripción, podrás aprovecharla: Zellige te dejará iniciar sesión con OAuth en estos servicios.",
       ],
+      providers: "Servicios con inicio de sesión OAuth",
+      trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
     },
   },
   contact: {
@@ -179,8 +181,10 @@ const en = {
       paragraphs: [
         "A subscription is frosted glass: you see the service, but not what's behind it. You don't really know how much you can use, the limits aren't clearly published, and they can change from one day to the next without you noticing.",
         "An API, on the other hand, publishes its price: so much per input token and so much per output token. You know what you pay and why. At Zellige we believe that is where things are heading, so you connect your models with your own API keys.",
-        "Even so, if you already pay for a subscription, you'll be able to use it: Zellige will let you sign in with OAuth to the major AI providers.",
+        "Even so, if you already pay for a subscription, you'll be able to use it: Zellige will let you sign in with OAuth to these services.",
       ],
+      providers: "Services with OAuth sign-in",
+      trademarks: "Trademarks belong to their respective owners.",
     },
   },
   contact: {
