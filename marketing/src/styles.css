@@ -289,12 +289,11 @@
   /* Eyelids close over the eye and meet a little below its middle, where the eye
      is wide, so a shut eye keeps a clear crease. Open lids rest clear of the eye
      (ZelFace.tsx: 0.45 h above, 0.2 h below), so travel per eye half-height h is:
-     upper lid 1.83 h down, lower lid 0.82 h up. A smile raises the cheek from
-     just below the socket (2 h + 4 below the eye's centre) to 0.62 h: 1.38 h + 4. */
-  .lid-13 { --lid-travel: 23.8px; --lid-rise: 10.7px; --cheek-rise: 21.9px; }
-  .lid-40 { --lid-travel: 73.2px; --lid-rise: 32.8px; --cheek-rise: 59.2px; }
-  .lid-46 { --lid-travel: 84.2px; --lid-rise: 37.7px; --cheek-rise: 67.5px; }
-  .lid-54 { --lid-travel: 98.8px; --lid-rise: 44.3px; --cheek-rise: 78.5px; }
+     upper lid 1.83 h down, lower lid 0.82 h up. */
+  .lid-13 { --lid-travel: 23.8px; --lid-rise: 10.7px; }
+  .lid-40 { --lid-travel: 73.2px; --lid-rise: 32.8px; }
+  .lid-46 { --lid-travel: 84.2px; --lid-rise: 37.7px; }
+  .lid-54 { --lid-travel: 98.8px; --lid-rise: 44.3px; }
   .companion-lid { animation: lid-blink 5s infinite; }
   .companion-lid-lower { animation: lid-blink-lower 5s infinite; }
   /* The pose belongs to an inner wrapper. Assembly, hover and scroll keep their
@@ -312,9 +311,16 @@
   /* Story: until Zel arrives, the layers frame an empty centre. */
   .zel-hiding :is(.layer-centre, .zel-face-layer) { opacity: 0; scale: 0.7; transition: opacity 0.3s ease, scale 0.3s ease; }
   .tile-scroll.zel-hiding .zel-whole { opacity: 0; }
-  /* Hero: joy (--zel-happy, 0 to 1) raises the cheeks and lifts the eyes a little. */
-  .zel-lively .companion-eye { translate: 0 calc(var(--zel-happy, 0) * -7px); }
-  .zel-lively .companion-cheek { translate: 0 calc(var(--zel-happy, 0) * var(--cheek-rise) * -1); }
+  /* Hero: joy first closes the eyes (through --zel-eye-open); while they are shut the
+     ∩ strokes take their place, curling up from the lids' crease (--zel-happy-y),
+     and flatten back into it before the eyes open again. No cross-fade is seen. */
+  .zel-attentive-eyes { opacity: calc(1 - var(--zel-happy-on, 0)); }
+  .zel-happy-eyes {
+    opacity: var(--zel-happy-on, 0);
+    scale: 1 var(--zel-happy-y, 1);
+    transform-box: fill-box;
+    transform-origin: 50% 75%;
+  }
   .speech-bubble::after {
     content: "";
     position: absolute;
@@ -369,6 +375,8 @@
   }
   .zel-piece { transform: none; }
   .zel-lively { --lid-shut: 0; }
+  .zel-attentive-eyes { opacity: 1; }
+  .zel-happy-eyes { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
