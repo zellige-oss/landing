@@ -46,3 +46,10 @@ test('CD files do not publish installation identifiers or internal deployment UR
     assert.doesNotMatch(contents, /https?:\/\/[^\s<>]+\.(?:vercel\.app|vercel-dns-[0-9]+\.com)/, path);
   }
 });
+
+test('only CD deploys: the Vercel Git integration creates no deployments', async () => {
+  // Every push used to create a Vercel deployment (even ignored ones count towards the
+  // daily limit); CD deploys main with the CLI and does not read this file.
+  const config = JSON.parse(await readFile(join(repositoryRoot, 'vercel.json'), 'utf8'));
+  assert.deepEqual(config, { git: { deploymentEnabled: false } });
+});
