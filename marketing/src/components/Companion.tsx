@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { useZelMotion } from "@/hooks/zel-motion";
 import layerCentre from "@/assets/layer-centre.webp";
 import layerCobalt from "@/assets/layer-cobalt.webp";
 import layerCrown from "@/assets/layer-crown.webp";
@@ -32,17 +33,23 @@ export function Companion({
   className,
   alt = "",
   follow = false,
+  lively = false,
+  motionDelay = 0,
 }: {
   mood: Mood;
   className?: string;
   alt?: string;
   /** Let the open eyes follow the pointer. */
   follow?: boolean;
+  /** Play the expressive motion study once the surrounding assembly has landed. */
+  lively?: boolean;
+  motionDelay?: number;
 }) {
   const root = useRef<HTMLDivElement>(null);
+  useZelMotion(root, lively, motionDelay);
   useEffect(() => {
     const node = root.current;
-    if (!follow || !node || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (lively || !follow || !node || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     function look(event: PointerEvent) {
       const rect = node!.getBoundingClientRect();
       const dx = event.clientX - (rect.left + rect.width / 2);
@@ -54,19 +61,27 @@ export function Companion({
     }
     addEventListener("pointermove", look, { passive: true });
     return () => removeEventListener("pointermove", look);
-  }, [follow]);
+  }, [follow, lively]);
   return (
-    <div ref={root} className={cn("relative", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
+    <div ref={root} className={cn("relative", lively && "zel-lively", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
       {/* Square box holding the stacked emblem layers. */}
       <div className="relative aspect-square w-full">
         {layers.map(({ name, src }) => (
-          <img key={name} src={src} width="960" height="960" alt="" draggable={false} className={`zel-layer layer-${name} absolute inset-0 size-full`} />
+          <div key={name} className={`zel-layer layer-${name} absolute inset-0 size-full`}>
+            <div className="zel-piece size-full" data-zel-motion={name}>
+              <img src={src} width="960" height="960" alt="" draggable={false} className="size-full" />
+            </div>
+          </div>
         ))}
         <img src={layerWhole} width="960" height="960" alt="" draggable={false} className="zel-whole absolute inset-0 size-full" />
       </div>
-      <svg viewBox="0 0 1254 1254" className="zel-face-layer absolute inset-0 size-full" aria-hidden="true">
-        <ZelFace mood={mood} />
-      </svg>
+      <div className="zel-face-layer absolute inset-0 size-full" aria-hidden="true">
+        <div className="zel-piece size-full" data-zel-motion="centre">
+          <svg viewBox="0 0 1254 1254" className="size-full">
+            <ZelFace mood={mood} lively={lively} />
+          </svg>
+        </div>
+      </div>
     </div>
   );
 }
