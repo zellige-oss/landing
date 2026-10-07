@@ -2,7 +2,7 @@
 
 > Historical review of an earlier iteration. The current design has changed;
 > this verdict does not approve the new geometry or the latest Buzz-inspired
-> layout. See `marketing.md` and `proposals/fractal-study.md` for current checks.
+> layout. See `marketing.md` for current checks.
 
 Disposition: **ship**. Independent read-only review of the HTML/CSS, direction
 contract, desktop and mobile hero/full-page captures, and the Buzz reference.

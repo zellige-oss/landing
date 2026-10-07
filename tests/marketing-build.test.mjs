@@ -115,15 +115,15 @@ test('symlinked output ancestors cannot redirect cleanup or writes', async (t) =
   assert.deepEqual(await readdir(join(root, 'protected')), ['keep.txt']);
 });
 
-test('all paths inherit the existing landing security headers', async () => {
+test('all paths get the landing security headers', async () => {
   const config = JSON.parse(await readFile(join(repositoryRoot, 'deploy/vercel-marketing.json')));
-  const caddy = await readFile(join(repositoryRoot, 'deploy/marketing.Caddyfile'), 'utf8');
   assert.equal(config.version, 3);
-  const headers = Object.fromEntries(
-    [...caddy.matchAll(/^\s*(X-Content-Type-Options|Referrer-Policy|X-Frame-Options|Content-Security-Policy)\s+(.+)$/gm)]
-      .map(([, name, value]) => [name, value.replace(/^"|"$/g, '')]),
-  );
-  assert.equal(Object.keys(headers).length, 4);
+  const headers = {
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'X-Frame-Options': 'DENY',
+    'Content-Security-Policy': "default-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'",
+  };
   assert.deepEqual(config.routes[0], { src: '/.*', headers, continue: true });
   assert.deepEqual(config.routes.slice(1), [
     { src: '^/$', dest: '/index.html' },
