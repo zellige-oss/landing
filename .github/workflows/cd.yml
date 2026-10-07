@@ -63,7 +63,12 @@ jobs:
           deployment_log="$(mktemp "${RUNNER_TEMP}/zellige-deploy.XXXXXX")"
           trap 'rm -f "$deployment_log"' EXIT
           if ! npm exec --ignore-scripts --yes --package=vercel@62.2.0 -- vercel deploy --prebuilt --prod --yes --meta sourceSha="$APPROVED_SHA" --token="$VERCEL_TOKEN" >"$deployment_log" 2>&1; then
-            echo "::error::Deployment failed. Check the Vercel dashboard; raw CLI output is not published."
+            # Only the CLI's error lines (such as the daily deployment limit), with
+            # Vercel identifiers and URLs redacted.
+            grep -m 5 -E 'Error|error:' "$deployment_log" \
+              | sed -E 's/(team|prj|dpl)_[A-Za-z0-9]+/\1_<redacted>/g; s#[^ ]*vercel\.(app|com)[^ ]*#<vercel-url>#g' \
+              | while IFS= read -r line; do echo "::error::Vercel: $line"; done || true
+            echo "::error::Deployment failed. Check the Vercel dashboard; the rest of the CLI output is not published."
             exit 1
           fi
           echo "Production landing deployed."
