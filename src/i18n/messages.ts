@@ -46,12 +46,10 @@ const es = {
     hover: "Pasa el ratón por el azulejo para ver cada capa.",
     workings: {
       title: "Por dentro",
-      nodes: [
-        ["Tus dispositivos", "Las apps de escritorio y de móvil, para todas las plataformas, y la web."],
-        ["Tailscale", "Una red privada entre tus dispositivos y tu servidor, estés donde estés."],
-        ["Tu servidor", "Zellige: el chat, el gestor de harness y tu agente personal, compartiendo la misma memoria."],
-        ["Los modelos", "Por API, con tus propias claves; o con tu suscripción, iniciando sesión con OAuth."],
-      ] as [string, string][],
+      devices: { title: "Tus dispositivos", items: ["Escritorio", "Móvil", "Web"] },
+      tunnel: { title: "Tailscale", body: "Red privada" },
+      server: { title: "Tu servidor", memory: "Memoria compartida" },
+      models: { title: "Los modelos", api: ["API", "Tus claves, precio por token"], oauth: ["OAuth", "Tu suscripción"] },
     },
     steps: {
       crown: {
@@ -155,12 +153,10 @@ const en = {
     hover: "Point at the tile to see each layer.",
     workings: {
       title: "Under the hood",
-      nodes: [
-        ["Your devices", "The desktop and mobile apps, on every platform, and the web."],
-        ["Tailscale", "A private network between your devices and your server, wherever you are."],
-        ["Your server", "Zellige: the chat, the harness manager and your personal agent, sharing one memory."],
-        ["The models", "Through their APIs, with your own keys; or with your subscription, signing in with OAuth."],
-      ] as [string, string][],
+      devices: { title: "Your devices", items: ["Desktop", "Mobile", "Web"] },
+      tunnel: { title: "Tailscale", body: "Private network" },
+      server: { title: "Your server", memory: "Shared memory" },
+      models: { title: "The models", api: ["API", "Your keys, priced per token"], oauth: ["OAuth", "Your subscription"] },
     },
     steps: {
       crown: {
