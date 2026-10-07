@@ -78,7 +78,7 @@ export function Companion({
       <div className="zel-face-layer absolute inset-0 size-full" aria-hidden="true">
         <div className="zel-piece size-full" data-zel-motion="centre">
           <svg viewBox="0 0 1254 1254" className="size-full">
-            <ZelFace mood={mood} lively={lively} />
+            <ZelFace mood={mood} />
           </svg>
         </div>
       </div>

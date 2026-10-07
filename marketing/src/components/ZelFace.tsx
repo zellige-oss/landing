@@ -22,11 +22,16 @@ const EYE_Y = 622;
 // How far the open lids rest beyond the eye, per eye half-height (see .lid-* in styles.css).
 const LID_CLEAR_UP = .45;
 const LID_CLEAR_DOWN = .2;
+// The cheek: a lower lid shaped like the eye, parked just below the eye's socket and
+// raised until its centre is this far below the eye's (per half-height), leaving a
+// smiling ∩ crescent.
+const CHEEK_SMILE = .62;
+// How far a smile lifts the whole eye (the hero animates the same lift, styles.css).
+const SMILE_LIFT = 7;
 
-function Arc({ x, up = true }: { x: number; up?: boolean }) {
-  // ∩ for a smile-squint, ∪ for closed, relaxed eyes.
-  const d = up ? `M${x - 44} ${EYE_Y + 22}Q${x} ${EYE_Y - 44} ${x + 44} ${EYE_Y + 22}` : `M${x - 42} ${EYE_Y - 8}Q${x} ${EYE_Y + 44} ${x + 42} ${EYE_Y - 8}`;
-  return <path d={d} fill="none" stroke="#f8f6ef" strokeWidth="24" strokeLinecap="round" />;
+function Closed({ x }: { x: number }) {
+  // ∪ for closed, relaxed eyes.
+  return <path d={`M${x - 42} ${EYE_Y - 8}Q${x} ${EYE_Y + 44} ${x + 42} ${EYE_Y - 8}`} fill="none" stroke="#f8f6ef" strokeWidth="24" strokeLinecap="round" />;
 }
 
 /*
@@ -35,14 +40,18 @@ function Arc({ x, up = true }: { x: number; up?: boolean }) {
  * clear of the eye, shadow included, so an open eye shows its whole bead. The lids
  * are drawn open, so without CSS (the generated mood images) the eye is open. CSS
  * moves them by the travel set for each eye height (.lid-13, .lid-40, ...).
+ * A smile raises a third, eye-shaped lid from below, the cheek, which leaves a ∩
+ * crescent of the same glaze: drawn raised with `smile`, or raised by --zel-happy.
  */
-function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number; ry?: number; squint?: boolean }) {
+function Open({ x, rx = 30, ry = 40, squint = false, smile = false }: { x: number; rx?: number; ry?: number; squint?: boolean; smile?: boolean }) {
   const id = useId().replaceAll(":", "");
   const h = squint ? 13 : ry, left = x - rx - 8, right = x + rx + 8;
   // Resting lid edges: above the eye by more than the lid's shadow reaches, below by a margin.
   const top = EYE_Y - h - LID_CLEAR_UP * h, bottom = EYE_Y + h + LID_CLEAR_DOWN * h;
+  const cheekY = smile ? EYE_Y + CHEEK_SMILE * h : EYE_Y + 2 * h + 4, cheekL = x - rx - 2, cheekR = x + rx + 2;
+  const cheekEdge = `M${cheekL} ${cheekY}A${rx + 2} ${h} 0 0 1 ${cheekR} ${cheekY}`;
   return (
-    <g className="companion-eye">
+    <g className="companion-eye" transform={smile ? `translate(0 ${-SMILE_LIFT})` : undefined}>
       <defs>
         <clipPath id={`${id}-eye`}><ellipse cx={x} cy={EYE_Y} rx={rx} ry={h} /></clipPath>
         {/* A little wider than the eye, so a shut lid also hides the eye's edge. */}
@@ -59,6 +68,11 @@ function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number;
           <stop offset=".62" stopColor="#f3ecdd" />
           <stop offset="1" stopColor="#d8ccb4" />
         </radialGradient>
+        <mask id={`${id}-cheek`}>
+          <g className={`companion-cheek lid-${h}`}>
+            <path d={`M${left} ${cheekY}H${cheekL}A${rx + 2} ${h} 0 0 1 ${cheekR} ${cheekY}H${right}V${cheekY + 3 * h}H${left}Z`} fill="#fff" />
+          </g>
+        </mask>
         <filter id={`${id}-shade`} x="-20%" y="-20%" width="140%" height="160%">
           <feDropShadow dx="0" dy={h * .08} stdDeviation={h * .07} floodColor="#000" floodOpacity=".55" />
         </filter>
@@ -72,11 +86,17 @@ function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number;
         <g className={`companion-lid-lower lid-${h}`}>
           <path d={`M${left} ${bottom}Q${x} ${bottom - h * .12} ${right} ${bottom}V${bottom + h}H${left}Z`} fill={`url(#${id}-lid)`} />
         </g>
+        {/* The cheek's shape moves inside a mask over a still fill, so its obsidian
+            stays in step with the face's gradient while it rises. */}
+        <rect x={left} y={EYE_Y - h - 4} width={right - left} height={2 * h + 8} fill={`url(#${id}-lid)`} mask={`url(#${id}-cheek)`} />
       </g>
       {/* The lid's edge catches the light: the crease that stays when the eye shuts. */}
       <g clipPath={`url(#${id}-eye)`}>
         <g className={`companion-lid lid-${h}`}>
           <path d={`M${left} ${top - 1.5}Q${x} ${top + h * .12 - 1.5} ${right} ${top - 1.5}`} fill="none" stroke="#4a6079" strokeOpacity=".9" strokeWidth="4.5" strokeLinecap="round" />
+        </g>
+        <g className={`companion-cheek lid-${h}`}>
+          <path d={cheekEdge} fill="none" stroke="#4a6079" strokeOpacity=".9" strokeWidth="4.5" strokeLinecap="round" />
         </g>
       </g>
     </g>
@@ -86,11 +106,11 @@ function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number;
 export function Eyes({ mood }: { mood: Mood }) {
   switch (mood) {
     case "hello":
-      return <><Arc x={EYE_L} /><Arc x={EYE_R} /></>;
+      return <g className="companion-look"><Open x={EYE_L} smile /><Open x={EYE_R} smile /></g>;
     case "content":
-      return <><Arc x={EYE_L} up={false} /><Arc x={EYE_R} up={false} /></>;
+      return <><Closed x={EYE_L} /><Closed x={EYE_R} /></>;
     case "wink":
-      return <><Arc x={EYE_L} /><g className="companion-look"><Open x={EYE_R} /></g></>;
+      return <g className="companion-look"><Open x={EYE_L} smile /><Open x={EYE_R} /></g>;
     case "excited":
       return (
         <g fill="none" stroke="#f8f6ef" strokeWidth="24" strokeLinecap="round" strokeLinejoin="round">
@@ -122,7 +142,7 @@ export function Eyes({ mood }: { mood: Mood }) {
 }
 
 /** The face group, in emblem coordinates (viewBox 0 0 1254 1254). */
-export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean }) {
+export function ZelFace({ mood }: { mood: Mood }) {
   const gradient = `zel-face-${useId().replaceAll(":", "")}`;
   return (
     <>
@@ -136,12 +156,7 @@ export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean
       <polygon points={STAR} fill={`url(#${gradient})`} />
       <polyline points={GLINT} fill="none" stroke="#fff" strokeOpacity=".12" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
       <g className="zel-face" transform="translate(625 644) scale(0.88) translate(-622 -622)">
-        {lively ? (
-          <>
-            <g className="zel-attentive-eyes"><Eyes mood={mood} /></g>
-            <g className="zel-happy-eyes companion-look"><Eyes mood="hello" /></g>
-          </>
-        ) : <Eyes mood={mood} />}
+        <Eyes mood={mood} />
       </g>
     </>
   );
