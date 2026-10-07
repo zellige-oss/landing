@@ -1,6 +1,6 @@
 > Website source and deployment now live in `zellige-oss/landing`.
 > Earlier implementation notes below are historical; use the root README
-> and `docs/deployment/vercel.md` for current commands.
+> and `openspec/deployment/vercel.md` for current commands.
 
 # Zellige — ceramic identity, Buzz-inspired composition
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { A, S, Q, PERIOD, STAR, RECURSION_SCALE, area, cellPieces, renderPattern, shifted } from '../docs/design/proposals/rosette.mjs';
+import { A, S, Q, PERIOD, STAR, RECURSION_SCALE, area, cellPieces, renderPattern, shifted } from '../openspec/design/proposals/rosette.mjs';
 
 const EPS=1e-9;
 const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);

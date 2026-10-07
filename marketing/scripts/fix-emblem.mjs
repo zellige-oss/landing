@@ -6,7 +6,7 @@
 // 2. The four cobalt corner squares had no gold rim on their outer sides, unlike
 //    every other piece. Frames those sides with a rim copied from the emblem's own
 //    rims (one cross-section per lighting direction, blended by the edge's facing).
-// The original is kept at docs/design/proposals/zellige-emblem-original.png.
+// The original is kept at openspec/design/proposals/zellige-emblem-original.png.
 import { copyFile, access } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +14,7 @@ import { distanceTo, fillHoles, grow } from './mask.mjs';
 import { RIM, rimColour, rimProfiles } from './rim.mjs';
 
 const emblem = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
-const original = fileURLToPath(new URL('../../docs/design/proposals/zellige-emblem-original.png', import.meta.url));
+const original = fileURLToPath(new URL('../../openspec/design/proposals/zellige-emblem-original.png', import.meta.url));
 // Always start from the untouched original, so the script can be re-run safely.
 await access(original).catch(() => copyFile(emblem, original));
 

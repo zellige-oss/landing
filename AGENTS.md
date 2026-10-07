@@ -3,6 +3,13 @@
 Rules for agents working in this repository. They add to the shared
 `/home/kzzazzk/AGENTS.md`.
 
+## Documentation
+
+Specs, design notes and deployment docs live in `openspec/`, not in `docs/`:
+`openspec/design/` (brand, marketing design, proposals) and
+`openspec/deployment/` (Vercel). Brand scripts read from
+`openspec/design/proposals/` too, such as the untouched original emblem.
+
 ## Before every push
 
 Every push to `main`, including merging a PR on GitHub, runs CI and, if it

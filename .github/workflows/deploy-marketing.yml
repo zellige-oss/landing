@@ -73,7 +73,7 @@ jobs:
           fi
           for setting in VERCEL_ORG_ID VERCEL_PROJECT_ID VERCEL_TOKEN; do
             if [ -z "${!setting}" ]; then
-              echo "::error::Missing $setting. See docs/deployment/vercel.md."
+              echo "::error::Missing $setting. See openspec/deployment/vercel.md."
               exit 1
             fi
           done

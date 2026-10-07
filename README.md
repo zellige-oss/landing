@@ -27,12 +27,12 @@ The build prerenders Spanish and English pages. Only validated static output
 is packaged into `.output/marketing/.vercel/output/`.
 
 `npm --prefix marketing run brand` rebuilds brand derivatives from `brand/` and
-`docs/design/proposals/`; it does not need a checkout of the application.
+`openspec/design/proposals/`; it does not need a checkout of the application.
 The application retains its own copies of the brand assets it uses.
 
 ## Deployment
 
-See [Vercel setup](docs/deployment/vercel.md). CI runs for PRs and pushes to
+See [Vercel setup](openspec/deployment/vercel.md). CI runs for PRs and pushes to
 `main`; production deployment follows successful push CI on the same commit.
 GitHub Actions variables and secrets must be configured in this repository;
 they are not transferred with Git history.
