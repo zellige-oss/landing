@@ -2,6 +2,9 @@ import { useEffect, useRef, type RefObject } from "react";
 
 const clamp = (n: number) => Math.min(1, Math.max(0, n));
 
+/** Where a sticky panel's bottom sits below the top of the viewport while pinned. */
+export const pinnedBottom = (pin: HTMLElement) => pin.offsetHeight + Number.parseFloat(getComputedStyle(pin).top);
+
 /**
  * How far the page has scrolled through `target`, from 0 to 1, reported once per
  * frame while it changes, from the target's top reaching the top of the viewport.
@@ -42,7 +45,7 @@ export function useScrollProgress(
       // The panel can change height with what it shows; taking the tallest it has
       // been keeps a change of step from moving the progress back across its own
       // threshold (and flipping between the two steps).
-      if (pin) pinned = Math.max(pinned, pin.offsetHeight + parseFloat(getComputedStyle(pin).top));
+      if (pin) pinned = Math.max(pinned, pinnedBottom(pin));
       span = Math.max(1, height - pinned);
       last = NaN;
       report();

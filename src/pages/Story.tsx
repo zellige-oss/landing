@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useScrollProgress } from "@/hooks/use-scroll-progress";
+import { pinnedBottom, useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
 import type { Mood } from "@/components/Companion";
 import { Trio, ZelGlyph, type Piece } from "@/components/Trio";
@@ -98,8 +98,7 @@ export function Story({ reduced }: { reduced: boolean }) {
     if (!node) return;
     const top = node.getBoundingClientRect().top + scrollY;
     // As useScrollProgress measures "pinned": until the sticky panel lets go.
-    const panel = node.firstElementChild as HTMLElement;
-    const span = node.offsetHeight - panel.offsetHeight - parseFloat(getComputedStyle(panel).top);
+    const span = node.offsetHeight - pinnedBottom(node.firstElementChild as HTMLElement);
     scrollTo({ top: top + (index ? STARTS[index] + 0.02 : 0) * span, behavior: "smooth" });
   }
 
