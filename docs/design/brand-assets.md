@@ -14,6 +14,11 @@ are not vector originals. The source moodboard is not shipped in the website.
   the emblem with an obsidian face on the centre star. The pilot uses `zel-hello`.
 - `brand/zellige-wordmark{,-night}.svg`: moodboard wordmark, day (navy)
   and night (porcelain); gold stars in both, from `marketing/scripts/build-wordmark.mjs`.
+- `brand/logo/zellige-logo-{horizontal,stacked}{,-night}.png`: the logo, Zel
+  (`zel-look`, eyes open, no expression) with the wordmark, beside it or above it,
+  on a transparent ground; `-night` uses the night wordmark for dark grounds. Built
+  by `marketing/scripts/build-brand.mjs` from the images above, so it follows any
+  change to the emblem, Zel's face or the wordmark.
 - Landing: `marketing/src/assets/layer-{centre,crown,cobalt,points}.webp` (the
   emblem's colour layers), `emblem.webp` and `marketing/public/favicon.png`.
 
