@@ -47,7 +47,7 @@ export function Trio({
   className?: string;
 }) {
   const t = useT();
-  // Pointing at a visible layer lifts it, with Zel; the page lights up its step.
+  // Pointing at a layer of the whole tile lifts it, with Zel; the page lights up its step.
   const [hover, setHoverState] = useState<Piece>();
   const setHover = (piece: Piece | undefined) => {
     if (piece === hover) return;
@@ -57,11 +57,14 @@ export function Trio({
   const pieceAt = (event: MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const piece = layerAt(((event.clientX - rect.left) / rect.width) * 2 - 1, ((event.clientY - rect.top) / rect.height) * 2 - 1);
-    return piece && (!show || show === piece) ? piece : undefined;
+    // Only the whole tile answers: while the story shows one layer, nothing does.
+    return show ? undefined : piece;
   };
+  // A layer stays lifted only while the whole tile shows (scrolling back can hide it).
+  const lifted = show ? undefined : hover;
   return (
     <div
-      className={cn("tile tile-scroll relative aspect-square", `show-${show ?? "all"}`, hover && `lift-${hover}`, hover && onPick && "cursor-pointer", className)}
+      className={cn("tile tile-scroll relative aspect-square", `show-${show ?? "all"}`, lifted && `lift-${lifted}`, lifted && onPick && "cursor-pointer", className)}
       onPointerMove={(event) => { if (event.pointerType === "mouse") setHover(pieceAt(event)); }}
       onPointerLeave={() => setHover(undefined)}
       onClick={(event) => { const piece = pieceAt(event); if (piece) onPick?.(piece); }}

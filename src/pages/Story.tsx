@@ -84,6 +84,8 @@ export function Story({ reduced }: { reduced: boolean }) {
   const live = !reduced && !settled;
   const stage = live ? active ?? 0 : null;
   const show = live && active !== undefined ? steps[active].layer : undefined;
+  // The tile answers the mouse only when whole: at the last step, or once settled.
+  const lit = show ? undefined : pointed;
   /** Scrolls to where a step has just begun. */
   function goTo(index: number) {
     const node = track.current;
@@ -138,8 +140,8 @@ export function Story({ reduced }: { reduced: boolean }) {
             )}
             <ol className="grid gap-1">
               {steps.map((step, index) => {
-                const current = pointed ? step.layer === pointed : stage === index;
-                const quiet = pointed ? !current : live && !current;
+                const current = lit ? step.layer === lit : stage === index;
+                const quiet = lit ? !current : live && !current;
                 const copy = t.story.steps[step.key];
                 return (
                   <li
