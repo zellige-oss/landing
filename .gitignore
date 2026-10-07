@@ -1,7 +1,7 @@
-marketing/node_modules/
-marketing/dist/
-marketing/.ssr/
-marketing/.brand/
+node_modules/
+dist/
+.ssr/
+.brand/
 .output/
 .runtime/
 .env

@@ -20,18 +20,25 @@ Before every `git push` or PR merge, run the same checks as CI and check each
 exit code. Do not push if any of them fails:
 
 ```bash
-cd marketing
 npm run lint; echo "lint: $?"
 npm run build; echo "build: $?"
-cd ..
-node --test tests/*.test.mjs; echo "tests: $?"
-node deploy/build-marketing.mjs; echo "package: $?"
+npm test; echo "tests: $?"
+node scripts/package-vercel.mjs; echo "package: $?"
 ```
 
 - Judge each check by its exit code, not by the last lines of its output. Never
   pipe lint through `tail`/`head` without also checking the status.
-- If you changed brand scripts or `ZelFace.tsx`, also run `npm run brand` in
-  `marketing/` and review which images changed.
+- If you changed brand scripts or `ZelFace.tsx`, also run `npm run brand` and
+  review which images changed.
+
+## Layout
+
+- `src/pages/`: one file per page of the landing; `src/layout/`: header and
+  footer; `src/components/`: what pages share. Put a new piece where it will be
+  reused rather than copying it into a page.
+- Tests sit beside the code they check (`src/__tests__/`, `scripts/__tests__/`)
+  and run with Vitest (`npm test`).
+- Brand art lives in `public/brand/`; generated web copies in `src/assets/`.
 
 ## Branches and PRs
 
