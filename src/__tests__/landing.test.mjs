@@ -42,7 +42,7 @@ test('landing declares its language and responsive viewport', () => {
 test('content is prerendered, so it reads without JavaScript', () => {
   assert.match(html, /<h1[^>]*id="hero-title"[^>]*>\s*<img[^>]*alt="zellige"/);
   for (const id of ['inicio', 'piezas', 'funciones', 'contacto']) assert.match(html, new RegExp(`id="${id}"`));
-  assert.match(html, /significa literalmente «azulejo»/, 'The name is explained under the title');
+  assert.match(html, /«azulejo»/, 'The name is explained under the title');
   assert.match(html, /Chat, desarrollo con agentes y agente personal,/);
 });
 

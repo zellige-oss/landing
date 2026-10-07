@@ -19,9 +19,10 @@ export function WhyZellige() {
         </svg>
         <span className="text-[14px] font-medium whitespace-nowrap underline decoration-brass/60 decoration-dotted underline-offset-4 group-hover/why:decoration-solid sm:text-[15px]">{t.hero.why.title}</span>
       </summary>
-      {/* Never over Zel: in the free space right of the wordmark on wide screens, and in
-          the flow below the link on smaller ones. */}
-      <div className="mx-auto mt-3 w-[min(88vw,360px)] rounded-2xl border border-border bg-popover p-5 text-left shadow-[0_18px_40px_-20px_rgb(20_43_53/0.5)] lg:absolute lg:top-0 lg:left-[calc(100%+11rem)] lg:z-20 lg:mt-0 lg:w-[320px]">
+      {/* In the free space right of the wordmark on wide screens. Smaller ones have no
+          room to spare, so it opens over Zel, under the link, rather than pushing Zel
+          down the page. */}
+      <div className="absolute top-full left-1/2 z-20 mt-3 w-[min(88vw,360px)] -translate-x-1/2 rounded-2xl border border-border bg-popover p-5 text-left shadow-[0_18px_40px_-20px_rgb(20_43_53/0.5)] lg:top-0 lg:left-[calc(100%+11rem)] lg:mt-0 lg:w-[320px] lg:translate-x-0">
         <p className="text-lg font-semibold text-gold">{t.hero.why.title}</p>
         <p className="mt-3 flex flex-wrap items-baseline gap-x-2.5 text-sm">
           <span className="font-semibold">zel·li·ge</span>
@@ -31,7 +32,6 @@ export function WhyZellige() {
         <div className="mt-2 grid gap-2 text-[15px] leading-[1.65] text-muted-foreground">
           <p>{t.hero.why.from} <span className="font-medium text-foreground">az-zellīj</span>, {t.hero.why.meaning}</p>
           <p>{t.hero.why.history}</p>
-          <p><strong className="font-semibold text-foreground">{t.hero.why.fact.label}</strong> {t.hero.why.fact.body}</p>
         </div>
       </div>
     </details>
