@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useMotionValueEvent, useScroll } from "motion/react";
+import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
 import type { Mood } from "./Companion";
 import { LayerGlyph, Trio, type Piece } from "./Trio";
@@ -42,11 +42,10 @@ export function Story({ reduced }: { reduced: boolean }) {
   const [startled, setStartled] = useState(false);
   const wasFound = useRef(false);
   const calm = useRef<number>(undefined);
-  const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end end"] });
-  useMotionValueEvent(scrollYProgress, "change", (t) => {
+  // With reduced motion the tile simply stays assembled and the steps read as a list.
+  useScrollProgress(section, "through", (t) => {
     const node = section.current;
-    // With reduced motion the tile simply stays assembled and the steps read as a list.
-    if (!node || reduced) return;
+    if (!node) return;
     // The crown is there from the start; each other layer lands just before its step.
     setProgress(node, "--p2", clamp((t - 0.19) / 0.09).toFixed(3));
     setProgress(node, "--p3", clamp((t - 0.45) / 0.09).toFixed(3));
@@ -59,7 +58,7 @@ export function Story({ reduced }: { reduced: boolean }) {
       setStartled(isFound);
       if (isFound) calm.current = window.setTimeout(() => setStartled(false), 1300);
     }
-  });
+  }, !reduced);
   useEffect(() => () => window.clearTimeout(calm.current), []);
   // The story only runs with motion allowed; otherwise (and before hydration) it is a plain list.
   const live = !reduced;

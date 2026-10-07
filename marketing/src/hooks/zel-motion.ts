@@ -92,6 +92,9 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
     let visible = false, greeted = false, greetingAt = -Infinity;
     let pointerAt = -Infinity, pointerX = 0, pointerY = 0, gazeX = 0, gazeY = 0;
     let drawing: boolean | undefined;
+    // The face is SVG, which repaints whenever anything in it moves: write the gaze
+    // and the lids only when they change (still eyes then cost nothing).
+    let lastLook = "", lastShut = "";
 
     function showDrawnEyes(on: boolean) {
       if (on === drawing) return;
@@ -107,6 +110,7 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       attentiveEyes?.style.removeProperty("opacity");
       drawnEyes?.style.removeProperty("opacity");
       drawing = undefined;
+      lastLook = lastShut = "";
       for (const part of parts) {
         part.tilt = 0;
         for (const element of part.nodes) element.style.removeProperty("transform");
@@ -137,11 +141,17 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           bump(phase, 3.52, 3.59, 3.72), bump(phase, 8.02, 8.1, 8.25), bump(phase, 11.35, 11.43, 11.58)) : 0;
         const age = elapsed - greetingAt;
         const look = `${(gazeX * 22).toFixed(2)}px ${(gazeY * 14 - Math.abs(gazeX) * 4).toFixed(2)}px`;
-        for (const element of looks) element.style.setProperty("translate", look);
+        if (look !== lastLook) {
+          lastLook = look;
+          for (const element of looks) element.style.setProperty("translate", look);
+        }
         // Lids: 0.09 open is shut; they meet at the crease.
         const open = Math.max(.09, (awake ? 1 : waking.open) - blink);
-        const shut = clamp((1 - open) / .91);
-        for (const { lid, travel } of lids) lid.style.setProperty("translate", `0 ${(shut * travel).toFixed(2)}px`);
+        const shut = clamp((1 - open) / .91).toFixed(3);
+        if (shut !== lastShut) {
+          lastShut = shut;
+          for (const { lid, travel } of lids) lid.style.setProperty("translate", `0 ${(Number(shut) * travel).toFixed(2)}px`);
+        }
         // During a greeting the drawn eyes stand in for the open ones; they start and
         // end as exactly the open eye, so the swap has no seam.
         const greeting = age >= 0 && age < GREETING_EYES;

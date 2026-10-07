@@ -77,7 +77,7 @@ export function Guide() {
       >
         {t.guide[current.id]}
       </p>
-      <Companion key={current.mood} mood={current.mood} follow className="w-16 shrink-0 drop-shadow-[0_14px_16px_rgb(11_29_41/0.35)] motion-safe:animate-float sm:w-24" />
+      <Companion key={current.mood} mood={current.mood} follow shadow="guide" className="w-16 shrink-0 motion-safe:animate-float sm:w-24" />
     </div>
   );
 }

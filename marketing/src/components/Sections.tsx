@@ -33,13 +33,16 @@ export function Panorama({ reduced }: { reduced: boolean }) {
     let tileSize = 0;
     let frame = 0;
     let assembly = "";
+    // The surface's place on the page, measured on resize only: reading layout on
+    // every scroll frame would force the page to restyle, which phones cannot afford.
+    let top = 0;
     const update = () => {
       frame = 0;
-      // Measure the current position, including layout changes in the story above.
-      // Spread assembly over most of the viewport instead of snapping together
-      // as soon as the first row enters it.
+      // From the cached position; layout changes above (the story) resize the
+      // document, which re-measures it. Spread assembly over most of the viewport
+      // instead of snapping together as soon as the first row enters it.
       const progress = Math.min(1, Math.max(0,
-        (innerHeight * 0.95 - element.getBoundingClientRect().top) / (innerHeight * 0.7),
+        (innerHeight * 0.95 - (top - scrollY)) / (innerHeight * 0.7),
       ));
       const eased = progress * progress * (3 - 2 * progress);
       // Only on change: away from this section it stays at 0 or 1 while the page scrolls.
@@ -53,6 +56,8 @@ export function Panorama({ reduced }: { reduced: boolean }) {
     };
     const resize = () => {
       cancelAnimationFrame(frame);
+      top = element.getBoundingClientRect().top + scrollY;
+      assembly = "";
       update();
       const tile = parseFloat(getComputedStyle(element.parentElement!).getPropertyValue("--tile"));
       if (element.clientWidth === width && tile === tileSize) return;
