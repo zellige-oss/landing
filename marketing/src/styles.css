@@ -103,7 +103,6 @@
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --animate-arrive: arrive 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-rise: rise 1.1s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  --animate-float: float 6s ease-in-out infinite;
   --animate-twinkle: twinkle 2.6s ease-in-out infinite;
   --animate-pop: pop 0.6s 0.9s cubic-bezier(0.3, 1.5, 0.5, 1) both;
 }
@@ -114,17 +113,16 @@
 @keyframes rise {
   from { opacity: 0; transform: translateY(40px) scale(0.97); }
 }
-@keyframes float {
-  50% { translate: 0 -10px; }
-}
 @keyframes wiggle {
   20% { rotate: -7deg; }
   45% { rotate: 6deg; }
   70% { rotate: -3deg; }
 }
-@keyframes blink {
-  0%, 94%, 100% { scale: 1 1; }
-  97% { scale: 1 0.1; }
+@keyframes lid-blink {
+  50% { translate: 0 var(--lid-travel); }
+}
+@keyframes lid-blink-lower {
+  50% { translate: 0 calc(var(--lid-rise) * -1); }
 }
 @keyframes twinkle {
   0%, 100% { opacity: 0.35; scale: 0.7; }
@@ -184,22 +182,16 @@
     background-image: url("./assets/lattice.svg");
     background-size: 96px 96px;
   }
+  /* A section's label: the same words as its link in the header, so a click lands
+     under the name you clicked. Plain case, no numbering. */
   .eyebrow {
-    @apply flex items-center gap-3.5 text-[11px] leading-[1.7] font-semibold tracking-[0.18em] text-gold uppercase;
-  }
-  .section-number {
-    @apply text-[11px] font-semibold tracking-[0.1em] text-gold tabular-nums;
+    @apply text-[15px] leading-normal font-semibold text-gold;
   }
   .ceramic {
     background: var(--ceramic-base) url("./assets/ceramic.webp");
   }
   .fragment {
     translate: 0 calc(var(--drift, 0) * 1px);
-  }
-  /* Panorama: loose pieces converge into one continuous mosaic as it scrolls in. */
-  .mosaic-panorama {
-    --tile: 140px;
-    --period: 560px;
   }
   /* Mosaic band: brass-edged, fading out at both ends so the page can breathe. */
   .mosaic-band {
@@ -208,28 +200,6 @@
     border-block: 2px solid var(--brand-gold);
     mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
     box-shadow: inset 0 6px 10px -6px rgb(0 0 0 / 0.35), inset 0 -6px 10px -6px rgb(0 0 0 / 0.35);
-  }
-  .mosaic-surface {
-    background-size: var(--period) var(--period);
-  }
-  .mosaic-surface.is-assembling {
-    @apply overflow-visible bg-surface;
-    background-image: url("./assets/lattice.svg");
-    background-size: 70px 70px;
-  }
-  .mosaic-piece {
-    --rest: calc(1 - var(--assembly, 0));
-    position: absolute;
-    height: var(--tile);
-    background: var(--ceramic-base) url("./assets/ceramic.webp") var(--bx) var(--by) / var(--period) var(--period);
-    transform: translate(calc(var(--dx) * var(--rest)), calc(var(--dy) * var(--rest))) rotate(calc(var(--r) * var(--rest)));
-    box-shadow: 4px 12px 22px color-mix(in srgb, #142b35 calc(var(--rest) * 40%), transparent);
-    will-change: transform;
-  }
-  .branch-tile {
-    fill: url(#ceramic);
-    stroke: var(--brass);
-    stroke-width: 1.5;
   }
   /* Mascot: leans toward the pointer, wiggles hello on hover. */
   .companion {
@@ -252,16 +222,23 @@
     scale: calc(1 + (var(--from) - 1) * (1 - var(--p)));
     opacity: var(--p);
   }
+  /* Story: only the layer being explained is named, next to it. */
   .tile-scroll .tile-label {
-    opacity: var(--p);
+    opacity: 0;
     translate: 0 calc((1 - var(--p)) * 12px);
+    transition: opacity 0.3s ease;
   }
-  /* The layer being explained glows; the rest of the emblem steps back. */
+  .tile-scroll.focus-crown .label-crown,
+  .tile-scroll.focus-cobalt .label-cobalt,
+  .tile-scroll.focus-points .label-points { opacity: var(--p); }
+  /* The whole tile, at the end of the story and once it has settled, names every layer. */
+  .tile-scroll.zel-found:not(.focus-crown, .focus-cobalt, .focus-points) .tile-label { opacity: 1; }
+  /* The layer being explained glows; the rest of the emblem steps back, keeping its
+     colour so it reads as placed and waiting, not missing. */
   .focus-crown .zel-layer:not(.layer-centre, .layer-crown),
   .focus-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
   .focus-points .zel-layer:not(.layer-centre, .layer-points) {
-    filter: saturate(0.25);
-    opacity: calc(var(--p) * 0.3);
+    opacity: calc(var(--p) * 0.45);
   }
   .focus-crown .layer-crown,
   .focus-cobalt .layer-cobalt,
@@ -278,31 +255,48 @@
   .focus-crown .zel-whole,
   .focus-cobalt .zel-whole,
   .focus-points .zel-whole { opacity: 0; }
-  .companion-look {
-    translate: var(--look-x, 0) var(--look-y, 0);
-    transition: translate 0.25s ease-out;
-  }
-  .companion-eye {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: blink 5s infinite;
-  }
-  /* The pose belongs to an inner wrapper. Assembly, hover and scroll keep their
-     own outer transforms, and the face always shares the centre tile's pose. */
-  .zel-piece {
-    transform: translateY(var(--zel-rise, 0%)) rotate(var(--zel-turn, 0deg)) scale(var(--zel-spread, 1));
-    transform-origin: center;
-  }
+  /* Where the eyes look: JS sets their translate (Companion.tsx, zel-motion.ts). */
+  .companion-look { transition: translate 0.25s ease-out; }
+  /* Eyelids close over the eye and meet a little below its middle, where the eye
+     is wide, so a shut eye keeps a clear crease. Open lids rest clear of the eye
+     (ZelFace.tsx: 0.45 h above, 0.2 h below), so travel per eye half-height h is:
+     upper lid 1.83 h down, lower lid 0.82 h up. */
+  .lid-13 { --lid-travel: 23.8px; --lid-rise: 10.7px; }
+  .lid-40 { --lid-travel: 73.2px; --lid-rise: 32.8px; }
+  .lid-46 { --lid-travel: 84.2px; --lid-rise: 37.7px; }
+  .lid-54 { --lid-travel: 98.8px; --lid-rise: 44.3px; }
+  /* Zel's shadow (Companion.tsx): the emblem's silhouette, blackened and blurred, set
+     a little lower. It never changes, so the browser paints it once. Values match the
+     drop-shadows it replaces (blur is half their radius). */
+  .zel-shadow { pointer-events: none; filter: brightness(0) blur(var(--shadow-blur)); opacity: var(--shadow-alpha); translate: 0 var(--shadow-y); }
+  .zel-shadow-hero { --shadow-y: 26px; --shadow-blur: 17px; --shadow-alpha: 0.3; }
+  .zel-shadow-tile { --shadow-y: 22px; --shadow-blur: 14px; --shadow-alpha: 0.3; }
+  .zel-shadow-footer { --shadow-y: 18px; --shadow-blur: 11px; --shadow-alpha: 0.35; }
+  /* In the story the shadow belongs to the whole tile, so it waits for Zel. */
+  .tile-scroll.zel-hiding .zel-shadow { opacity: 0; transition: opacity 0.3s ease; }
+  .tile-scroll .zel-shadow { transition: opacity 0.6s 0.9s ease; }
+  /* Moving pieces get their own GPU layers, so moving them never repaints them. */
+  .zel-lively .zel-piece { will-change: transform; }
+  .tile-scroll .zel-layer { will-change: scale, opacity; }
+  /* One blink each time Companion.tsx switches .zel-blinking on. */
+  .zel-blinking .companion-lid { animation: lid-blink 0.3s ease-in-out; }
+  .zel-blinking .companion-lid-lower { animation: lid-blink-lower 0.3s ease-in-out; }
+  /* The pose belongs to an inner wrapper, posed by the hero's motion (zel-motion.ts).
+     Assembly, hover and scroll keep their own outer transforms, and the face always
+     shares the centre tile's pose. */
+  .zel-piece { transform-origin: 49.8% 51.4%; } /* the emblem's centre */
   .zel-lively[data-zel-awake] .zel-whole { opacity: 0; }
   .zel-lively .companion-look { transition: none; }
-  .zel-lively .companion-eye {
-    animation: none;
-    scale: 1 var(--zel-eye-open, 0.09);
-  }
-  /* Story: until Zel is found, the centre is just the emblem's teal star. */
-  .zel-hiding .zel-face-layer { opacity: 0; scale: 0.7; transition: opacity 0.3s ease, scale 0.3s ease; }
-  .zel-attentive-eyes { opacity: calc(1 - var(--zel-happy, 0)); }
-  .zel-happy-eyes { opacity: var(--zel-happy, 0); }
+  /* Hero: asleep until the motion opens the lids (it sets each lid's translate). */
+  .zel-lively { --lid-shut: 1; }
+  .zel-lively .companion-lid { animation: none; translate: 0 calc(var(--lid-shut) * var(--lid-travel)); }
+  .zel-lively .companion-lid-lower { animation: none; translate: 0 calc(var(--lid-shut) * var(--lid-rise) * -1); }
+  /* Story: until Zel arrives, the layers frame an empty centre. */
+  .zel-hiding :is(.layer-centre, .zel-face-layer) { opacity: 0; scale: 0.7; transition: opacity 0.3s ease, scale 0.3s ease; }
+  .tile-scroll.zel-hiding .zel-whole { opacity: 0; }
+  /* Hero: during a greeting, drawn eyes (redrawn each frame by the motion) stand in
+     for the open eyes and turn into the happy ∩ and back. */
+  .zel-greeting-eyes { opacity: 0; }
   .speech-bubble::after {
     content: "";
     position: absolute;
@@ -315,29 +309,12 @@
     border-top: 1px solid var(--border);
     border-right: 1px solid var(--border);
   }
-  .progress-item::before {
-    content: "";
-    flex: 0 0 12px;
-    height: 12px;
-    rotate: 45deg;
-    border: 1px solid var(--night-gold);
-  }
-  .progress-item[data-done]::before {
-    background: var(--night-gold);
-  }
   [data-reveal] {
     transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
   [data-reveal].reveal-ready {
     opacity: 0;
     transform: translateY(22px);
-  }
-}
-
-@media (max-width: 700px) {
-  .mosaic-panorama {
-    --tile: 96px;
-    --period: 384px;
   }
 }
 
@@ -356,9 +333,9 @@
     transform: none;
   }
   .zel-piece { transform: none; }
-  .zel-lively .companion-eye { scale: 1; }
+  .zel-lively { --lid-shut: 0; }
   .zel-attentive-eyes { opacity: 1; }
-  .zel-happy-eyes { opacity: 0; }
+  .zel-greeting-eyes { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -373,9 +350,32 @@
   .tile-intro .label-cobalt { animation-delay: 1.4s; }
   .tile-intro .label-points { animation-delay: 1.6s; }
   .tile-intro .tile-greeting { animation: pop 0.6s 1.9s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: bottom left; }
-  /* Found: the face jumps out of the centre tile and the pieces startle. */
-  .tile-scroll.zel-found .zel-face-layer { animation: found-face 0.75s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
-  .tile-scroll.zel-found .zel-layer:not(.layer-centre) .zel-piece { animation: found-startle 0.6s 0.05s ease-out; }
+  /* Found: Zel drops into the empty centre spinning, like a tile being set, and
+     squashes as it lands; the impact rings out through the crown, the blue and
+     the points in turn, and a brass ring spreads. The assembled emblem, with its
+     drawn rims, takes over once everything has settled. */
+  .tile-scroll.zel-found :is(.layer-centre, .zel-face-layer) { animation: zel-set 1s both; transform-origin: 50% 51.4%; }
+  .tile-scroll.zel-found .layer-crown .zel-piece { animation: zel-ripple 0.5s 0.5s ease-out; }
+  .tile-scroll.zel-found .layer-cobalt .zel-piece { animation: zel-ripple 0.5s 0.58s ease-out; }
+  .tile-scroll.zel-found .layer-points .zel-piece { animation: zel-ripple 0.5s 0.66s ease-out; }
+  .tile-scroll.zel-found .zel-whole { animation: whole-in 0.3s 1.25s backwards; }
+  .tile-scroll.zel-found::after {
+    content: "";
+    position: absolute;
+    inset: 30%;
+    border: 3px solid var(--brand-gold);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: zel-ring 0.8s 0.5s ease-out;
+  }
+}
+/* Story on phones: each step's card rises in as it becomes the current one. */
+@media (prefers-reduced-motion: no-preference) and (max-width: 1023px) {
+  .story-step[aria-current="step"] { animation: step-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+}
+@keyframes step-in {
+  from { opacity: 0; translate: 0 10px; }
 }
 @keyframes layer-in {
   from { scale: var(--from); opacity: 0; }
@@ -383,13 +383,120 @@
 @keyframes centre-in {
   from { opacity: 0; scale: 0.6; }
 }
-@keyframes found-face {
-  from { opacity: 0; scale: 0.6; }
-  45% { opacity: 1; scale: 1.14; translate: 0 -3%; }
+/* The centre star has eightfold symmetry, so a quarter turn lands it exactly in place. */
+@keyframes zel-set {
+  from { opacity: 0; translate: 0 -75%; scale: 1.3; rotate: -90deg; animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6); }
+  15% { opacity: 1; }
+  50% { translate: 0 0; scale: 1; rotate: 0deg; animation-timing-function: ease-out; }
+  62% { scale: 1.12 0.86; }
+  76% { scale: 0.95 1.05; }
+  88% { scale: 1.02 0.98; }
+  to { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; }
 }
-@keyframes found-startle {
-  30% { translate: 0 -2.5%; }
-  60% { translate: 0 0.8%; }
+@keyframes zel-ripple {
+  35% { scale: 1.045; }
+  70% { scale: 0.99; }
+}
+/*
+ * Body language: each mood moves Zel's tiles, which no other mascot can do. Only
+ * the tiles' images move (Zel's own pose, the assembly and the scroll story use
+ * the wrappers around them), around the emblem's centre. While they move, the
+ * assembled emblem that covers resting layers steps aside.
+ *   thinking   the crown clicks round an eighth of a turn at a time, like a dial
+ *   curious    the outer layers lean, one after another, as if peering
+ *   excited    the layers bounce outward in a ripple
+ *   focused    the layers draw in tight
+ *   hello      the points give a quick wave
+ *   wink       the points flick a quarter turn now and then
+ *   content    the layers breathe, slowly
+ * Turns use each layer's symmetry (the crown has eight-fold, the blue and the points
+ * four-fold), so a layer always lands looking whole.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .zel-layer .zel-piece > img { transform-origin: 49.8% 51.4%; transition: scale 0.6s cubic-bezier(0.3, 1.4, 0.5, 1); }
+  :is(.zel-mood-thinking, .zel-mood-curious, .zel-mood-excited, .zel-mood-focused, .zel-mood-hello, .zel-mood-wink, .zel-mood-content):not(.zel-lively) .zel-whole { opacity: 0; }
+  .zel-mood-thinking .layer-crown .zel-piece > img { animation: zel-dial 9.6s cubic-bezier(0.5, 0, 0.3, 1.4) infinite; }
+  .zel-mood-curious .layer-points .zel-piece > img { animation: zel-peer-far 4.4s ease-in-out infinite; }
+  .zel-mood-curious .layer-cobalt .zel-piece > img { animation: zel-peer-mid 4.4s 0.12s ease-in-out infinite; }
+  .zel-mood-curious .layer-crown .zel-piece > img { animation: zel-peer-near 4.4s 0.24s ease-in-out infinite; }
+  .zel-mood-excited .layer-crown .zel-piece > img { animation: zel-bounce-near 1.5s ease-out infinite; }
+  .zel-mood-excited .layer-cobalt .zel-piece > img { animation: zel-bounce-mid 1.5s 0.09s ease-out infinite; }
+  .zel-mood-excited .layer-points .zel-piece > img { animation: zel-bounce-far 1.5s 0.18s ease-out infinite; }
+  .zel-mood-focused .layer-points .zel-piece > img { scale: 0.95; }
+  .zel-mood-focused .layer-cobalt .zel-piece > img { scale: 0.97; }
+  .zel-mood-focused .layer-crown .zel-piece > img { scale: 0.985; }
+  .zel-mood-hello .layer-points .zel-piece > img { animation: zel-wave 3.6s ease-in-out infinite; }
+  .zel-mood-wink .layer-points .zel-piece > img { animation: zel-flick 20s cubic-bezier(0.5, 0, 0.3, 1.5) infinite; }
+  .zel-mood-content .zel-layer:not(.layer-centre) .zel-piece > img { animation: zel-breathe 5.2s ease-in-out infinite; }
+  .zel-mood-content .layer-cobalt .zel-piece > img { animation-delay: 0.2s; }
+  .zel-mood-content .layer-points .zel-piece > img { animation-delay: 0.4s; }
+}
+/* Eight clicks of 45 degrees make a whole turn, so the loop has no jump. */
+@keyframes zel-dial {
+  0%, 8% { rotate: 0deg; }
+  12.5%, 20.5% { rotate: 45deg; }
+  25%, 33% { rotate: 90deg; }
+  37.5%, 45.5% { rotate: 135deg; }
+  50%, 58% { rotate: 180deg; }
+  62.5%, 70.5% { rotate: 225deg; }
+  75%, 83% { rotate: 270deg; }
+  87.5%, 95.5% { rotate: 315deg; }
+  100% { rotate: 360deg; }
+}
+/* Fixed values per layer, no variables: keyframes with variables cannot run on the
+   GPU, and the browser would recompute them every frame. Outer layers move more. */
+@keyframes zel-peer-far {
+  0%, 15%, 100% { rotate: 0deg; }
+  35%, 65% { rotate: -6deg; }
+  80% { rotate: 2.1deg; }
+}
+@keyframes zel-peer-mid {
+  0%, 15%, 100% { rotate: 0deg; }
+  35%, 65% { rotate: -3.5deg; }
+  80% { rotate: 1.2deg; }
+}
+@keyframes zel-peer-near {
+  0%, 15%, 100% { rotate: 0deg; }
+  35%, 65% { rotate: -1.5deg; }
+  80% { rotate: 0.5deg; }
+}
+@keyframes zel-bounce-far {
+  0%, 55%, 100% { scale: 1; }
+  18% { scale: 1.085; }
+  36% { scale: 0.99; }
+}
+@keyframes zel-bounce-mid {
+  0%, 55%, 100% { scale: 1; }
+  18% { scale: 1.065; }
+  36% { scale: 0.99; }
+}
+@keyframes zel-bounce-near {
+  0%, 55%, 100% { scale: 1; }
+  18% { scale: 1.045; }
+  36% { scale: 0.99; }
+}
+@keyframes zel-wave {
+  0%, 52%, 100% { rotate: 0deg; }
+  60% { rotate: 7deg; }
+  70% { rotate: -6deg; }
+  80% { rotate: 4deg; }
+  90% { rotate: -1.5deg; }
+}
+/* Four quarter turns, one every five seconds: a whole turn, so the loop has no jump. */
+@keyframes zel-flick {
+  0%, 21% { rotate: 0deg; }
+  25%, 46% { rotate: 90deg; }
+  50%, 71% { rotate: 180deg; }
+  75%, 96% { rotate: 270deg; }
+  100% { rotate: 360deg; }
+}
+@keyframes zel-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.018; }
+}
+@keyframes zel-ring {
+  from { opacity: 0.9; scale: 0.4; }
+  to { opacity: 0; scale: 1.7; }
 }
 @keyframes whole-in {
   from { opacity: 0; }
@@ -405,6 +512,7 @@
   .hero-intro .layer-crown { animation: fly-in 1s 0.85s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 1.5; --spin: 12deg; }
   .hero-intro .layer-centre, .hero-intro .zel-face-layer { animation: centre-in 0.7s 1.35s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: center; }
   .hero-intro .zel-whole { animation: whole-in 0.3s 2.05s backwards; }
+  .hero-intro .zel-shadow { animation: whole-in 0.6s 1.7s backwards; }
   .hero-intro .hero-greeting { animation: pop 0.6s 2.1s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: bottom left; }
   .hero .hero-copy { animation: arrive 0.8s 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 }
@@ -419,20 +527,7 @@
   .hero-zel .layer-points { scale: calc(1 + var(--out, 0) * 0.6); opacity: calc(1 - var(--out, 0) * 1.1); }
   .hero-zel .layer-cobalt { scale: calc(1 + var(--out, 0) * 0.42); opacity: calc(1 - var(--out, 0) * 0.9); }
   .hero-zel .layer-crown { scale: calc(1 + var(--out, 0) * 0.26); opacity: calc(1 - var(--out, 0) * 0.7); }
-  .hero-zel { opacity: max(0, calc(1 - var(--out, 0) * 1.6)); }
-  /* Pointing at a layer lifts it and dims the rest. */
-  .hero-zel .zel-layer { transition: translate 0.35s ease, filter 0.35s ease; }
-  .lift-crown .zel-layer:not(.layer-centre, .layer-crown),
-  .lift-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
-  .lift-points .zel-layer:not(.layer-centre, .layer-points) { filter: saturate(0.3) brightness(0.92); opacity: 0.45; }
+  /* .hero-zel fades as the hero scrolls away: Hero.tsx sets its opacity. */
   .hero-zel .zel-whole { opacity: calc(1 - var(--out, 0) * 100); transition: none; }
-  .lift-crown .zel-whole, .lift-cobalt .zel-whole, .lift-points .zel-whole { opacity: 0; }
-  .lift-crown .layer-crown, .lift-cobalt .layer-cobalt, .lift-points .layer-points {
-    translate: 0 -6px;
-    filter: drop-shadow(0 10px 14px rgb(11 29 41 / 0.35)) drop-shadow(0 0 16px rgb(212 182 120 / 0.55));
-  }
-  .hero-label-crown { left: 50%; top: 74%; translate: -50% 0; }
-  .hero-label-cobalt { left: 2%; top: 4%; }
-  .hero-label-points { right: -4%; top: 60%; }
   .hero { background-image: radial-gradient(60% 50% at 50% 46%, rgb(201 169 98 / 0.12), transparent 70%); }
 }

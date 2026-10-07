@@ -41,16 +41,18 @@ test('landing declares its language and responsive viewport', () => {
 
 test('content is prerendered, so it reads without JavaScript', () => {
   assert.match(html, /<h1[^>]*id="hero-title"[^>]*>\s*<img[^>]*alt="zellige"/);
-  for (const id of ['inicio', 'piezas', 'ramas', 'proyecto']) assert.match(html, new RegExp(`id="${id}"`));
+  for (const id of ['inicio', 'piezas', 'funciones', 'contacto']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /pequeña piedra pulida/, 'The name is explained under the title');
   assert.match(html, /Tu IA está repartida en mil apps\./);
-  assert.match(html, /<details[^>]*open/, 'Principles use native disclosures');
 });
 
-test('landing has no links to the pilot, development domain, or GitHub', () => {
-  const forbidden = /\b(?:piloto?|zellige-dev)\b|(?:^|\/\/)(?:[^/]+\.)?github\.com(?:[/:]|$)/i;
+test('landing links GitHub only for the project repository, never the pilot or development domain', () => {
+  const forbidden = /\b(?:piloto?|zellige-dev)\b/i;
+  const github = /(?:^|\/\/)(?:[^/]+\.)?github\.com(?:[/:]|$)/i;
   for (const { attrs } of tags.filter(({ name }) => name === 'a')) {
-    assert.doesNotMatch(decodeURIComponent(attrs.href ?? ''), forbidden);
+    const href = decodeURIComponent(attrs.href ?? '');
+    assert.doesNotMatch(href, forbidden);
+    if (github.test(href)) assert.equal(href, 'https://github.com/zellige-oss/Zellige', `Only the project repository: ${href}`);
   }
   assert.doesNotMatch(html, /pilot-preview/);
 });

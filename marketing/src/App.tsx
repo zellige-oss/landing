@@ -1,10 +1,9 @@
 import { useReducedMotion, useReveals } from "@/hooks/motion";
 import { ceramic } from "@/components/brand";
 import { Footer } from "@/components/Footer";
-import { Guide } from "@/components/Guide";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { Band, Branches, Panorama, Project } from "@/components/Sections";
+import { Band, Contact, Features } from "@/components/Sections";
 import { Story } from "@/components/Story";
 import { useT } from "@/i18n";
 
@@ -26,14 +25,12 @@ export function App() {
       <main id="contenido">
         <Hero reduced={reduced} />
         <Band />
+        {/* Four pages: the brand, what Zellige is, what it brings together, and how to reach it. */}
         <Story reduced={reduced} />
-        <Panorama reduced={reduced} />
-        <Branches />
-        <Band tall />
-        <Project />
+        <Features />
+        <Contact />
       </main>
       <Footer />
-      <Guide />
     </>
   );
 }
