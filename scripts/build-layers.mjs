@@ -10,7 +10,7 @@
 // lines inside pieces are smoothed into the glaze.
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
-import { distanceTo, fillHoles, grow } from './mask.mjs';
+import { distanceTo, fillHoles, flood, grow } from './mask.mjs';
 import { RIM, facing, rimColour, rimProfiles } from './rim.mjs';
 
 const source = fileURLToPath(new URL('../public/brand/zellige-emblem.png', import.meta.url));
@@ -54,24 +54,8 @@ for (const id of [1, 2, 3]) {
 const layer = new Uint8Array(N);
 // The centre star: teal connected to the middle, bridging crackle lines (≤5 px).
 {
-  const seen = new Uint8Array(N);
-  const stack = [(H >> 1) * W + (W >> 1)];
-  while (stack.length) {
-    const k = stack.pop();
-    if (seen[k]) continue;
-    seen[k] = 1;
-    layer[k] = 1;
-    const x = k % W, y = (k - x) / W;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      for (let step = 1; step <= 5; step += 1) {
-        const nx = x + dx * step, ny = y + dy * step;
-        if (nx < 0 || ny < 0 || nx >= W || ny >= H) break;
-        const n = ny * W + nx;
-        if (kind[n] === 2) { if (!seen[n]) stack.push(n); break; }
-        if (kind[n] !== 9) break;
-      }
-    }
-  }
+  const star = flood((H >> 1) * W + (W >> 1), (n) => kind[n] === 2, W, H, (n) => kind[n] === 9);
+  for (let k = 0; k < N; k += 1) if (star[k]) layer[k] = 1;
 }
 for (let k = 0; k < N; k += 1) {
   if (layer[k]) continue;

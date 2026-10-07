@@ -2,6 +2,8 @@
  * Zel's eye geometry, shared by the face (ZelFace.tsx) and the hero's motion
  * (hooks/zel-motion.ts). Coordinates are the face's: eyes at x 521 / 723, y 622.
  */
+import { bump, hold } from "@/lib/easing";
+
 export const EYE_L = 521;
 export const EYE_R = 723;
 export const EYE_Y = 622;
@@ -13,12 +15,6 @@ export const HAPPY_HALF_WIDTH = 44;
 export const HAPPY_END = 22;
 export const HAPPY_PEAK = 44;
 export const HAPPY_STROKE = 24;
-
-const clamp = (n: number) => Math.max(0, Math.min(1, n));
-const ease = (n: number) => { const t = clamp(n); return t * t * (3 - 2 * t); };
-const ramp = (t: number, a: number, b: number) => ease((t - a) / (b - a));
-const bump = (t: number, a: number, m: number, b: number) => t < m ? ramp(t, a, m) : 1 - ramp(t, m, b);
-const hold = (t: number, a: number, b: number, c: number, d: number) => ramp(t, a, b) * (1 - ramp(t, c, d));
 
 type Point = [number, number];
 // Both outlines run the same way with the same number of points (over the top, round

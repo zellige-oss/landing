@@ -19,7 +19,7 @@ async function listRegularFiles(root, prefix = '') {
     else if (entry.isFile()) files.push(path);
     else throw new Error(`Unexpected file type: ${path}`);
   }
-  return files.sort();
+  return files.sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 async function readRegularFile(root, relativePath) {

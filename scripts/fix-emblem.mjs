@@ -10,7 +10,7 @@
 import { copyFile, access } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
-import { distanceTo, fillHoles, grow } from './mask.mjs';
+import { distanceTo, fillHoles, flood, grow } from './mask.mjs';
 import { RIM, rimColour, rimProfiles } from './rim.mjs';
 
 const emblem = fileURLToPath(new URL('../public/brand/zellige-emblem.png', import.meta.url));
@@ -32,23 +32,9 @@ const cobalt = (k) => { const [h, s] = hsv(k); return data[k * 4 + 3] > 40 && h 
 const teal = (k) => { const [h, s] = hsv(k); return data[k * 4 + 3] > 40 && h >= 160 && h < 200 && s > 0.25; };
 
 // The top point: cobalt connected to its middle, bridging thin crackle lines.
-const top = new Uint8Array(N);
-const stack = [Math.round(H * 0.17) * W + (W >> 1)];
-if (!cobalt(stack[0])) throw new Error('Seed is not on the cobalt top point');
-while (stack.length) {
-  const k = stack.pop();
-  if (top[k]) continue;
-  top[k] = 1;
-  const x = k % W, y = (k - x) / W;
-  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    for (let step = 1; step <= 5; step += 1) {
-      const nx = x + dx * step, ny = y + dy * step;
-      if (nx < 0 || ny < 0 || nx >= W || ny >= H) break;
-      const n = ny * W + nx;
-      if (cobalt(n)) { if (!top[n]) stack.push(n); break; }
-    }
-  }
-}
+const topSeed = Math.round(H * 0.17) * W + (W >> 1);
+if (!cobalt(topSeed)) throw new Error('Seed is not on the cobalt top point');
+const top = flood(topSeed, cobalt, W, H);
 
 // Reference glaze: the three teal points (teal outside the central star's disc).
 const stats = (select) => {
@@ -80,24 +66,8 @@ for (let k = 0; k < N; k += 1) {
 // 2. Gold rims for the cobalt squares. Mask each square (cobalt connected to its
 // middle, bridging crackle lines), then fill crackle notches and holes.
 const fill = (seed, accept) => {
-  const mask = new Uint8Array(N);
-  const stack = [seed];
   if (!accept(seed)) throw new Error(`Seed ${seed % W},${Math.floor(seed / W)} is not on its piece`);
-  while (stack.length) {
-    const k = stack.pop();
-    if (mask[k]) continue;
-    mask[k] = 1;
-    const x = k % W, y = (k - x) / W;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      for (let step = 1; step <= 5; step += 1) {
-        const nx = x + dx * step, ny = y + dy * step;
-        if (nx < 0 || ny < 0 || nx >= W || ny >= H) break;
-        const n = ny * W + nx;
-        if (accept(n)) { if (!mask[n]) stack.push(n); break; }
-      }
-    }
-  }
-  return mask;
+  return flood(seed, accept, W, H);
 };
 const squares = new Uint8Array(N);
 for (const [fx, fy] of [[0.28, 0.31], [0.72, 0.31], [0.28, 0.72], [0.72, 0.72]]) {
