@@ -21,7 +21,8 @@ are not vector originals. The source moodboard is not shipped in the website.
   by `marketing/scripts/build-brand.mjs` from the images above, so it follows any
   change to the emblem, Zel's face or the wordmark.
 - Landing: `marketing/src/assets/layer-{centre,crown,cobalt,points}.webp` (the
-  emblem's colour layers), `emblem.webp` and `marketing/public/favicon.png`.
+  emblem's colour layers), `emblem.webp`, `zel-mark.webp` (Zel for the header's
+  logo, beside the wordmark) and `marketing/public/favicon.png`.
 
 Regenerate everything derived with `npm run brand` in `marketing/` after changing
 the emblem or Zel's face (`marketing/src/components/ZelFace.tsx`, the same
