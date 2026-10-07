@@ -6,8 +6,9 @@
 //   public/favicon.png           landing favicon, 64 px
 //   public/brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png   Zel + wordmark
 //   src/assets/zel-mark.webp     Zel for the header's logo, 512 px tall (it also flies there from the hero)
-//   src/assets/glyph-{crown,cobalt,points}.webp   each layer with Zel at its centre, 128 px
+//   src/assets/glyph-{crown,cobalt,points}.webp   each layer, joined where it has one, with Zel at its centre, 128 px
 // (The emblem layers come from build-layers.mjs, which `npm run brand` runs first.)
+import { existsSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
@@ -36,7 +37,9 @@ const centre = await sharp(path('../src/assets/layer-centre.webp')).resize(960, 
 const zelCentre = await sharp(path('../public/brand/zel/zel-look.png')).resize(960, 960)
   .composite([{ input: centre, blend: 'dest-in' }]).png().toBuffer();
 for (const piece of ['crown', 'cobalt', 'points']) {
-  const glyph = await sharp(path(`../src/assets/layer-${piece}.webp`)).resize(960, 960)
+  // The joined piece where the emblem splits the layer into four, as the story shows it.
+  const joined = path(`../src/assets/layer-${piece}-joined.webp`);
+  const glyph = await sharp(existsSync(joined) ? joined : path(`../src/assets/layer-${piece}.webp`)).resize(960, 960)
     .composite([{ input: zelCentre }]).png().toBuffer();
   await sharp(glyph).trim().resize(128, 128, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .webp({ quality: 90 }).toFile(path(`../src/assets/glyph-${piece}.webp`));

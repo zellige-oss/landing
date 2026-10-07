@@ -22,8 +22,10 @@ are not vector originals. The source moodboard is not shipped in the website; ev
   by `scripts/build-brand.mjs` from the images above, so it follows any
   change to the emblem, Zel's face or the wordmark.
 - Landing: `src/assets/layer-{centre,crown,cobalt,points}.webp` (the
-  emblem's colour layers), `glyph-{crown,cobalt,points}.webp` (each layer with
-  Zel at its centre), `emblem.webp`, `zel-mark.webp` (Zel for the header's
+  emblem's colour layers), `layer-{cobalt,points}-joined.webp` (the blue and the
+  green each joined into one piece, an X and a diamond, for the story to show on
+  their own), `glyph-{crown,cobalt,points}.webp` (each layer, joined where it has
+  one, with Zel at its centre), `emblem.webp`, `zel-mark.webp` (Zel for the header's
   logo, beside the wordmark) and `public/favicon.png`.
 - `public/brand/zellige-ceramic-source.png`: the approved ceramic mosaic the
   landing's texture (`src/assets/ceramic.webp`) is cut from.

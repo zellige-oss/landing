@@ -4,6 +4,7 @@
 //   crown   — the eight ivory kites around it
 //   cobalt  — the four blue corner squares
 //   points  — the four outer teal points (see scripts/fix-emblem.mjs)
+// and, for the story, joined versions of those split into four (layer-*-joined).
 // Every layer keeps the emblem's own pixels and full canvas, so stacked they
 // rebuild the logo exactly. Each piece takes the whole gold rim around it, so it
 // reads as a complete tile when the layers separate, and the thin gold crackle
@@ -105,19 +106,24 @@ function hulls(glaze) {
     };
     const hull = simplify(half(points).concat(half([...points].reverse())));
     polygons.push(hull);
-    const ys = hull.map(([, y]) => y);
-    for (let y = Math.ceil(Math.min(...ys)); y <= Math.max(...ys); y += 1) {
-      let from = Infinity, to = -Infinity;
-      for (let i = 0; i < hull.length; i += 1) {
-        const [ax, ay] = hull[i], [bx, by] = hull[(i + 1) % hull.length];
-        if ((y < ay && y < by) || (y > ay && y > by)) continue;
-        const xs = ay === by ? [ax, bx] : [ax + ((y - ay) / (by - ay)) * (bx - ax)];
-        for (const x of xs) { from = Math.min(from, x); to = Math.max(to, x); }
-      }
-      for (let x = Math.ceil(from); x <= Math.floor(to); x += 1) filled[y * W + x] = 1;
-    }
+    fillPolygon(hull, filled);
   }
   return { filled, polygons };
+}
+// Fills a convex polygon into `mask`, row by row.
+function fillPolygon(polygon, mask) {
+  const ys = polygon.map(([, y]) => y);
+  for (let y = Math.ceil(Math.min(...ys)); y <= Math.max(...ys); y += 1) {
+    let from = Infinity, to = -Infinity;
+    for (let i = 0; i < polygon.length; i += 1) {
+      const [ax, ay] = polygon[i], [bx, by] = polygon[(i + 1) % polygon.length];
+      if ((y < ay && y < by) || (y > ay && y > by)) continue;
+      const xs = ay === by ? [ax, bx] : [ax + ((y - ay) / (by - ay)) * (bx - ax)];
+      for (const x of xs) { from = Math.min(from, x); to = Math.max(to, x); }
+    }
+    for (let x = Math.ceil(from); x <= Math.floor(to); x += 1) mask[y * W + x] = 1;
+  }
+  return mask;
 }
 // Reduces a hull to one vertex per real corner: drops vertices that barely turn
 // (under 10°), then squares off the short sides that the glaze's rounded corners
@@ -183,6 +189,7 @@ function mitred(polygons, euclidean) {
   return field;
 }
 const fields = {};
+const outlines = {};
 for (const id of STACK) {
   const glaze = layer.map((value) => (value === id ? 1 : 0));
   // Holes left by crackle nodes are filled, so no rim is drawn around them.
@@ -192,6 +199,7 @@ for (const id of STACK) {
     continue;
   }
   const { filled, polygons } = hulls(closed);
+  outlines[id] = polygons;
   fields[id] = mitred(polygons, distanceTo(filled, W, H));
 }
 // Crackle lines inside a piece belong to it.
@@ -232,13 +240,11 @@ await save('whole', pixels);
 // Each layer: its pieces' glaze, then the new rim out to RIM px with an antialiased
 // edge, shaded by the facing of the outward normal (the distance field's gradient).
 const profiles = rimProfiles(data, W);
-const names = { 1: 'centre', 2: 'crown', 3: 'cobalt', 4: 'points' };
-for (const [id, name] of Object.entries(names)) {
-  const d = fields[id];
+async function render(name, d, glaze = pixels) {
   const cut = Buffer.alloc(N * 4);
   for (let k = 0; k < N; k += 1) {
     if (!d[k]) {
-      cut.set(pixels.subarray(k * 4, k * 4 + 4), k * 4);
+      cut.set(glaze.subarray(k * 4, k * 4 + 4), k * 4);
       continue;
     }
     if (d[k] >= RIM + 0.5) continue;
@@ -249,4 +255,158 @@ for (const [id, name] of Object.entries(names)) {
     cut[k * 4 + 3] = Math.round(255 * Math.min(1, RIM + 0.5 - d[k]));
   }
   await save(name, cut);
+}
+const names = { 1: 'centre', 2: 'crown', 3: 'cobalt', 4: 'points' };
+for (const [id, name] of Object.entries(names)) await render(name, fields[id]);
+
+// Joined layers, for the story, where each layer shows on its own around Zel
+// (Trio.tsx): there the blue and the green each read as one piece rather than four.
+// Stacked, the crown over the blue and the blue over the green, they still show only
+// the emblem's own pieces; the assembled tile keeps the layers above all the same.
+const box = (points) => {
+  const xs = points.map(([x]) => x), ys = points.map(([, y]) => y);
+  return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+};
+const centroid = (polygon) => polygon.reduce(([sx, sy], [x, y]) => [sx + x / polygon.length, sy + y / polygon.length], [0, 0]);
+const dot = ([ax, ay], [bx, by]) => ax * bx + ay * by;
+// Where the lines through a–b and c–d cross.
+const meet = ([ax, ay], [bx, by], [cx, cy], [dx, dy]) => {
+  const d1 = [bx - ax, by - ay], d2 = [dx - cx, dy - cy];
+  const t = ((cx - ax) * d2[1] - (cy - ay) * d2[0]) / (d1[0] * d2[1] - d1[1] * d2[0]);
+  return [ax + d1[0] * t, ay + d1[1] * t];
+};
+// The side a–b moved `distance` px away from the point `inside`.
+const shift = ([ax, ay], [bx, by], inside, distance) => {
+  const length = Math.hypot(bx - ax, by - ay);
+  let [nx, ny] = [(by - ay) / length, (ax - bx) / length];
+  if ((inside[0] - ax) * nx + (inside[1] - ay) * ny > 0) [nx, ny] = [-nx, -ny];
+  return [[ax + nx * distance, ay + ny * distance], [bx + nx * distance, by + ny * distance]];
+};
+// Each point's tip (the corner nearest the emblem's centre) and the corners either side.
+const middle = centroid(outlines[4].flat());
+const points = outlines[4].map((polygon) => {
+  const tip = polygon.reduce((best, p, i) => (Math.hypot(p[0] - middle[0], p[1] - middle[1]) < Math.hypot(polygon[best][0] - middle[0], polygon[best][1] - middle[1]) ? i : best), 0);
+  const [dx, dy] = centroid(polygon).map((v, i) => v - middle[i]);
+  const side = Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? 'top' : 'bottom') : (dx < 0 ? 'left' : 'right');
+  return { polygon, side, tip: polygon[tip], beside: [polygon.at(tip - 1), polygon[(tip + 1) % polygon.length]] };
+});
+
+// A joined piece from convex parts: the union of their masks, and a rim that is the
+// nearest part's, each with mitred corners.
+function union(parts) {
+  const tile = new Uint8Array(N);
+  let field;
+  for (const part of parts) {
+    const mask = fillPolygon(part, new Uint8Array(N));
+    const d = mitred([part], distanceTo(mask, W, H));
+    for (let k = 0; k < N; k += 1) if (mask[k]) tile[k] = 1;
+    field = field ? field.map((v, k) => Math.min(v, d[k])) : d;
+  }
+  return { tile, field };
+}
+
+// A joined piece's glaze: the first piece's glaze, smoothed of crackle and stretched
+// over the whole tile, so it keeps that piece's facets, with the fine grain and
+// crackle of the nearest piece on top at their own scale, mirrored to fill the tile.
+// `axes` are the unit vectors the pieces are squared to; each piece's glaze is the
+// largest box on them inside it, clear of its rim.
+const raw = { raw: { width: W, height: H, channels: 4 } };
+const smooth = await sharp(pixels, raw).median(11).raw().toBuffer();
+const blurred = await sharp(pixels, raw).blur(1.5).raw().toBuffer();
+function stretched(tile, outline, pieces, axes) {
+  const INSET = 6, GRAIN = 14; // px clear of a rim; the grain's largest step, per channel
+  const frame = (polygon) => {
+    const centre = centroid(polygon);
+    const half = axes.map((axis) => {
+      const reach = polygon.map((p) => dot([p[0] - centre[0], p[1] - centre[1]], axis));
+      return (Math.max(...reach) - Math.min(...reach)) / 2;
+    });
+    return { centre, half };
+  };
+  const inside = (polygon, p) => polygon.every((a, i) => {
+    const [s, t] = shift(a, polygon[(i + 1) % polygon.length], centroid(polygon), 0);
+    const length = Math.hypot(t[0] - s[0], t[1] - s[1]);
+    const toward = dot([centroid(polygon)[0] - s[0], centroid(polygon)[1] - s[1]], [s[1] - t[1], t[0] - s[0]]) > 0 ? 1 : -1;
+    return (toward * dot([p[0] - s[0], p[1] - s[1]], [s[1] - t[1], t[0] - s[0]])) / length >= INSET;
+  });
+  const glazes = pieces.map((polygon) => {
+    const { centre, half } = frame(polygon);
+    // Shrink the box until its corners are clear of the piece's rim.
+    let scale = 1;
+    const corner = (u, v) => [0, 1].map((c) => centre[c] + axes[0][c] * u * half[0] * scale + axes[1][c] * v * half[1] * scale);
+    while ([[-1, -1], [1, -1], [1, 1], [-1, 1]].some(([u, v]) => !inside(polygon, corner(u, v)))) scale *= 0.98;
+    return { centre, half: half.map((h) => h * scale) };
+  });
+  const whole = frame(outline);
+  const at = (buffer, [x, y], c) => {
+    const ux = Math.floor(x), vy = Math.floor(y), fx = x - ux, fy = y - vy;
+    const get = (px, py) => buffer[(py * W + px) * 4 + c];
+    return (get(ux, vy) * (1 - fx) + get(ux + 1, vy) * fx) * (1 - fy) + (get(ux, vy + 1) * (1 - fx) + get(ux + 1, vy + 1) * fx) * fy;
+  };
+  // `t` mirrored back and forth into -half..half.
+  const mirror = (t, half) => {
+    const p = (((t + half) % (4 * half)) + 4 * half) % (4 * half);
+    return (p < 2 * half ? p : 4 * half - p) - half;
+  };
+  const place = ({ centre, half }, [u, v]) => [0, 1].map((c) => centre[c] + axes[0][c] * u * half[0] + axes[1][c] * v * half[1]);
+  const glaze = Buffer.alloc(N * 4);
+  for (let k = 0; k < N; k += 1) {
+    if (!tile[k]) continue;
+    const p = [k % W, Math.floor(k / W)];
+    const local = (frameOf) => axes.map((axis, i) => dot([p[0] - frameOf.centre[0], p[1] - frameOf.centre[1]], axis) / frameOf.half[i]);
+    const base = place(glazes[0], local(whole));
+    const near = glazes.reduce((a, b) => (Math.hypot(p[0] - a.centre[0], p[1] - a.centre[1]) < Math.hypot(p[0] - b.centre[0], p[1] - b.centre[1]) ? a : b));
+    const offset = axes.map((axis) => dot([p[0] - near.centre[0], p[1] - near.centre[1]], axis));
+    const grain = [0, 1].map((c) => near.centre[c] + axes[0][c] * mirror(offset[0], near.half[0]) + axes[1][c] * mirror(offset[1], near.half[1]));
+    for (let c = 0; c < 3; c += 1) {
+      const fine = Math.max(-GRAIN, Math.min(GRAIN, at(pixels, grain, c) - at(blurred, grain, c)));
+      glaze[k * 4 + c] = Math.max(0, Math.min(255, Math.round(at(smooth, base, c) + fine)));
+    }
+    glaze[k * 4 + 3] = 255;
+  }
+  return glaze;
+}
+
+// The cobalt piece: one tile out to the four squares' outer corners, notched where
+// each green point comes in, two rims clear of it as in the emblem: an X around Zel,
+// whose arms are the four squares. It is built from four convex quarters, each from
+// its corner along the tile's sides to the notches, in to their apexes and the centre.
+{
+  const [x0, y0, x1, y1] = box(outlines[3].flat());
+  const edges = { top: [[x0, y0], [x1, y0]], bottom: [[x0, y1], [x1, y1]], left: [[x0, y0], [x0, y1]], right: [[x1, y0], [x1, y1]] };
+  const notches = {};
+  for (const { polygon, side, tip, beside } of points) {
+    const sides = beside.map((p) => shift(tip, p, centroid(polygon), 2 * RIM));
+    notches[side] = { apex: meet(...sides[0], ...sides[1]), ends: sides.map((line) => meet(...line, ...edges[side])) };
+  }
+  const centre = [(notches.top.apex[0] + notches.bottom.apex[0]) / 2, (notches.left.apex[1] + notches.right.apex[1]) / 2];
+  const near = (ends, corner) => ends.reduce((a, b) => (Math.hypot(a[0] - corner[0], a[1] - corner[1]) < Math.hypot(b[0] - corner[0], b[1] - corner[1]) ? a : b));
+  const quarters = [[x0, y0, 'top', 'left'], [x1, y0, 'top', 'right'], [x1, y1, 'bottom', 'right'], [x0, y1, 'bottom', 'left']].map(([x, y, across, down]) => [
+    [x, y], near(notches[across].ends, [x, y]), notches[across].apex, centre, notches[down].apex, near(notches[down].ends, [x, y]),
+  ]);
+  const { tile, field } = union(quarters);
+  // The upper-left square's glaze first: it lends the tile its facets.
+  const squares = [...outlines[3]].sort((a, b) => centroid(a)[0] + centroid(a)[1] - centroid(b)[0] - centroid(b)[1]);
+  const glaze = stretched(tile, [[x0, y0], [x1, y0], [x1, y1], [x0, y1]], squares, [[1, 0], [0, 1]]);
+  await render('cobalt-joined', field, glaze);
+}
+
+// The green piece: the four points and everything between them and Zel, each point
+// joined to the next from the corner beside its tip, as a diamond around Zel whose
+// corners are the four points. Its parts: the points, a quarter between each two
+// points (the two corners and the two tips), and the square between the four tips.
+{
+  const order = [...points].sort((a, b) => Math.atan2(a.tip[1] - middle[1], a.tip[0] - middle[0]) - Math.atan2(b.tip[1] - middle[1], b.tip[0] - middle[0]));
+  const quarters = order.map((a, i) => {
+    const b = order[(i + 1) % order.length];
+    const closest = (corners, to) => corners.reduce((s, t) => (Math.hypot(s[0] - to[0], s[1] - to[1]) < Math.hypot(t[0] - to[0], t[1] - to[1]) ? s : t));
+    return [a.tip, closest(a.beside, b.tip), closest(b.beside, a.tip), b.tip];
+  });
+  const { tile, field } = union([...order.map(({ polygon }) => polygon), ...quarters, order.map(({ tip }) => tip)]);
+  // The top point's glaze first, squared to the points' diagonal sides.
+  const top = order.find(({ side }) => side === 'top');
+  const pieces = [top, ...order.filter((point) => point !== top)].map(({ polygon }) => polygon);
+  const outline = order.map(({ polygon }) => polygon.reduce((far, p) => (Math.hypot(p[0] - middle[0], p[1] - middle[1]) > Math.hypot(far[0] - middle[0], far[1] - middle[1]) ? p : far)));
+  const glaze = stretched(tile, outline, pieces, [[Math.SQRT1_2, Math.SQRT1_2], [Math.SQRT1_2, -Math.SQRT1_2]]);
+  await render('points-joined', field, glaze);
 }
