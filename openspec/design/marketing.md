@@ -17,22 +17,22 @@ and Zel, the mascot, is the centre that holds them together.
    meaning ("tile"), a line of history and a fun fact. It sits beside the
    wordmark on wide screens and in the flow on smaller ones, never over Zel. As
    the hero scrolls away, Zel flies, shrinking, into the header's logo.
-2. **How does it work?** (`src/pages/Story.tsx`): the title stays in the sticky
+2. **What is Zellige?** (`src/pages/Story.tsx`): the title stays in the sticky
    panel with the story. Zel stays in the centre of the tile and each scroll step
    shows one layer around it: chat (crown), the harness manager (blue), the
    personal agent (green). Each part is named with its layer and Zel at its centre.
    The whole tile comes last and briefly, with "Zellige is all of this" rising under
-   it. On wide screens "Under the hood" then rises in the same sticky panel, in the
+   it. On wide screens "How does it work?" then fades in in the same sticky panel, in the
    tile's place, without scrolling to it; on phones, where it is taller than the
    screen, it follows the story. Once the tile is whole, the tile and
    the parts point at each other: hovering a layer lifts it, with Zel, and lights
    up its part; hovering a part lifts its layer. Clicking or tapping a layer jumps
-   to its step. "Under the hood" explains the
+   to its step. "How does it work?" explains the
    setup and draws it: your devices reach your server over Tailscale; the server
    runs Zellige (its three layers on one shared memory) and reaches the models by
    API or OAuth. The story plays once, then settles; without JavaScript or with
    reduced motion it is a list.
-3. **Features** (`src/pages/Features.tsx`): "Bring your own", two cards. BYOK ·
+3. **Bring your own** (`src/pages/Features.tsx`): "Bring your own", two cards. BYOK ·
    BYOS: your API keys, priced per token in the open, or a subscription you already
    pay for, signed in with OAuth (each tool's sign-in listed). BYOH: the
    open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness), as

@@ -1,7 +1,7 @@
 import { useState, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
-import { Companion, layers, type Layer, type Mood } from "./Companion";
+import { Companion, type Layer, type Mood } from "./Companion";
 import glyphCrown from "@/assets/glyph-crown.webp";
 import glyphCobalt from "@/assets/glyph-cobalt.webp";
 import glyphPoints from "@/assets/glyph-points.webp";
@@ -19,12 +19,6 @@ import glyphPoints from "@/assets/glyph-points.webp";
  */
 export type Piece = Exclude<Layer, "centre">;
 export const pieces: Piece[] = ["crown", "cobalt", "points"];
-
-/** One layer of the emblem, small, to name it in labels and lists. */
-export function LayerGlyph({ layer, className }: { layer: Piece; className?: string }) {
-  const { src, joined } = layers.find(({ name }) => name === layer)!;
-  return <img src={joined ?? src} alt="" width="960" height="960" className={cn("size-5 shrink-0", className)} draggable={false} />;
-}
 
 const glyphs: Record<Piece, string> = { crown: glyphCrown, cobalt: glyphCobalt, points: glyphPoints };
 

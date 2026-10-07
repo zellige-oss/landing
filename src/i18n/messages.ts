@@ -13,11 +13,12 @@ const es = {
   header: {
     home: "Zellige, inicio",
     nav: "Principal",
-    links: { idea: "Cómo funciona", features: "Funciones", contact: "Contacto" },
+    links: { idea: "¿Qué es Zellige?", features: "Bring your own", contact: "Contacto" },
     theme: "Cambiar entre modo claro y oscuro",
     themeTitle: "Modo claro / oscuro",
     menu: "Menú",
     repository: "Repositorio en GitHub",
+    code: "Código en GitHub",
   },
   hero: {
     why: {
@@ -43,10 +44,10 @@ const es = {
     hint: "Desliza para ver cada capa",
     progress: "Pasos",
     goTo: "Ir al paso",
-    title: "¿Cómo funciona?",
+    title: "¿Qué es Zellige?",
     hover: "Pasa el ratón por el azulejo o por cada parte para verla.",
     workings: {
-      title: "Por dentro",
+      title: "¿Cómo funciona?",
       body: "Configura tu servidor personal y conecta tus modelos por API, o con tu suscripción. A través de Tailscale entras desde las apps de escritorio y de móvil, para todas las plataformas, y desde la web.",
       devices: { title: "Tus dispositivos", items: ["Escritorio", "Móvil", "Web"] },
       tunnel: { title: "Tailscale", body: "Red privada" },
@@ -117,11 +118,12 @@ const en = {
   header: {
     home: "Zellige, home",
     nav: "Main",
-    links: { idea: "How it works", features: "Features", contact: "Contact" },
+    links: { idea: "What is Zellige?", features: "Bring your own", contact: "Contact" },
     theme: "Switch between light and dark mode",
     themeTitle: "Light / dark mode",
     menu: "Menu",
     repository: "Repository on GitHub",
+    code: "Code on GitHub",
   },
   hero: {
     why: {
@@ -147,10 +149,10 @@ const en = {
     hint: "Scroll to see each layer",
     progress: "Steps",
     goTo: "Go to step",
-    title: "How does it work?",
+    title: "What is Zellige?",
     hover: "Point at the tile or at each part to see it.",
     workings: {
-      title: "Under the hood",
+      title: "How does it work?",
       body: "Set up your personal server and connect your models through their APIs, or with your subscription. Through Tailscale you reach it from the desktop and mobile apps, on every platform, and from the web.",
       devices: { title: "Your devices", items: ["Desktop", "Mobile", "Web"] },
       tunnel: { title: "Tailscale", body: "Private network" },
