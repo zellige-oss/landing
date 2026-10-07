@@ -22,7 +22,7 @@ export function Features() {
   return (
     <section id="funciones" aria-labelledby="features-title" className="px-6 py-20 sm:px-[clamp(24px,4.5vw,80px)] sm:py-28 min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]">
       <div data-reveal>
-        <p className="eyebrow"><span className="section-number">02</span> {t.features.eyebrow}</p>
+        <p className="eyebrow">{t.header.links.features}</p>
         <h2 id="features-title" className="mt-4 text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
           {t.features.headline.lead}<br /><em className="text-accent">{t.features.headline.turn}</em>
         </h2>
@@ -77,7 +77,7 @@ export function Contact() {
       <div aria-hidden="true" className="ceramic absolute inset-x-0 top-0 h-[34px] border-b border-brass bg-[length:136px_136px] bg-repeat-x" />
       <div data-reveal className="grid items-start sm:grid-cols-[1fr_2fr] sm:gap-x-[10%]">
         <img src={emblem} width="260" height="260" alt="" loading="lazy" decoding="async" className="mb-8 w-[82px] drop-shadow-[0_18px_30px_#0008] sm:row-span-4 sm:mb-0 sm:w-[min(100%,260px)] sm:self-center sm:justify-self-center" />
-        <p className="eyebrow text-night-gold"><span className="section-number text-night-gold">03</span> {t.contact.eyebrow}</p>
+        <p className="eyebrow text-night-gold">{t.header.links.contact}</p>
         <h2 id="contact-title" className="mt-6 text-[49px] leading-[1.02] sm:text-[clamp(46px,5.5vw,84px)]">
           {t.contact.headline.lead}<br /><em className="text-night-gold">{t.contact.headline.turn}</em>
         </h2>

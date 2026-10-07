@@ -38,7 +38,6 @@ const es = {
     points: { name: "Puntas", use: "Agentes personales" },
   },
   story: {
-    eyebrow: "El arte de unir",
     hint: "Desliza para montar el azulejo",
     progress: "Pasos de la historia",
     goTo: "Ir al paso",
@@ -65,7 +64,6 @@ const es = {
     },
   },
   features: {
-    eyebrow: "Lo que podrás hacer",
     headline: { lead: "Tres maneras de usar la IA,", turn: "un solo sitio." },
     // [icon, layer of the tile it belongs to, use, title, body]
     pillars: [
@@ -83,7 +81,6 @@ const es = {
     },
   },
   contact: {
-    eyebrow: "Contacto",
     headline: { lead: "¿Quieres poner", turn: "tu pieza?" },
     body: "Zellige es un proyecto abierto. Sigue cómo avanza en GitHub, abre un issue con tus ideas o escríbenos.",
     repo: "Código en GitHub",
@@ -132,7 +129,6 @@ const en = {
     points: { name: "Points", use: "Personal agents" },
   },
   story: {
-    eyebrow: "The art of joining",
     hint: "Scroll to build the tile",
     progress: "Story steps",
     goTo: "Go to step",
@@ -159,7 +155,6 @@ const en = {
     },
   },
   features: {
-    eyebrow: "What you'll be able to do",
     headline: { lead: "Three ways to use AI,", turn: "one place." },
     pillars: [
       ["chat", "crown", "Chat", "The chat you know", "Think out loud with the model you choose, like any AI chat, but without the conversation being locked inside one app."],
@@ -176,7 +171,6 @@ const en = {
     },
   },
   contact: {
-    eyebrow: "Contact",
     headline: { lead: "Want to add", turn: "your piece?" },
     body: "Zellige is an open project. Follow how it's going on GitHub, open an issue with your ideas, or write to us.",
     repo: "Code on GitHub",

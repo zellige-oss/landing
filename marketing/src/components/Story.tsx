@@ -95,7 +95,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   return (
     <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
       <div className={cn(gutter, "pt-20 pb-4 lg:pb-8")}>
-        <p className="eyebrow"><span className="section-number">01</span> {t.story.eyebrow}</p>
+        <p className="eyebrow">{t.header.links.idea}</p>
         <h2 id="piezas-title" className="mt-4 text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
           {t.story.headline.lead}<br /><em className="text-accent">{t.story.headline.turn}</em>
         </h2>
