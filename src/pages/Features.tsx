@@ -38,7 +38,7 @@ export function Features() {
       </ul>
       <div data-reveal className="mt-14 border-t border-border pt-10 sm:mt-20">
         <h3 className="font-serif text-[28px] text-gold italic sm:text-[32px]">{t.features.together.title}</h3>
-        <ul className="mt-6 grid gap-6 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4">
+        <ul className="mt-6 grid gap-6 sm:grid-cols-3 sm:gap-10">
           {t.features.together.items.map(([title, body]) => (
             <li key={title} className="flex gap-3.5">
               <span aria-hidden="true" className="mt-2 size-2.5 shrink-0 rotate-45 bg-brass" />
@@ -49,6 +49,13 @@ export function Features() {
             </li>
           ))}
         </ul>
+      </div>
+      {/* Why Zellige is built around model APIs rather than subscriptions. */}
+      <div data-reveal className="mt-14 grid gap-6 rounded-2xl border border-border bg-popover/70 p-6 shadow-[0_14px_34px_-26px_rgb(20_43_53/0.45)] sm:mt-20 sm:p-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-14">
+        <h3 className="font-serif text-[28px] leading-tight text-gold italic sm:text-[32px]">{t.features.api.title}</h3>
+        <div className="grid gap-4 text-[15px] leading-[1.75] text-muted-foreground sm:text-base">
+          {t.features.api.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        </div>
       </div>
     </section>
   );

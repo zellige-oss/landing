@@ -93,8 +93,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   return (
     <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
       <div className={cn(gutter, "pt-20 pb-4 lg:pb-8")}>
-        <p className="eyebrow">{t.header.links.idea}</p>
-        <h2 id="piezas-title" className="mt-4 text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
+        <h2 id="piezas-title" className="text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
           {t.story.title}
         </h2>
       </div>
@@ -104,7 +103,7 @@ export function Story({ reduced }: { reduced: boolean }) {
             gutter,
             "grid items-center gap-5 lg:grid-cols-[1fr_1fr] lg:gap-[6vw]",
             // Below the fixed header, which is 68 px tall (76 px from sm).
-            live ? "sticky top-[68px] h-[calc(100svh-68px)] content-start py-4 lg:content-center sm:top-[76px] sm:h-[calc(100svh-76px)]" : "pt-6 pb-20",
+            live ? "sticky top-[68px] h-[calc(100svh-68px)] content-start py-4 sm:top-[76px] sm:h-[calc(100svh-76px)]" : "pt-6 pb-20",
           )}
         >
           <div>
