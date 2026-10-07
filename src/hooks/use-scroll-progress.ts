@@ -4,8 +4,9 @@ const clamp = (n: number) => Math.min(1, Math.max(0, n));
 
 /**
  * How far the page has scrolled through `target`, from 0 to 1, reported once per
- * frame while it changes. "through": from the target's top reaching the top of the
- * viewport until its bottom reaches the bottom (a sticky story). "past": until its
+ * frame while it changes, from the target's top reaching the top of the viewport.
+ * "pinned": until the target's first child, which is sticky, lets go (a sticky story
+ * that ends as soon as its panel starts scrolling away). "past": until the target's
  * bottom reaches the top (a section scrolling away).
  *
  * The target's position is measured only on load and when something resizes; while
@@ -15,7 +16,7 @@ const clamp = (n: number) => Math.min(1, Math.max(0, n));
  */
 export function useScrollProgress(
   target: RefObject<HTMLElement | null>,
-  kind: "through" | "past",
+  kind: "pinned" | "past",
   onProgress: (progress: number) => void,
   enabled = true,
 ) {
@@ -25,7 +26,8 @@ export function useScrollProgress(
   useEffect(() => {
     const element = target.current;
     if (!enabled || !element) return;
-    let top = 0, span = 1, frame = 0, last = NaN;
+    const pin = kind === "pinned" ? element.firstElementChild as HTMLElement | null : null;
+    let top = 0, span = 1, frame = 0, last = NaN, pinned = 0;
     const report = () => {
       frame = 0;
       const progress = clamp((scrollY - top) / span);
@@ -36,7 +38,12 @@ export function useScrollProgress(
     const measure = () => {
       top = element.getBoundingClientRect().top + scrollY;
       const height = element.offsetHeight;
-      span = Math.max(1, kind === "through" ? height - innerHeight : height);
+      // A sticky panel lets go when the target's bottom reaches the panel's bottom.
+      // The panel can change height with what it shows; taking the tallest it has
+      // been keeps a change of step from moving the progress back across its own
+      // threshold (and flipping between the two steps).
+      if (pin) pinned = Math.max(pinned, pin.offsetHeight + parseFloat(getComputedStyle(pin).top));
+      span = Math.max(1, height - pinned);
       last = NaN;
       report();
     };
@@ -44,13 +51,16 @@ export function useScrollProgress(
     measure();
     const observer = new ResizeObserver(() => { cancelAnimationFrame(frame); frame = 0; measure(); });
     observer.observe(element);
+    if (pin) observer.observe(pin);
     observer.observe(document.documentElement);
     addEventListener("scroll", schedule, { passive: true });
-    addEventListener("resize", measure);
+    // A new viewport lays the panel out anew: start over from its current height.
+    const resize = () => { pinned = 0; measure(); };
+    addEventListener("resize", resize);
     return () => {
       observer.disconnect();
       removeEventListener("scroll", schedule);
-      removeEventListener("resize", measure);
+      removeEventListener("resize", resize);
       cancelAnimationFrame(frame);
     };
   }, [target, kind, enabled]);

@@ -22,9 +22,8 @@ and Zel, the mascot, is the centre that holds them together.
    shows one layer around it: chat (crown), the harness manager (blue), the
    personal agent (green). Each part is named with its layer and Zel at its centre.
    The whole tile comes last and briefly, with "Zellige is all of this" rising under
-   it. On wide screens "Under the hood" then rises in the same sticky panel, in the
-   tile's place, without scrolling to it; on phones, where it is taller than the
-   screen, it follows the story. Once the tile is whole, the tile and
+   it. The whole tile comes at the very end of the story's scroll, so the story lets
+   go at once, and "Under the hood", right under it, fades in. Once the tile is whole, the tile and
    the parts point at each other: hovering a layer lifts it, with Zel, and lights
    up its part; hovering a part lifts its layer. Clicking or tapping a layer jumps
    to its step. "Under the hood" explains the

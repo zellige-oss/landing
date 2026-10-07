@@ -20,12 +20,12 @@ function Link({ children }: { children?: ReactNode }) {
 }
 
 /** How Zellige is put together: your devices reach your server through Tailscale; it reaches the models. */
-export function Workings({ reveal = true, className }: { reveal?: boolean; className?: string }) {
+export function Workings({ className }: { className?: string }) {
   const t = useT();
   const w = t.story.workings;
   const deviceIcons = [Monitor, Smartphone, Globe];
   return (
-    <div data-reveal={reveal || undefined} className={cn("pb-20", className)}>
+    <div className={cn("pb-20", className)}>
       <h3 className="text-2xl font-semibold tracking-tight sm:text-3xl">{w.title}</h3>
       <p className="mt-3 max-w-[64ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base">{w.body}</p>
       <div className="mt-8 flex flex-col items-stretch lg:grid lg:grid-cols-[minmax(0,0.75fr)_auto_minmax(0,1.25fr)_auto_minmax(0,0.75fr)] lg:items-center">
