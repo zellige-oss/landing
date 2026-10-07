@@ -282,10 +282,8 @@
   .focus-crown .zel-whole,
   .focus-cobalt .zel-whole,
   .focus-points .zel-whole { opacity: 0; }
-  .companion-look {
-    translate: var(--look-x, 0) var(--look-y, 0);
-    transition: translate 0.25s ease-out;
-  }
+  /* Where the eyes look: JS sets their translate (Companion.tsx, zel-motion.ts). */
+  .companion-look { transition: translate 0.25s ease-out; }
   /* Eyelids close over the eye and meet a little below its middle, where the eye
      is wide, so a shut eye keeps a clear crease. Open lids rest clear of the eye
      (ZelFace.tsx: 0.45 h above, 0.2 h below), so travel per eye half-height h is:
@@ -296,16 +294,14 @@
   .lid-54 { --lid-travel: 98.8px; --lid-rise: 44.3px; }
   .companion-lid { animation: lid-blink 5s infinite; }
   .companion-lid-lower { animation: lid-blink-lower 5s infinite; }
-  /* The pose belongs to an inner wrapper. Assembly, hover and scroll keep their
-     own outer transforms, and the face always shares the centre tile's pose. */
-  .zel-piece {
-    transform: translateY(var(--zel-rise, 0%)) rotate(var(--zel-turn, 0deg)) scale(var(--zel-spread, 1));
-    transform-origin: center;
-  }
+  /* The pose belongs to an inner wrapper, posed by the hero's motion (zel-motion.ts).
+     Assembly, hover and scroll keep their own outer transforms, and the face always
+     shares the centre tile's pose. */
+  .zel-piece { transform-origin: center; }
   .zel-lively[data-zel-awake] .zel-whole { opacity: 0; }
   .zel-lively .companion-look { transition: none; }
-  /* Hero: the motion sets how open the eyes are (0.09 shut, 1 open). */
-  .zel-lively { --lid-shut: clamp(0, (1 - var(--zel-eye-open, 0.09)) / 0.91, 1); }
+  /* Hero: asleep until the motion opens the lids (it sets each lid's translate). */
+  .zel-lively { --lid-shut: 1; }
   .zel-lively .companion-lid { animation: none; translate: 0 calc(var(--lid-shut) * var(--lid-travel)); }
   .zel-lively .companion-lid-lower { animation: none; translate: 0 calc(var(--lid-shut) * var(--lid-rise) * -1); }
   /* Story: until Zel arrives, the layers frame an empty centre. */
@@ -313,8 +309,7 @@
   .tile-scroll.zel-hiding .zel-whole { opacity: 0; }
   /* Hero: during a greeting, drawn eyes (redrawn each frame by the motion) stand in
      for the open eyes and turn into the happy ∩ and back. */
-  .zel-attentive-eyes { opacity: calc(1 - var(--zel-happy-on, 0)); }
-  .zel-greeting-eyes { opacity: var(--zel-happy-on, 0); }
+  .zel-greeting-eyes { opacity: 0; }
   .speech-bubble::after {
     content: "";
     position: absolute;
@@ -457,7 +452,7 @@
   .hero-zel .layer-points { scale: calc(1 + var(--out, 0) * 0.6); opacity: calc(1 - var(--out, 0) * 1.1); }
   .hero-zel .layer-cobalt { scale: calc(1 + var(--out, 0) * 0.42); opacity: calc(1 - var(--out, 0) * 0.9); }
   .hero-zel .layer-crown { scale: calc(1 + var(--out, 0) * 0.26); opacity: calc(1 - var(--out, 0) * 0.7); }
-  .hero-zel { opacity: max(0, calc(1 - var(--out, 0) * 1.6)); }
+  /* .hero-zel fades as the hero scrolls away: Hero.tsx sets its opacity. */
   /* Pointing at a layer lifts it and dims the rest. */
   .hero-zel .zel-layer { transition: translate 0.35s ease, filter 0.35s ease; }
   .lift-crown .zel-layer:not(.layer-centre, .layer-crown),

@@ -13,6 +13,21 @@ const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
 ];
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
+// Each layer's progress goes only onto the elements that use it (the layer, its
+// label, the assembled emblem), not the section: a variable on the section would
+// restyle the whole section on every scroll event, which phones cannot keep up with.
+const users = { "--p2": ".layer-cobalt, .label-cobalt, .zel-whole", "--p3": ".layer-points, .label-points, .zel-whole" };
+// Most scroll events leave a layer's progress where it was (0 or 1); skip those.
+const written = new WeakMap<HTMLElement, Partial<Record<keyof typeof users, string | null>>>();
+function setProgress(section: HTMLElement, name: keyof typeof users, value: string | null) {
+  const last = written.get(section) ?? {};
+  if (last[name] === value) return;
+  written.set(section, { ...last, [name]: value });
+  for (const element of section.querySelectorAll<HTMLElement>(users[name])) {
+    if (value === null) element.style.removeProperty(name);
+    else element.style.setProperty(name, value);
+  }
+}
 /** The step where Zel arrives: the whole tile, once every layer is in place. */
 const FOUND = steps.findIndex((step) => step.key === "tile");
 
@@ -33,8 +48,8 @@ export function Story({ reduced }: { reduced: boolean }) {
     // With reduced motion the tile simply stays assembled and the steps read as a list.
     if (!node || reduced) return;
     // The crown is there from the start; each other layer lands just before its step.
-    node.style.setProperty("--p2", clamp((t - 0.19) / 0.09).toFixed(3));
-    node.style.setProperty("--p3", clamp((t - 0.45) / 0.09).toFixed(3));
+    setProgress(node, "--p2", clamp((t - 0.19) / 0.09).toFixed(3));
+    setProgress(node, "--p3", clamp((t - 0.45) / 0.09).toFixed(3));
     const step = t < 0.28 ? 0 : t < 0.54 ? 1 : t < 0.8 ? 2 : 3;
     setActive(step);
     const isFound = (step ?? 0) >= FOUND;
@@ -54,10 +69,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   useEffect(() => {
     const node = section.current;
     if (!node) return;
-    for (const name of ["--p2", "--p3"]) {
-      if (live) node.style.setProperty(name, "0");
-      else node.style.removeProperty(name);
-    }
+    for (const name of ["--p2", "--p3"] as const) setProgress(node, name, live ? "0" : null);
   }, [live]);
 
   return (

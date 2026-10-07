@@ -49,8 +49,11 @@ const pieces = [
 ];
 
 /** The approved motion study, with a quiet idle and a greeting on hover or tap.
- * Updates CSS variables directly: animation frames never re-render React.
- * Outer layer wrappers remain available to the intro and scroll animations.
+ * Animation frames never re-render React. Each value is written straight onto the
+ * element that uses it (a piece, a lid, a pair of eyes), never as a variable on an
+ * ancestor: that would make the browser restyle the whole of Zel every frame, which
+ * phones cannot keep up with. Outer layer wrappers remain available to the intro
+ * and scroll animations.
  */
 export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: boolean, delay: number) {
   useEffect(() => {
@@ -62,6 +65,15 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       nodes: [...node.querySelectorAll<HTMLElement>(`[data-zel-motion="${piece.name}"]`)],
       tilt: 0,
     }));
+    const looks = [...node.querySelectorAll<SVGGElement>(".companion-look")];
+    // Each lid's travel comes from its eye size class (.lid-40, ...) in styles.css.
+    const lids = [...node.querySelectorAll<SVGGElement>(".companion-lid, .companion-lid-lower")].map((lid) => {
+      const upper = lid.classList.contains("companion-lid");
+      const travel = parseFloat(getComputedStyle(lid).getPropertyValue(upper ? "--lid-travel" : "--lid-rise")) || 0;
+      return { lid, travel: upper ? travel : -travel };
+    });
+    const attentiveEyes = node.querySelector<SVGGElement>(".zel-attentive-eyes");
+    const drawnEyes = node.querySelector<SVGGElement>(".zel-greeting-eyes");
     const greetingEyes = [...node.querySelectorAll<SVGPathElement>("[data-zel-greeting-eye]")].map((eye) => ({
       x: Number(eye.dataset.zelGreetingEye),
       eye,
@@ -70,15 +82,25 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
     let frame = 0, previous = 0, elapsed = -delay / 1000;
     let visible = false, greeted = false, greetingAt = -Infinity;
     let pointerAt = -Infinity, pointerX = 0, pointerY = 0, gazeX = 0, gazeY = 0;
+    let drawing: boolean | undefined;
+
+    function showDrawnEyes(on: boolean) {
+      if (on === drawing) return;
+      drawing = on;
+      attentiveEyes?.style.setProperty("opacity", on ? "0" : "1");
+      drawnEyes?.style.setProperty("opacity", on ? "1" : "0");
+    }
 
     function reset() {
       delete node!.dataset.zelAwake;
-      for (const prop of ["--look-x", "--look-y", "--zel-happy-on", "--zel-eye-open"]) node!.style.removeProperty(prop);
+      for (const look of looks) look.style.removeProperty("translate");
+      for (const { lid } of lids) lid.style.removeProperty("translate");
+      attentiveEyes?.style.removeProperty("opacity");
+      drawnEyes?.style.removeProperty("opacity");
+      drawing = undefined;
       for (const part of parts) {
         part.tilt = 0;
-        for (const element of part.nodes) {
-          for (const prop of ["--zel-turn", "--zel-rise", "--zel-spread"]) element.style.removeProperty(prop);
-        }
+        for (const element of part.nodes) element.style.removeProperty("transform");
       }
       gazeX = 0;
       gazeY = 0;
@@ -89,7 +111,7 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       previous = now;
       elapsed += dt;
       if (elapsed >= 0) {
-        node!.dataset.zelAwake = "";
+        if (!("zelAwake" in node!.dataset)) node!.dataset.zelAwake = "";
         // One welcome after waking; later greetings respond to the reader.
         if (!greeted && elapsed >= WAKE + .5) { greeted = true; greetingAt = elapsed; }
         const waking = wake(elapsed);
@@ -105,13 +127,16 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
         const blink = awake ? Math.max(bump(phase, 3.28, 3.355, 3.48),
           bump(phase, 3.52, 3.59, 3.72), bump(phase, 8.02, 8.1, 8.25), bump(phase, 11.35, 11.43, 11.58)) : 0;
         const age = elapsed - greetingAt;
-        node!.style.setProperty("--look-x", `${(gazeX * 22).toFixed(2)}px`);
-        node!.style.setProperty("--look-y", `${(gazeY * 14 - Math.abs(gazeX) * 4).toFixed(2)}px`);
-        node!.style.setProperty("--zel-eye-open", Math.max(.09, (awake ? 1 : waking.open) - blink).toFixed(3));
+        const look = `${(gazeX * 22).toFixed(2)}px ${(gazeY * 14 - Math.abs(gazeX) * 4).toFixed(2)}px`;
+        for (const element of looks) element.style.setProperty("translate", look);
+        // Lids: 0.09 open is shut; they meet at the crease.
+        const open = Math.max(.09, (awake ? 1 : waking.open) - blink);
+        const shut = clamp((1 - open) / .91);
+        for (const { lid, travel } of lids) lid.style.setProperty("translate", `0 ${(shut * travel).toFixed(2)}px`);
         // During a greeting the drawn eyes stand in for the open ones; they start and
         // end as exactly the open eye, so the swap has no seam.
         const greeting = age >= 0 && age < GREETING_EYES;
-        node!.style.setProperty("--zel-happy-on", greeting ? "1" : "0");
+        showDrawnEyes(greeting);
         if (greeting) {
           for (const { x, eye, ivory } of greetingEyes) {
             const shape = greetingEye(x, age);
@@ -132,11 +157,8 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           const wakeRise = w ? -10 * w.stretch + 14 * w.nod - 22 * w.jolt : 0;
           const wakeSpread = w ? 2 * w.stretch - 1.2 * w.nod + 2.6 * w.jolt : 0;
           const rise = (-1.7 * breath + 3.5 * pose.anticipation - 16 * pose.hop + wakeRise) / 470 * 100;
-          for (const element of part.nodes) {
-            element.style.setProperty("--zel-turn", `${(turn + wakeTurn).toFixed(3)}deg`);
-            element.style.setProperty("--zel-rise", `${rise.toFixed(3)}%`);
-            element.style.setProperty("--zel-spread", (1 + (pose.spread + wakeSpread) * part.spread).toFixed(4));
-          }
+          const transform = `translateY(${rise.toFixed(3)}%) rotate(${(turn + wakeTurn).toFixed(3)}deg) scale(${(1 + (pose.spread + wakeSpread) * part.spread).toFixed(4)})`;
+          for (const element of part.nodes) element.style.setProperty("transform", transform);
         }
       }
       frame = requestAnimationFrame(tick);

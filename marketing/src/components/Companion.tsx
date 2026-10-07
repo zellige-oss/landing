@@ -18,8 +18,8 @@ export type { Mood };
  * the assembled emblem, with its drawn rims, covers them while they rest in place
  * (.zel-whole in styles.css). The face is SVG, so Zel can change
  * expression, blink and look around (ZelFace.tsx).
- * Positions are set only through CSS custom properties from JS, never inline
- * style attributes, to stay within the landing's CSP.
+ * Positions are set from JS through the CSS object model, never inline style
+ * attributes in the markup, to stay within the landing's CSP.
  */
 export type Layer = "centre" | "crown" | "cobalt" | "points";
 export const layers: { name: Layer; src: string }[] = [
@@ -56,8 +56,9 @@ export function Companion({
       const dy = event.clientY - (rect.top + rect.height * 0.5);
       const length = Math.hypot(dx, dy) || 1;
       const reach = Math.min(1, length / 400);
-      node!.style.setProperty("--look-x", `${((dx / length) * reach * 70).toFixed(1)}px`);
-      node!.style.setProperty("--look-y", `${((dy / length) * reach * 50).toFixed(1)}px`);
+      // Onto the eyes themselves, not as variables on Zel: that would restyle all of it.
+      const offset = `${((dx / length) * reach * 70).toFixed(1)}px ${((dy / length) * reach * 50).toFixed(1)}px`;
+      for (const eyes of node!.querySelectorAll<SVGGElement>(".companion-look")) eyes.style.setProperty("translate", offset);
     }
     addEventListener("pointermove", look, { passive: true });
     return () => removeEventListener("pointermove", look);
