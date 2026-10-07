@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { EYE_L, EYE_R, EYE_RX, EYE_RY, EYE_Y, HAPPY_END, HAPPY_HALF_WIDTH, HAPPY_PEAK, HAPPY_STROKE, greetingEye } from "./zel-eye-shapes";
 
 export type Mood = "hello" | "look" | "thinking" | "excited" | "curious" | "focused" | "wink" | "content" | "surprised";
 // The moods with a generated image (scripts/build-brand.mjs); "surprised" only plays on the web.
@@ -16,17 +17,15 @@ export const moods: Mood[] = ["hello", "look", "thinking", "excited", "curious",
 const STAR = "828,642 770,699 775,783 688,772 624,837 560,769 477,783 486,703 420,644 491,584 478,507 562,521 624,456 688,519 774,506 762,580";
 // Light catching the upper-left sides, just inside the rim.
 const GLINT = "455,644 514,594 504,530 573,542 624,488";
-const EYE_L = 521;
-const EYE_R = 723;
-const EYE_Y = 622;
 // How far the open lids rest beyond the eye, per eye half-height (see .lid-* in styles.css).
 const LID_CLEAR_UP = .45;
 const LID_CLEAR_DOWN = .2;
 
 function Arc({ x, up = true }: { x: number; up?: boolean }) {
   // ∩ for a smile-squint, ∪ for closed, relaxed eyes.
-  const d = up ? `M${x - 44} ${EYE_Y + 22}Q${x} ${EYE_Y - 44} ${x + 44} ${EYE_Y + 22}` : `M${x - 42} ${EYE_Y - 8}Q${x} ${EYE_Y + 44} ${x + 42} ${EYE_Y - 8}`;
-  return <path d={d} fill="none" stroke="#f8f6ef" strokeWidth="24" strokeLinecap="round" />;
+  const w = HAPPY_HALF_WIDTH;
+  const d = up ? `M${x - w} ${EYE_Y + HAPPY_END}Q${x} ${EYE_Y - HAPPY_PEAK} ${x + w} ${EYE_Y + HAPPY_END}` : `M${x - 42} ${EYE_Y - 8}Q${x} ${EYE_Y + 44} ${x + 42} ${EYE_Y - 8}`;
+  return <path d={d} fill="none" stroke="#f8f6ef" strokeWidth={HAPPY_STROKE} strokeLinecap="round" />;
 }
 
 /*
@@ -36,7 +35,7 @@ function Arc({ x, up = true }: { x: number; up?: boolean }) {
  * are drawn open, so without CSS (the generated mood images) the eye is open. CSS
  * moves them by the travel set for each eye height (.lid-13, .lid-40, ...).
  */
-function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number; ry?: number; squint?: boolean }) {
+function Open({ x, rx = EYE_RX, ry = EYE_RY, squint = false }: { x: number; rx?: number; ry?: number; squint?: boolean }) {
   const id = useId().replaceAll(":", "");
   const h = squint ? 13 : ry, left = x - rx - 8, right = x + rx + 8;
   // Resting lid edges: above the eye by more than the lid's shadow reaches, below by a margin.
@@ -132,6 +131,13 @@ export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean
           <stop offset=".55" stopColor="#05080d" />
           <stop offset="1" stopColor="#000" />
         </radialGradient>
+        {lively && (
+          <radialGradient id={`${gradient}-glaze`} cx="42%" cy="34%" r="70%">
+            <stop offset="0" stopColor="#fffdf8" />
+            <stop offset=".62" stopColor="#f3ecdd" />
+            <stop offset="1" stopColor="#d8ccb4" />
+          </radialGradient>
+        )}
       </defs>
       <polygon points={STAR} fill={`url(#${gradient})`} />
       <polyline points={GLINT} fill="none" stroke="#fff" strokeOpacity=".12" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
@@ -139,7 +145,19 @@ export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean
         {lively ? (
           <>
             <g className="zel-attentive-eyes"><Eyes mood={mood} /></g>
-            <g className="zel-happy-eyes companion-look"><Eyes mood="hello" /></g>
+            {/* Greeting eyes: the motion redraws them every frame (zel-eye-shapes.ts),
+                from the open eye into the happy ∩ and back. */}
+            <g className="zel-greeting-eyes companion-look">
+              {[EYE_L, EYE_R].map((x) => {
+                const { d } = greetingEye(x, 0);
+                return (
+                  <g key={x}>
+                    <path data-zel-greeting-eye={x} d={d} fill={`url(#${gradient}-glaze)`} />
+                    <path data-zel-greeting-ivory={x} d={d} fill="#f8f6ef" opacity="0" />
+                  </g>
+                );
+              })}
+            </g>
           </>
         ) : <Eyes mood={mood} />}
       </g>

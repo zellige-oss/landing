@@ -311,16 +311,10 @@
   /* Story: until Zel arrives, the layers frame an empty centre. */
   .zel-hiding :is(.layer-centre, .zel-face-layer) { opacity: 0; scale: 0.7; transition: opacity 0.3s ease, scale 0.3s ease; }
   .tile-scroll.zel-hiding .zel-whole { opacity: 0; }
-  /* Hero: joy first closes the eyes (through --zel-eye-open); while they are shut the
-     ∩ strokes take their place, curling up from the lids' crease (--zel-happy-y),
-     and flatten back into it before the eyes open again. No cross-fade is seen. */
+  /* Hero: during a greeting, drawn eyes (redrawn each frame by the motion) stand in
+     for the open eyes and turn into the happy ∩ and back. */
   .zel-attentive-eyes { opacity: calc(1 - var(--zel-happy-on, 0)); }
-  .zel-happy-eyes {
-    opacity: var(--zel-happy-on, 0);
-    scale: 1 var(--zel-happy-y, 1);
-    transform-box: fill-box;
-    transform-origin: 50% 75%;
-  }
+  .zel-greeting-eyes { opacity: var(--zel-happy-on, 0); }
   .speech-bubble::after {
     content: "";
     position: absolute;
@@ -376,7 +370,7 @@
   .zel-piece { transform: none; }
   .zel-lively { --lid-shut: 0; }
   .zel-attentive-eyes { opacity: 1; }
-  .zel-happy-eyes { opacity: 0; }
+  .zel-greeting-eyes { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

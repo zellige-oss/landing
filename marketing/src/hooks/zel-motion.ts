@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from "react";
+import { GREETING_EYES, greetingEye } from "@/components/zel-eye-shapes";
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 const ease = (n: number) => { const t = clamp(n); return t * t * (3 - 2 * t); };
@@ -6,21 +7,12 @@ const ramp = (t: number, a: number, b: number) => ease((t - a) / (b - a));
 const bump = (t: number, a: number, m: number, b: number) => t < m ? ramp(t, a, m) : 1 - ramp(t, m, b);
 const hold = (t: number, a: number, b: number, c: number, d: number) => ramp(t, a, b) * (1 - ramp(t, c, d));
 
-// Overshoots to about 1.1 before settling at 1.
-const backOut = (n: number) => { const t = clamp(n) - 1; return 1 + t * t * (2.7 * t + 1.7); };
-
-// The greeting, t seconds after it starts. The happy ∩ eyes are drawn differently
-// from the open eyes, so they never fade into each other: the eyes shut quickly, the
-// strokes curl up out of the shut lids (overshooting a little), hold, flatten back
-// into the lids, and the eyes open.
+// The greeting, t seconds after it starts. The eyes' part (widen, then turn into the
+// happy ∩ and back) is drawn by greetingEye in zel-eye-shapes.ts.
 function reaction(t: number) {
-  const happyOn = t >= .4 && t < 1.88;
   return {
     anticipation: bump(t, 0, .2, .4),
     hop: bump(t, .22, .54, 1.06),
-    shut: hold(t, .29, .4, 1.88, 2.02),
-    happyOn,
-    happyY: happyOn ? Math.max(.12, backOut((t - .4) / .16) * (1 - ramp(t, 1.74, 1.88))) : 1,
     spread: t > .26 && t < 1.66 ? Math.sin(Math.PI * (t - .26) / 1.4) : 0,
   };
 }
@@ -70,13 +62,18 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       nodes: [...node.querySelectorAll<HTMLElement>(`[data-zel-motion="${piece.name}"]`)],
       tilt: 0,
     }));
+    const greetingEyes = [...node.querySelectorAll<SVGPathElement>("[data-zel-greeting-eye]")].map((eye) => ({
+      x: Number(eye.dataset.zelGreetingEye),
+      eye,
+      ivory: node.querySelector<SVGPathElement>(`[data-zel-greeting-ivory="${eye.dataset.zelGreetingEye}"]`),
+    }));
     let frame = 0, previous = 0, elapsed = -delay / 1000;
     let visible = false, greeted = false, greetingAt = -Infinity;
     let pointerAt = -Infinity, pointerX = 0, pointerY = 0, gazeX = 0, gazeY = 0;
 
     function reset() {
       delete node!.dataset.zelAwake;
-      for (const prop of ["--look-x", "--look-y", "--zel-happy-on", "--zel-happy-y", "--zel-eye-open"]) node!.style.removeProperty(prop);
+      for (const prop of ["--look-x", "--look-y", "--zel-happy-on", "--zel-eye-open"]) node!.style.removeProperty(prop);
       for (const part of parts) {
         part.tilt = 0;
         for (const element of part.nodes) {
@@ -108,12 +105,21 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
         const blink = awake ? Math.max(bump(phase, 3.28, 3.355, 3.48),
           bump(phase, 3.52, 3.59, 3.72), bump(phase, 8.02, 8.1, 8.25), bump(phase, 11.35, 11.43, 11.58)) : 0;
         const age = elapsed - greetingAt;
-        const greeting = reaction(age);
         node!.style.setProperty("--look-x", `${(gazeX * 22).toFixed(2)}px`);
         node!.style.setProperty("--look-y", `${(gazeY * 14 - Math.abs(gazeX) * 4).toFixed(2)}px`);
-        node!.style.setProperty("--zel-eye-open", Math.max(.09, Math.min((awake ? 1 : waking.open) - blink, 1 - greeting.shut)).toFixed(3));
-        node!.style.setProperty("--zel-happy-on", greeting.happyOn ? "1" : "0");
-        node!.style.setProperty("--zel-happy-y", greeting.happyY.toFixed(3));
+        node!.style.setProperty("--zel-eye-open", Math.max(.09, (awake ? 1 : waking.open) - blink).toFixed(3));
+        // During a greeting the drawn eyes stand in for the open ones; they start and
+        // end as exactly the open eye, so the swap has no seam.
+        const greeting = age >= 0 && age < GREETING_EYES;
+        node!.style.setProperty("--zel-happy-on", greeting ? "1" : "0");
+        if (greeting) {
+          for (const { x, eye, ivory } of greetingEyes) {
+            const shape = greetingEye(x, age);
+            eye.setAttribute("d", shape.d);
+            ivory?.setAttribute("d", shape.d);
+            ivory?.setAttribute("opacity", shape.ivory.toFixed(3));
+          }
+        }
         const breath = Math.sin(elapsed / 6.4 * Math.PI * 4);
         for (const part of parts) {
           const pose = reaction(age - part.delay);
