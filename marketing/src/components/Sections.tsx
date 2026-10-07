@@ -32,6 +32,7 @@ export function Panorama({ reduced }: { reduced: boolean }) {
     let width = 0;
     let tileSize = 0;
     let frame = 0;
+    let assembly = "";
     const update = () => {
       frame = 0;
       // Measure the current position, including layout changes in the story above.
@@ -41,7 +42,11 @@ export function Panorama({ reduced }: { reduced: boolean }) {
         (innerHeight * 0.95 - element.getBoundingClientRect().top) / (innerHeight * 0.7),
       ));
       const eased = progress * progress * (3 - 2 * progress);
-      element.style.setProperty("--assembly", eased.toFixed(5));
+      // Only on change: away from this section it stays at 0 or 1 while the page scrolls.
+      const value = eased.toFixed(5);
+      if (value === assembly) return;
+      assembly = value;
+      element.style.setProperty("--assembly", value);
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);

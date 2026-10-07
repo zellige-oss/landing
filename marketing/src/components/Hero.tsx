@@ -65,16 +65,32 @@ function Emblem({ reduced }: { reduced: boolean }) {
   );
 }
 
+// How far the hero has scrolled away, written only onto what fades with it: Zel's
+// layers get --out, and Zel's wrapper its opacity. As a variable on the section or
+// the wrapper it would restyle all of the hero, or all of Zel, on every scroll
+// event, which phones cannot keep up with.
+const lastOut = new WeakMap<HTMLElement, string | null>();
+function setOut(section: HTMLElement | null, value: string | null) {
+  if (!section || lastOut.get(section) === value) return;
+  lastOut.set(section, value);
+  for (const element of section.querySelectorAll<HTMLElement>(".hero-zel :is(.layer-points, .layer-cobalt, .layer-crown, .zel-whole)")) {
+    if (value === null) element.style.removeProperty("--out");
+    else element.style.setProperty("--out", value);
+  }
+  const zel = section.querySelector<HTMLElement>(".hero-zel");
+  if (value === null) zel?.style.removeProperty("opacity");
+  else zel?.style.setProperty("opacity", Math.max(0, 1 - Number(value) * 1.6).toFixed(3));
+}
+
 export function Hero({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end start"] });
   useEffect(() => {
-    if (reduced) section.current?.style.removeProperty("--out");
-    else section.current?.style.setProperty("--out", Math.min(1, scrollYProgress.get() * 1.6).toFixed(3));
+    setOut(section.current, reduced ? null : Math.min(1, scrollYProgress.get() * 1.6).toFixed(3));
   }, [reduced, scrollYProgress]);
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    if (!reduced) section.current?.style.setProperty("--out", Math.min(1, progress * 1.6).toFixed(3));
+    if (!reduced) setOut(section.current, Math.min(1, progress * 1.6).toFixed(3));
   });
   return (
     <section

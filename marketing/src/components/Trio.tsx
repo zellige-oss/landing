@@ -3,13 +3,14 @@ import { useT } from "@/i18n";
 import { Companion, layers, type Layer, type Mood } from "./Companion";
 
 /*
- * Zel is the standard emblem; the tile assembles around its centre one colour
- * layer at a time, each layer a way of using AI:
+ * Zel is the standard emblem; the tile assembles one colour layer at a time, each
+ * layer a way of using AI, and in the scroll story Zel fills the centre last:
  *   crown  (ivory kites, closest to Zel)      → chat
  *   cobalt (blue corners and top point)       → chat managers and meta-harnesses
  *   points (outer teal points, reaching out)  → personal agents
- * Motion is CSS only: the intro plays once; the scroll story drives --p1..--p3 from
- * JS. Without JS or with reduced motion, the emblem is simply whole.
+ * Motion is CSS only: the intro plays once; the scroll story drives --p2 and --p3
+ * from JS (the crown is its base). Without JS or with reduced motion, the emblem is
+ * simply whole.
  */
 export type Piece = Exclude<Layer, "centre">;
 export const pieces: Piece[] = ["crown", "cobalt", "points"];
@@ -35,13 +36,13 @@ export function Trio({
   className,
 }: {
   mood: Mood;
-  /** intro: assembles once on load; scroll: follows --p1..--p3 set on an ancestor. */
+  /** intro: assembles once on load; scroll: follows --p2 and --p3 set on an ancestor. */
   mode: "intro" | "scroll";
   /** The layer being explained: it glows while the others step back. */
   focus?: Piece;
   /** Zel introduces itself in a bubble once the tile is complete. */
   greeting?: boolean;
-  /** Whether Zel's face shows; when it appears, Zel startles at being found. */
+  /** Whether Zel fills the centre; in the scroll story it drops in when found. */
   found?: boolean;
   className?: string;
 }) {
