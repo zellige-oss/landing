@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { Mood } from "@/components/Companion";
 import { LayerGlyph, Trio, type Piece } from "@/components/Trio";
 import { Workings } from "@/components/Workings";
+import { zelMark } from "@/components/brand";
 import { useT } from "@/i18n";
 
 const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
@@ -35,6 +36,8 @@ export function Story({ reduced }: { reduced: boolean }) {
   // past it, it settles into a still summary (every step, the whole tile, every
   // label), so coming back up never replays it.
   const [settled, setSettled] = useState(false);
+  // The layer under the mouse on the tile: its step lights up and the rest step back.
+  const [pointed, setPointed] = useState<Piece>();
   const seenEnd = useRef(false);
   // What the reader is looking at when the story settles (the next section) and
   // where it was on screen, to put it back exactly there afterwards.
@@ -111,6 +114,7 @@ export function Story({ reduced }: { reduced: boolean }) {
             mood={steps[stage ?? steps.length - 1].mood}
             show={show}
             onPick={(piece) => { if (live) goTo(steps.findIndex((step) => step.layer === piece)); }}
+            onHover={setPointed}
             className="mx-auto w-[min(62vw,32svh,300px)] sm:w-[min(62vw,38svh,380px)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:w-[min(84%,460px,60svh)]"
           />
           <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
@@ -134,21 +138,23 @@ export function Story({ reduced }: { reduced: boolean }) {
             )}
             <ol className="grid gap-1">
               {steps.map((step, index) => {
-                const current = stage === index;
+                const current = pointed ? step.layer === pointed : stage === index;
+                const quiet = pointed ? !current : live && !current;
                 const copy = t.story.steps[step.key];
                 return (
                   <li
                     key={step.key}
-                    aria-current={current ? "step" : undefined}
+                    aria-current={stage === index ? "step" : undefined}
                     onClick={live && !current ? () => goTo(index) : undefined}
                     className={cn(
-                      "story-step rounded-2xl border border-transparent p-4 transition-[opacity,background-color,border-color] duration-500 sm:p-5",
-                      live && !current && "cursor-pointer opacity-45 hover:opacity-80 max-lg:hidden",
+                      "story-step rounded-2xl border border-transparent p-4 transition-[opacity,background-color,border-color] duration-300 sm:p-5",
+                      quiet && "opacity-40",
+                      live && !current && "cursor-pointer hover:opacity-80 max-lg:hidden",
                       current && "border-brass/60 bg-popover/80 shadow-[0_14px_34px_-22px_rgb(20_43_53/0.45)]",
                     )}
                   >
                     <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-base sm:text-lg">
-                      {step.layer ? <LayerGlyph layer={step.layer} className="size-7" /> : <span aria-hidden="true" className="size-2.5 rotate-45 bg-brass" />}
+                      {step.layer ? <LayerGlyph layer={step.layer} className="size-7" /> : <img src={zelMark} width="530" height="512" alt="" className="h-7 w-auto" />}
                       <strong className="font-semibold">{copy.title}</strong>
                     </p>
                     <p className="mt-2 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base">{copy.body}</p>

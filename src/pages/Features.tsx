@@ -1,69 +1,66 @@
 import type { ReactNode } from "react";
-import { KeyRound, Plug, SquareTerminal, Workflow, type LucideIcon } from "lucide-react";
+import { Database, KeyRound, RefreshCw, Server, Workflow, type LucideIcon } from "lucide-react";
 import { ProviderMark, openHarnesses, providers } from "@/components/providers";
 import { useT } from "@/i18n";
 
-/** The commercial harnesses (OpenCode sits with the open-source ones). */
-const harnesses = providers.filter(({ name }) => !["Antigravity", "OpenCode"].includes(name));
-
-function Card({ icon: Icon, tag, title, body, children }: { icon: LucideIcon; tag: string; title: string; body: string; children?: ReactNode }) {
+function Card({ icon: Icon, tag, title, body, children }: { icon: LucideIcon; tag: string; title: string; body: string; children: ReactNode }) {
   return (
-    <li data-reveal className="flex flex-col rounded-2xl border border-border bg-popover/70 p-6 shadow-[0_14px_34px_-26px_rgb(20_43_53/0.45)]">
-      <p className="flex items-center gap-3 font-serif text-[34px] leading-none text-gold italic">
-        <span aria-hidden="true" className="grid size-10 place-items-center rounded-xl border border-brass/50 bg-surface not-italic">
+    <li data-reveal className="flex flex-col rounded-2xl border border-border bg-popover/70 p-6 shadow-[0_14px_34px_-26px_rgb(20_43_53/0.45)] sm:p-7">
+      <p className="flex items-center gap-3">
+        <span aria-hidden="true" className="grid size-10 place-items-center rounded-xl border border-brass/50 bg-surface text-gold">
           <Icon strokeWidth={1.5} className="size-5" />
         </span>
-        {tag}
+        <span className="text-sm font-bold tracking-[0.12em] text-gold">{tag}</span>
       </p>
-      <h3 className="mt-2 text-lg font-semibold">{title}</h3>
-      <p className="mt-1.5 text-[15px] leading-[1.6] text-muted-foreground">{body}</p>
-      {children && <div className="mt-auto pt-4 text-[13px]">{children}</div>}
+      <h3 className="mt-4 text-xl font-semibold">{title}</h3>
+      <p className="mt-2 text-[15px] leading-[1.65] text-muted-foreground">{body}</p>
+      <div className="mt-auto pt-5 text-sm">{children}</div>
     </li>
   );
 }
 
-/** Bring your own: API key, subscription (or not) and harness. */
+const pointIcons = [Server, Database, RefreshCw];
+
+/** Bring your own: API key or subscription, and an open-source harness. */
 export function Features() {
   const t = useT();
   const f = t.features;
   return (
     <section id="funciones" aria-labelledby="features-title" className="px-6 py-20 sm:px-[clamp(24px,4.5vw,80px)] sm:py-24 min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]">
       <h2 id="features-title" data-reveal className="text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">{f.title}</h2>
-      <ul className="mt-8 grid gap-4 lg:grid-cols-3">
-        <Card icon={KeyRound} {...f.key} />
-        <Card icon={Plug} {...f.sub}>
-          <ul aria-label={f.providers} className="grid gap-1.5">
+      <ul className="mt-8 grid gap-4 lg:grid-cols-2">
+        <Card icon={KeyRound} {...f.access}>
+          <ul aria-label={f.providers} className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
             {providers.map(({ name, command, paths }) => (
-              <li key={name} className="flex items-center gap-2">
-                <ProviderMark paths={paths} className="size-3.5 shrink-0" />
-                <span className="w-24 shrink-0">{name}</span>
-                {command ? <code className="truncate font-mono text-muted-foreground">{command}</code> : <span className="text-muted-foreground">{f.sub.google}</span>}
+              <li key={name} className="flex min-w-0 items-center gap-2">
+                <ProviderMark paths={paths} className="size-4 shrink-0" />
+                <span className="shrink-0">{name}</span>
+                {command ? <code className="truncate font-mono text-[12px] text-muted-foreground">{command}</code> : <span className="text-muted-foreground">{f.access.google}</span>}
               </li>
             ))}
           </ul>
         </Card>
         <Card icon={Workflow} {...f.harness}>
-          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            {harnesses.map(({ name, paths }) => (
-              <li key={name} className="inline-flex items-center gap-1.5"><ProviderMark paths={paths} className="size-3.5" />{name}</li>
-            ))}
-          </ul>
-          <p className="mt-3 text-[11px] tracking-wide text-muted-foreground uppercase">{f.harness.open}</p>
-          <ul className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            {openHarnesses.map(({ name, paths }) => (
-              <li key={name} className="inline-flex items-center gap-1.5">
-                {paths ? <ProviderMark paths={paths} className="size-3.5" /> : <SquareTerminal aria-hidden="true" strokeWidth={1.75} className="size-3.5" />}
-                {name}
+          <ul aria-label={f.harnesses} className="flex flex-wrap gap-2">
+            {openHarnesses.map(({ name, paths, viewBox }) => (
+              <li key={name} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 py-1.5 pr-3.5 pl-2.5">
+                <ProviderMark paths={paths} viewBox={viewBox} className="size-4" />{name}
               </li>
             ))}
-            <li className="text-muted-foreground">{f.harness.more}</li>
+            <li className="self-center pl-1 text-muted-foreground">{f.harness.more}</li>
           </ul>
         </Card>
       </ul>
-      <ul data-reveal className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[15px]">
-        {f.points.map((point) => (
-          <li key={point} className="flex items-center gap-2.5"><span aria-hidden="true" className="size-2 rotate-45 bg-brass" />{point}</li>
-        ))}
+      {/* What every part shares, as one bar under the cards. */}
+      <ul data-reveal className="mt-4 grid divide-y divide-border rounded-2xl border border-border bg-popover/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {f.points.map((point, index) => {
+          const Icon = pointIcons[index];
+          return (
+            <li key={point} className="flex items-center gap-3 px-5 py-4 text-[15px] font-medium">
+              <Icon aria-hidden="true" strokeWidth={1.5} className="size-5 shrink-0 text-gold" />{point}
+            </li>
+          );
+        })}
       </ul>
       <p className="mt-4 text-xs text-muted-foreground/80">{f.trademarks}</p>
     </section>

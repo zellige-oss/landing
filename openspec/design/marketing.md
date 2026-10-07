@@ -10,34 +10,38 @@ allows only `'self'`. `public/locale.js` sends `/` to the browser's language.
 Zellige is a tile made of many small stones; each stone is a way of using AI,
 and Zel, the mascot, is the centre that holds them together.
 
-1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel and one line. A gold
-   spark beside the wordmark opens where the name comes from ("Why Zellige?",
-   `src/components/WhyZellige.tsx`). The emblem's layers fly in and lock around
-   Zel, who wakes up. As the hero scrolls away, Zel flies, shrinking, into the
-   header's logo; scrolling back flies it home.
+1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel, one line
+   (self-hosted and open source) and "Bring your own: harness · sub · API key",
+   kept in English as the jargon is. "Why Zellige?" beside the wordmark opens
+   where the name comes from (`src/components/WhyZellige.tsx`), beside the
+   wordmark on wide screens and in the flow on smaller ones, never over Zel. As
+   the hero scrolls away, Zel flies, shrinking, into the header's logo.
 2. **How it works** (`src/pages/Story.tsx`): the title stays in the sticky panel
    with the story. Zel stays in the centre of the tile and each scroll step shows
    one layer around it: chat (crown), the harness manager (blue), the personal
-   agent (green); the last puts the whole tile together. Each layer uses a harness
-   you bring. With a mouse, pointing at a layer lifts it and explains it; clicking
-   or tapping one jumps to its step. Below, "Under the hood" is the architecture:
-   your devices reach your server over Tailscale; the server runs Zellige (its
-   three layers on one shared memory) and reaches the models by API or OAuth. The story plays
-   once, then settles; without JavaScript or with reduced motion it is a list.
-3. **Features** (`src/pages/Features.tsx`): "Bring your own", three short cards.
-   BYOK: your API keys, priced per token in the open, unlike a subscription's
-   hidden limits. BYOS: a subscription you already pay for, signed in with OAuth
-   (each tool's sign-in listed). BYOH: the harness you choose, commercial or open
-   source. Below, one line: on your server, one memory, change models without
-   losing anything. Tool marks live in `src/components/providers.tsx`.
+   agent (green); the last puts the whole tile together. With a mouse, pointing at
+   a layer lifts it, with Zel, and lights up its step while the rest step back;
+   clicking or tapping one jumps to its step. Below, "Under the hood" explains the
+   setup and draws it: your devices reach your server over Tailscale; the server
+   runs Zellige (its three layers on one shared memory) and reaches the models by
+   API or OAuth. The story plays once, then settles; without JavaScript or with
+   reduced motion it is a list.
+3. **Features** (`src/pages/Features.tsx`): "Bring your own", two cards. BYOK ·
+   BYOS: your API keys, priced per token in the open, or a subscription you already
+   pay for, signed in with OAuth (each tool's sign-in listed). BYOH: the
+   open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness). A bar
+   below: on your server, one memory, change models without losing anything. Tool
+   marks live in `src/components/providers.tsx`.
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,
-   both set in `src/site.ts`.
+   both set in `src/site.ts`, beside a mosaic panel still being laid
+   (`src/components/TileInProgress.tsx`): one piece hovers over its gap and sets
+   into place when you hover the section.
 
 The header (`src/layout/Header.tsx`) carries the logo (Zel beside the wordmark)
-and links named like each page's label; on phones the links, and an icon button
-to the GitHub repository, sit in a menu. The footer (`src/layout/Footer.tsx`) is
-one line: logo, tagline, GitHub, email, back to top. A mosaic band
-(`src/components/Band.tsx`) separates the pages.
+and links named like each page's label; on phones they sit in a menu, each with a
+piece of the tile, beside an icon button to the GitHub repository. The footer
+(`src/layout/Footer.tsx`) is one line: logo, tagline, GitHub, email, back to top.
+A mosaic band (`src/components/Band.tsx`) separates the pages.
 
 ## Zel
 
@@ -53,8 +57,8 @@ one line: logo, tagline, GitHub, email, back to top. A mosaic band
 
 Zellige ornament is for brand moments (wordmark, mosaic, logo, Zel); buttons
 and UI stay plain and modern. Brand art and how it is generated are described
-in [brand-assets.md](brand-assets.md). Fonts are local Onest and Cormorant
-Garamond (`public/fonts/`, SIL OFL).
+in [brand-assets.md](brand-assets.md). The font is local Onest (`public/fonts/`, SIL OFL);
+the turn of a phrase keeps it and takes the accent colour.
 
 ## Checks
 

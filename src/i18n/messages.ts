@@ -26,8 +26,8 @@ const es = {
       meaning: "«pequeña piedra pulida»",
       body: "Un mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
     },
-    title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "en un solo sitio abierto." },
-    bring: ["Trae tu harness", "Trae tu suscripción", "Trae tu clave de API"],
+    title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "self\u2011hosted y open source." },
+    bring: { lead: "Bring your own", items: ["harness", "sub", "API key"] },
     next: "Ir a la siguiente sección",
   },
   zel: {
@@ -46,10 +46,11 @@ const es = {
     hover: "Pasa el ratón por el azulejo para ver cada capa.",
     workings: {
       title: "Por dentro",
+      body: "Configura tu servidor personal y conecta tus modelos por API, o con tu suscripción. A través de Tailscale entras desde las apps de escritorio y de móvil, para todas las plataformas, y desde la web.",
       devices: { title: "Tus dispositivos", items: ["Escritorio", "Móvil", "Web"] },
       tunnel: { title: "Tailscale", body: "Red privada" },
       server: { title: "Tu servidor", memory: "Memoria compartida" },
-      models: { title: "Los modelos", api: ["API", "Tus claves, precio por token"], oauth: ["OAuth", "Tu suscripción"] },
+      models: { title: "Los modelos", api: ["API", "Tus API keys"], oauth: ["OAuth", "Tu suscripción"] },
     },
     steps: {
       crown: {
@@ -66,32 +67,27 @@ const es = {
       },
       tile: {
         title: "Zellige es todo esto",
-        body: "Configura tu servidor personal, conecta tus modelos por API y lo tendrás todo. A través de Tailscale entras desde las apps de escritorio y de móvil, para todas las plataformas, y desde la web.",
+        body: "Chat, gestor de harness y agente personal, juntos alrededor de Zel y con la misma memoria.",
       },
     },
   },
   features: {
-    title: "Trae lo tuyo",
-    key: {
-      tag: "BYOK",
-      title: "Tu clave de API",
-      body: "Precio por token, a la vista. Una suscripción es un cristal opaco: no ves sus límites y cambian sin avisar.",
-    },
-    sub: {
-      tag: "BYOS",
-      title: "Tu suscripción… o no",
-      body: "Si ya pagas una, inicia sesión con OAuth.",
+    title: "Bring your own",
+    access: {
+      tag: "BYOK · BYOS",
+      title: "Tu API key… o tu suscripción",
+      body: "Con una API pagas por token, con el precio a la vista. Una suscripción es un cristal opaco: no ves sus límites y cambian sin avisar. Aun así, si ya pagas una, inicia sesión con OAuth.",
       google: "con Google",
     },
     harness: {
       tag: "BYOH",
-      title: "Tu harness",
-      body: "Chat, gestor y agente, con el harness que elijas.",
-      open: "Open source",
+      title: "Tu harness open source",
+      body: "El chat, el gestor de harness y tu agente funcionan con el harness open source que elijas.",
       more: "y otros",
     },
     points: ["En tu servidor", "Una sola memoria", "Cambia de modelo sin perder nada"],
     providers: "Herramientas con inicio de sesión OAuth",
+    harnesses: "Harness open source",
     trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
   },
   contact: {
@@ -133,8 +129,8 @@ const en = {
       meaning: "“small polished stone”",
       body: "A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
     },
-    title: { lead: "Chat, software development with agents and a personal agent,", turn: "in one open place." },
-    bring: ["Bring your own harness", "Bring your own sub", "Bring your own API key"],
+    title: { lead: "Chat, software development with agents and a personal agent,", turn: "self\u2011hosted and open source." },
+    bring: { lead: "Bring your own", items: ["harness", "sub", "API key"] },
     next: "Go to the next section",
   },
   zel: {
@@ -153,10 +149,11 @@ const en = {
     hover: "Point at the tile to see each layer.",
     workings: {
       title: "Under the hood",
+      body: "Set up your personal server and connect your models through their APIs, or with your subscription. Through Tailscale you reach it from the desktop and mobile apps, on every platform, and from the web.",
       devices: { title: "Your devices", items: ["Desktop", "Mobile", "Web"] },
       tunnel: { title: "Tailscale", body: "Private network" },
       server: { title: "Your server", memory: "Shared memory" },
-      models: { title: "The models", api: ["API", "Your keys, priced per token"], oauth: ["OAuth", "Your subscription"] },
+      models: { title: "The models", api: ["API", "Your API keys"], oauth: ["OAuth", "Your subscription"] },
     },
     steps: {
       crown: {
@@ -173,32 +170,27 @@ const en = {
       },
       tile: {
         title: "Zellige is all of this",
-        body: "Set up your personal server, connect your models through their APIs and you have it all. Through Tailscale you reach it from the desktop and mobile apps, on every platform, and from the web.",
+        body: "Chat, harness manager and personal agent, together around Zel and sharing one memory.",
       },
     },
   },
   features: {
     title: "Bring your own",
-    key: {
-      tag: "BYOK",
-      title: "Your API key",
-      body: "Price per token, in the open. A subscription is frosted glass: you can't see its limits, and they change without notice.",
-    },
-    sub: {
-      tag: "BYOS",
-      title: "Your sub… or don't",
-      body: "Already paying for one? Sign in with OAuth.",
+    access: {
+      tag: "BYOK · BYOS",
+      title: "Your API key… or your sub",
+      body: "With an API you pay per token, with the price in the open. A subscription is frosted glass: you can't see its limits, and they change without notice. Still, if you already pay for one, sign in with OAuth.",
       google: "with Google",
     },
     harness: {
       tag: "BYOH",
-      title: "Your harness",
-      body: "Chat, manager and agent, on the harness you choose.",
-      open: "Open source",
+      title: "Your open-source harness",
+      body: "The chat, the harness manager and your agent run on the open-source harness you choose.",
       more: "and more",
     },
     points: ["On your server", "One memory", "Change models without losing anything"],
     providers: "Tools with OAuth sign-in",
+    harnesses: "Open-source harnesses",
     trademarks: "Trademarks belong to their respective owners.",
   },
   contact: {
