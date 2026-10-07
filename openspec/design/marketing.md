@@ -15,7 +15,7 @@ and Zel, the mascot, is the centre that holds them together.
    which the story then fills in. The emblem's layers fly in and lock around Zel,
    who wakes up and says hello. As the hero scrolls away, Zel flies, shrinking,
    into the header's logo; scrolling back flies it home.
-2. **The idea** (`src/pages/Story.tsx`): what Zellige is. Zel stays in the centre
+2. **How it works** (`src/pages/Story.tsx`): what Zellige is. Zel stays in the centre
    of the tile and each scroll step shows one layer around it, one way of using
    Zel: the ivory crown is chat, the blue is the harness manager for building
    software with agents, the green points are the personal agent. The last step

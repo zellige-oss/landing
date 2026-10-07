@@ -14,7 +14,7 @@ const es = {
   header: {
     home: "Zellige, inicio",
     nav: "Principal",
-    links: { idea: "La idea", features: "Funciones", contact: "Contacto" },
+    links: { idea: "Cómo funciona", features: "Funciones", contact: "Contacto" },
     theme: "Cambiar entre modo claro y oscuro",
     themeTitle: "Modo claro / oscuro",
     menu: "Menú",
@@ -75,8 +75,15 @@ const es = {
         ["Una sola historia", "El chat, el gestor de harness y tu agente parten de la misma historia, en lugar de empezar cada uno desde cero."],
         ["En tu servidor", "Un proyecto abierto y autoalojado: tu historia se guarda en tu propio servidor, no en el de un proveedor."],
         ["Cambia de modelo, no de historia", "Los modelos y las herramientas pueden cambiar sin llevarse por delante lo que has construido."],
-        ["Por API, no por suscripción", "Conectas los modelos con tus propias claves de API y pagas solo lo que usas. Las suscripciones también tendrán soporte, pero no son lo principal."],
       ] as [string, string][],
+    },
+    api: {
+      title: "Por qué API y no suscripción",
+      paragraphs: [
+        "Una suscripción es un cristal opaco: ves el servicio, pero no lo que hay detrás. No sabes cuánto puedes usar de verdad, los límites no se publican con claridad y pueden cambiar de un día para otro sin que te des cuenta.",
+        "Una API, en cambio, publica su precio: tanto por cada token de entrada y tanto por cada token de salida. Sabes qué pagas y por qué. En Zellige creemos que el futuro va por ahí, así que conectas tus modelos con tus propias claves de API.",
+        "Aun así, si ya pagas una suscripción, podrás aprovecharla: Zellige te dejará iniciar sesión con OAuth en los grandes proveedores de IA.",
+      ],
     },
   },
   contact: {
@@ -105,7 +112,7 @@ const en = {
   header: {
     home: "Zellige, home",
     nav: "Main",
-    links: { idea: "The idea", features: "Features", contact: "Contact" },
+    links: { idea: "How it works", features: "Features", contact: "Contact" },
     theme: "Switch between light and dark mode",
     themeTitle: "Light / dark mode",
     menu: "Menu",
@@ -165,8 +172,15 @@ const en = {
         ["One story", "The chat, the harness manager and your agent start from the same story, instead of each starting from scratch."],
         ["On your server", "An open, self-hosted project: your story is kept on your own server, not a provider's."],
         ["Change models, not your story", "Models and tools can change without taking what you've built with them."],
-        ["Through APIs, not subscriptions", "You connect models with your own API keys and pay only for what you use. Subscriptions will be supported too, but they are not the focus."],
       ] as [string, string][],
+    },
+    api: {
+      title: "Why APIs, not subscriptions",
+      paragraphs: [
+        "A subscription is frosted glass: you see the service, but not what's behind it. You don't really know how much you can use, the limits aren't clearly published, and they can change from one day to the next without you noticing.",
+        "An API, on the other hand, publishes its price: so much per input token and so much per output token. You know what you pay and why. At Zellige we believe that is where things are heading, so you connect your models with your own API keys.",
+        "Even so, if you already pay for a subscription, you'll be able to use it: Zellige will let you sign in with OAuth to the major AI providers.",
+      ],
     },
   },
   contact: {
