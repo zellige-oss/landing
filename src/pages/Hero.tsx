@@ -6,6 +6,7 @@ import { ease } from "@/lib/easing";
 import { useT } from "@/i18n";
 import { Companion } from "@/components/Companion";
 import { Wordmark } from "@/components/Wordmark";
+import { WhyZellige } from "@/components/WhyZellige";
 
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
@@ -17,7 +18,7 @@ import { Wordmark } from "@/components/Wordmark";
 function Emblem({ reduced }: { reduced: boolean }) {
   const t = useT();
   return (
-    <div className={cn("hero-zel tile relative mx-auto aspect-square w-[min(78vw,clamp(200px,30vh,380px))]", !reduced && "hero-intro")}>
+    <div className={cn("hero-zel tile relative mx-auto aspect-square w-[min(84vw,clamp(220px,38vh,440px))]", !reduced && "hero-intro")}>
       <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} alt={t.zel.alt} shadow="hero" className="size-full" />
     </div>
   );
@@ -91,28 +92,19 @@ export function Hero({ reduced }: { reduced: boolean }) {
       aria-labelledby="hero-title"
       className="hero relative isolate flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-6 pt-20 pb-14 text-center sm:pt-16"
     >
-      <h1 id="hero-title" className="leading-none motion-safe:animate-arrive">
-        <Wordmark alt="zellige" className="mx-auto h-auto w-[min(62vw,clamp(200px,26vh,280px))] drop-shadow-[0_14px_20px_#0f3b6e26]" />
-      </h1>
+      {/* The spark beside the wordmark opens where the name comes from. */}
+      <div className="relative z-[3] motion-safe:animate-arrive">
+        <h1 id="hero-title" className="leading-none">
+          <Wordmark alt="zellige" className="mx-auto h-auto w-[min(62vw,clamp(200px,26vh,280px))] drop-shadow-[0_14px_20px_#0f3b6e26]" />
+        </h1>
+        <WhyZellige />
+      </div>
       <div className="mt-3 mb-5 sm:mt-4 sm:mb-6">
         <Emblem reduced={reduced} />
       </div>
       <p className="hero-copy relative z-[2] max-w-[22ch] text-[clamp(26px,3.4vw,42px)] leading-[1.08] tracking-[-0.045em] text-balance">
         {t.hero.title.lead} <em className="text-accent">{t.hero.title.turn}</em>
       </p>
-      {/* Where the name comes from, as a dictionary would put it: many pieces, one
-          pattern, which the story below then fills with the ways of using AI. */}
-      <div className="hero-copy relative z-[2] mt-6 max-w-[50ch] sm:mt-7">
-        <span aria-hidden="true" className="mx-auto mb-4 block size-2 rotate-45 bg-brass" />
-        <p className="flex flex-wrap items-baseline justify-center gap-x-2.5 text-sm sm:text-[15px]">
-          <span className="font-semibold">zel·li·ge</span>
-          <span className="text-muted-foreground">/zɛˈliːʒ/</span>
-          <span lang="ar" dir="rtl" className="text-muted-foreground">الزليج</span>
-        </p>
-        <p className="mt-2 text-[15px] leading-[1.65] text-pretty text-muted-foreground sm:text-base">
-          {t.hero.origin.from} <i>az-zellīj</i>, {t.hero.origin.meaning}. {t.hero.origin.body}
-        </p>
-      </div>
       {/* Next section: a quiet cue at the bottom edge. */}
       <a
         href="#piezas"

@@ -10,11 +10,11 @@ allows only `'self'`. `public/locale.js` sends `/` to the browser's language.
 Zellige is a tile made of many small stones; each stone is a way of using AI,
 and Zel, the mascot, is the centre that holds them together.
 
-1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel, one line and where
-   the name comes from (a mosaic of pieces that only make a pattern together),
-   which the story then fills in. The emblem's layers fly in and lock around Zel,
-   who wakes up and says hello. As the hero scrolls away, Zel flies, shrinking,
-   into the header's logo; scrolling back flies it home.
+1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel and one line. A gold
+   spark beside the wordmark opens where the name comes from ("Why Zellige?",
+   `src/components/WhyZellige.tsx`). The emblem's layers fly in and lock around
+   Zel, who wakes up. As the hero scrolls away, Zel flies, shrinking, into the
+   header's logo; scrolling back flies it home.
 2. **How it works** (`src/pages/Story.tsx`): what Zellige is. Zel stays in the centre
    of the tile and each scroll step shows one layer around it, one way of using
    Zel: the ivory crown is chat, the blue is the harness manager for building
