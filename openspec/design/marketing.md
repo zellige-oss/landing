@@ -23,8 +23,12 @@ and Zel, the mascot, is the centre that holds them together.
    or tapping one jumps to its step. Below, "Under the hood" draws the path: your
    devices, Tailscale, your server, the models (by API or OAuth). The story plays
    once, then settles; without JavaScript or with reduced motion it is a list.
-3. **Features** (`src/pages/Features.tsx`): one pillar per layer, then what joins
-   them: one story, on your own server, change models without losing it.
+3. **Features** (`src/pages/Features.tsx`): "Bring your own", three short cards.
+   BYOK: your API keys, priced per token in the open, unlike a subscription's
+   hidden limits. BYOS: a subscription you already pay for, signed in with OAuth
+   (each tool's sign-in listed). BYOH: the harness you choose, commercial or open
+   source. Below, one line: on your server, one memory, change models without
+   losing anything. Tool marks live in `src/components/providers.tsx`.
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,
    both set in `src/site.ts`.
 
