@@ -111,17 +111,29 @@ export function Story({ reduced }: { reduced: boolean }) {
   return (
     <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
       <div ref={track} className={cn(live && "h-[300vh] lg:h-[330vh]")}>
-        {/* Below the fixed header, which is 68 px tall (76 px from sm). As tall as its
-            content, so the next part follows it as soon as the story ends. */}
-        <div className={cn("relative", live ? "sticky top-[68px] pt-6 pb-4 sm:top-[76px]" : "pt-20 pb-10")}>
+        {/* Below the fixed header, which is 68 px tall (76 px from sm). On phones it
+            fills the screen under the header and centres the story, so the room the
+            story leaves frames it rather than gaping below, and what follows comes
+            straight after it. From lg it is as tall as its content, and "Por dentro"
+            shares its one cell with the story, so neither leaves the layout: the
+            story fades out where it is, then "Por dentro" fades in in its place, and
+            back the other way when scrolling up. */}
+        <div
+          className={cn(
+            "relative",
+            live
+              ? "sticky top-[68px] pt-6 pb-4 max-lg:flex max-lg:min-h-[calc(100svh-68px)] max-lg:flex-col max-lg:justify-center sm:top-[76px] sm:max-lg:min-h-[calc(100svh-76px)] lg:grid"
+              : "pt-20 pb-10",
+          )}
+        >
           {/* The title stays with the story: on phones above the tile and the step, on
               wide screens above the steps, with the tile beside them. */}
           <div
             className={cn(
               gutter,
-              "grid content-start gap-x-[6vw] gap-y-4 transition-[opacity,translate,visibility] duration-500 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center",
-              // Stepping aside for "Por dentro": out of the flow, so the panel takes its height.
-              inside && "lg:invisible lg:absolute lg:inset-x-0 lg:top-6 lg:-translate-y-6 lg:opacity-0",
+              "grid content-start gap-x-[6vw] gap-y-4 transition-[opacity,visibility] duration-300 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center lg:[grid-area:1/1]",
+              // Stepping aside for "Por dentro", and back once it has gone.
+              inside ? "lg:invisible lg:opacity-0" : "lg:delay-300",
             )}
           >
             <h2 id="piezas-title" className="text-[clamp(32px,8vw,44px)] leading-[1.02] lg:col-start-1 lg:row-start-1 lg:self-end lg:text-[clamp(44px,4.2vw,68px)]">
@@ -203,7 +215,12 @@ export function Story({ reduced }: { reduced: boolean }) {
               )}
             </div>
           </div>
-          {inside && <Workings reveal={false} className={cn(gutter, "story-end pb-0 max-lg:hidden")} />}
+          {live && (
+            <Workings
+              reveal={false}
+              className={cn(gutter, "pb-0 transition-[opacity,visibility] duration-500 max-lg:hidden lg:[grid-area:1/1]", inside ? "lg:delay-300" : "invisible opacity-0")}
+            />
+          )}
         </div>
       </div>
       <Workings className={cn(gutter, live && "lg:hidden")} />
