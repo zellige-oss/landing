@@ -287,12 +287,13 @@
     transition: translate 0.25s ease-out;
   }
   /* Eyelids close over the eye and meet a little below its middle, where the eye
-     is wide, so a shut eye keeps a clear crease. Travel per eye half-height h:
-     upper lid 1.38 h down, lower lid 0.62 h up. */
-  .lid-13 { --lid-travel: 18px; --lid-rise: 8px; }
-  .lid-40 { --lid-travel: 55px; --lid-rise: 25px; }
-  .lid-46 { --lid-travel: 63px; --lid-rise: 29px; }
-  .lid-54 { --lid-travel: 75px; --lid-rise: 33px; }
+     is wide, so a shut eye keeps a clear crease. Open lids rest clear of the eye
+     (ZelFace.tsx: 0.45 h above, 0.2 h below), so travel per eye half-height h is:
+     upper lid 1.83 h down, lower lid 0.82 h up. */
+  .lid-13 { --lid-travel: 23.8px; --lid-rise: 10.7px; }
+  .lid-40 { --lid-travel: 73.2px; --lid-rise: 32.8px; }
+  .lid-46 { --lid-travel: 84.2px; --lid-rise: 37.7px; }
+  .lid-54 { --lid-travel: 98.8px; --lid-rise: 44.3px; }
   .companion-lid { animation: lid-blink 5s infinite; }
   .companion-lid-lower { animation: lid-blink-lower 5s infinite; }
   /* The pose belongs to an inner wrapper. Assembly, hover and scroll keep their

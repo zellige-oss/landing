@@ -19,6 +19,9 @@ const GLINT = "455,644 514,594 504,530 573,542 624,488";
 const EYE_L = 521;
 const EYE_R = 723;
 const EYE_Y = 622;
+// How far the open lids rest beyond the eye, per eye half-height (see .lid-* in styles.css).
+const LID_CLEAR_UP = .45;
+const LID_CLEAR_DOWN = .2;
 
 function Arc({ x, up = true }: { x: number; up?: boolean }) {
   // ∩ for a smile-squint, ∪ for closed, relaxed eyes.
@@ -28,14 +31,16 @@ function Arc({ x, up = true }: { x: number; up?: boolean }) {
 
 /*
  * An open eye under obsidian lids. Blinks and sleep lower the upper lid (and raise a
- * short lower one) over the eye instead of squashing it; at rest the upper lid just
- * shows along the top edge, with a rim of light and a soft shadow for relief. The
- * lids are drawn open, so without CSS (the generated mood images) the eye is open.
- * CSS moves them by the travel set for each eye height (.lid-13, .lid-40, ...).
+ * short lower one) over the eye instead of squashing it. At rest both lids sit just
+ * clear of the eye, shadow included, so an open eye shows its whole bead. The lids
+ * are drawn open, so without CSS (the generated mood images) the eye is open. CSS
+ * moves them by the travel set for each eye height (.lid-13, .lid-40, ...).
  */
 function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number; ry?: number; squint?: boolean }) {
   const id = useId().replaceAll(":", "");
-  const h = squint ? 13 : ry, left = x - rx - 8, right = x + rx + 8, top = EYE_Y - h, bottom = EYE_Y + h;
+  const h = squint ? 13 : ry, left = x - rx - 8, right = x + rx + 8;
+  // Resting lid edges: above the eye by more than the lid's shadow reaches, below by a margin.
+  const top = EYE_Y - h - LID_CLEAR_UP * h, bottom = EYE_Y + h + LID_CLEAR_DOWN * h;
   return (
     <g className="companion-eye">
       <defs>
