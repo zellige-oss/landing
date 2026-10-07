@@ -27,6 +27,7 @@ export function App() {
         <Band />
         {/* Four pages: the brand, what Zellige is, what it brings together, and how to reach it. */}
         <Story reduced={reduced} />
+        <Band />
         <Features />
         <Contact />
       </main>
