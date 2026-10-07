@@ -13,16 +13,17 @@ const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
 ];
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
-/** The step where Zel is found: the personal agents, reaching out. */
-const FOUND = steps.findIndex((step) => step.key === "points");
+/** The step where Zel arrives: the whole tile, once every layer is in place. */
+const FOUND = steps.findIndex((step) => step.key === "tile");
 
 /** Scroll story: each kind of AI use arrives as a layer of the emblem until the tile is complete. */
 export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
   const [active, setActive] = useState<number>();
-  // Zel hides in the centre tile until the personal-agents step finds it, and is
-  // startled for a moment; scrolling back hides it again, so the surprise replays.
+  // The crown is the base; the blue and the points close in around an empty centre,
+  // and only the last step drops Zel into it, wide-eyed for a moment from the landing.
+  // Scrolling back empties the centre again, so the arrival replays.
   const [startled, setStartled] = useState(false);
   const wasFound = useRef(false);
   const calm = useRef<number>(undefined);
@@ -31,12 +32,10 @@ export function Story({ reduced }: { reduced: boolean }) {
     const node = section.current;
     // With reduced motion the tile simply stays assembled and the steps read as a list.
     if (!node || reduced) return;
-    // Each layer lands just before its step starts.
-    node.style.setProperty("--p1", clamp(t / 0.1).toFixed(3));
+    // The crown is there from the start; each other layer lands just before its step.
     node.style.setProperty("--p2", clamp((t - 0.19) / 0.09).toFixed(3));
     node.style.setProperty("--p3", clamp((t - 0.45) / 0.09).toFixed(3));
-    // No step until the first layer has landed.
-    const step = t < 0.1 ? undefined : t < 0.28 ? 0 : t < 0.54 ? 1 : t < 0.8 ? 2 : 3;
+    const step = t < 0.28 ? 0 : t < 0.54 ? 1 : t < 0.8 ? 2 : 3;
     setActive(step);
     const isFound = (step ?? 0) >= FOUND;
     if (isFound !== wasFound.current) {
@@ -55,7 +54,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   useEffect(() => {
     const node = section.current;
     if (!node) return;
-    for (const name of ["--p1", "--p2", "--p3"]) {
+    for (const name of ["--p2", "--p3"]) {
       if (live) node.style.setProperty(name, "0");
       else node.style.removeProperty(name);
     }
