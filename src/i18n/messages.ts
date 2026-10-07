@@ -92,7 +92,7 @@ const es = {
     trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
   },
   contact: {
-    headline: { lead: "¿Quieres poner", turn: "tu pieza?" },
+    headline: { lead: "¿Quieres aportar", turn: "tu parte?" },
     body: "Zellige es un proyecto abierto. Sigue cómo avanza en GitHub, abre un issue con tus ideas o escríbenos.",
     repo: "Código en GitHub",
     email: "Escríbenos",

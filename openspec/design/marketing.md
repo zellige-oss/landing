@@ -22,10 +22,12 @@ and Zel, the mascot, is the centre that holds them together.
    shows one layer around it: chat (crown), the harness manager (blue), the
    personal agent (green). Each part is named with its layer and Zel at its centre.
    The whole tile comes last and briefly, with "Zellige is all of this" rising under
-   it, so "Under the hood" follows soon after. Once the tile is whole, the tile and
+   it. On wide screens "Under the hood" then rises in the same sticky panel, in the
+   tile's place, without scrolling to it; on phones, where it is taller than the
+   screen, it follows the story. Once the tile is whole, the tile and
    the parts point at each other: hovering a layer lifts it, with Zel, and lights
    up its part; hovering a part lifts its layer. Clicking or tapping a layer jumps
-   to its step. Below, "Under the hood" explains the
+   to its step. "Under the hood" explains the
    setup and draws it: your devices reach your server over Tailscale; the server
    runs Zellige (its three layers on one shared memory) and reaches the models by
    API or OAuth. The story plays once, then settles; without JavaScript or with
