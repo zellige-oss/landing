@@ -123,12 +123,10 @@
   70% { rotate: -3deg; }
 }
 @keyframes lid-blink {
-  0%, 94%, 100% { translate: 0 0; }
-  97% { translate: 0 var(--lid-travel); }
+  50% { translate: 0 var(--lid-travel); }
 }
 @keyframes lid-blink-lower {
-  0%, 94%, 100% { translate: 0 0; }
-  97% { translate: 0 calc(var(--lid-rise) * -1); }
+  50% { translate: 0 calc(var(--lid-rise) * -1); }
 }
 @keyframes twinkle {
   0%, 100% { opacity: 0.35; scale: 0.7; }
@@ -292,8 +290,23 @@
   .lid-40 { --lid-travel: 73.2px; --lid-rise: 32.8px; }
   .lid-46 { --lid-travel: 84.2px; --lid-rise: 37.7px; }
   .lid-54 { --lid-travel: 98.8px; --lid-rise: 44.3px; }
-  .companion-lid { animation: lid-blink 5s infinite; }
-  .companion-lid-lower { animation: lid-blink-lower 5s infinite; }
+  /* Zel's shadow (Companion.tsx): the emblem's silhouette, blackened and blurred, set
+     a little lower. It never changes, so the browser paints it once. Values match the
+     drop-shadows it replaces (blur is half their radius). */
+  .zel-shadow { pointer-events: none; filter: brightness(0) blur(var(--shadow-blur)); opacity: var(--shadow-alpha); translate: 0 var(--shadow-y); }
+  .zel-shadow-hero { --shadow-y: 26px; --shadow-blur: 17px; --shadow-alpha: 0.3; }
+  .zel-shadow-tile { --shadow-y: 22px; --shadow-blur: 14px; --shadow-alpha: 0.3; }
+  .zel-shadow-footer { --shadow-y: 18px; --shadow-blur: 11px; --shadow-alpha: 0.35; }
+  .zel-shadow-guide { --shadow-y: 14px; --shadow-blur: 8px; --shadow-alpha: 0.35; }
+  /* In the story the shadow belongs to the whole tile, so it waits for Zel. */
+  .tile-scroll.zel-hiding .zel-shadow { opacity: 0; transition: opacity 0.3s ease; }
+  .tile-scroll .zel-shadow { transition: opacity 0.6s 0.9s ease; }
+  /* Moving pieces get their own GPU layers, so moving them never repaints them. */
+  .zel-lively .zel-piece { will-change: transform; }
+  .tile-scroll .zel-layer { will-change: scale, opacity; }
+  /* One blink each time Companion.tsx switches .zel-blinking on. */
+  .zel-blinking .companion-lid { animation: lid-blink 0.3s ease-in-out; }
+  .zel-blinking .companion-lid-lower { animation: lid-blink-lower 0.3s ease-in-out; }
   /* The pose belongs to an inner wrapper, posed by the hero's motion (zel-motion.ts).
      Assembly, hover and scroll keep their own outer transforms, and the face always
      shares the centre tile's pose. */
@@ -439,12 +452,12 @@
   .zel-layer .zel-piece > img { transform-origin: 49.8% 51.4%; transition: scale 0.6s cubic-bezier(0.3, 1.4, 0.5, 1); }
   :is(.zel-mood-thinking, .zel-mood-curious, .zel-mood-excited, .zel-mood-focused, .zel-mood-hello, .zel-mood-wink, .zel-mood-content):not(.zel-lively) .zel-whole { opacity: 0; }
   .zel-mood-thinking .layer-crown .zel-piece > img { animation: zel-dial 9.6s cubic-bezier(0.5, 0, 0.3, 1.4) infinite; }
-  .zel-mood-curious .layer-points .zel-piece > img { animation: zel-peer 4.4s ease-in-out infinite; --lean: -6deg; }
-  .zel-mood-curious .layer-cobalt .zel-piece > img { animation: zel-peer 4.4s 0.12s ease-in-out infinite; --lean: -3.5deg; }
-  .zel-mood-curious .layer-crown .zel-piece > img { animation: zel-peer 4.4s 0.24s ease-in-out infinite; --lean: -1.5deg; }
-  .zel-mood-excited .layer-crown .zel-piece > img { animation: zel-bounce 1.5s ease-out infinite; --pop: 1.045; }
-  .zel-mood-excited .layer-cobalt .zel-piece > img { animation: zel-bounce 1.5s 0.09s ease-out infinite; --pop: 1.065; }
-  .zel-mood-excited .layer-points .zel-piece > img { animation: zel-bounce 1.5s 0.18s ease-out infinite; --pop: 1.085; }
+  .zel-mood-curious .layer-points .zel-piece > img { animation: zel-peer-far 4.4s ease-in-out infinite; }
+  .zel-mood-curious .layer-cobalt .zel-piece > img { animation: zel-peer-mid 4.4s 0.12s ease-in-out infinite; }
+  .zel-mood-curious .layer-crown .zel-piece > img { animation: zel-peer-near 4.4s 0.24s ease-in-out infinite; }
+  .zel-mood-excited .layer-crown .zel-piece > img { animation: zel-bounce-near 1.5s ease-out infinite; }
+  .zel-mood-excited .layer-cobalt .zel-piece > img { animation: zel-bounce-mid 1.5s 0.09s ease-out infinite; }
+  .zel-mood-excited .layer-points .zel-piece > img { animation: zel-bounce-far 1.5s 0.18s ease-out infinite; }
   .zel-mood-focused .layer-points .zel-piece > img { scale: 0.95; }
   .zel-mood-focused .layer-cobalt .zel-piece > img { scale: 0.97; }
   .zel-mood-focused .layer-crown .zel-piece > img { scale: 0.985; }
@@ -466,14 +479,36 @@
   87.5%, 95.5% { rotate: 315deg; }
   100% { rotate: 360deg; }
 }
-@keyframes zel-peer {
+/* Fixed values per layer, no variables: keyframes with variables cannot run on the
+   GPU, and the browser would recompute them every frame. Outer layers move more. */
+@keyframes zel-peer-far {
   0%, 15%, 100% { rotate: 0deg; }
-  35%, 65% { rotate: var(--lean); }
-  80% { rotate: calc(var(--lean) * -0.35); }
+  35%, 65% { rotate: -6deg; }
+  80% { rotate: 2.1deg; }
 }
-@keyframes zel-bounce {
+@keyframes zel-peer-mid {
+  0%, 15%, 100% { rotate: 0deg; }
+  35%, 65% { rotate: -3.5deg; }
+  80% { rotate: 1.2deg; }
+}
+@keyframes zel-peer-near {
+  0%, 15%, 100% { rotate: 0deg; }
+  35%, 65% { rotate: -1.5deg; }
+  80% { rotate: 0.5deg; }
+}
+@keyframes zel-bounce-far {
   0%, 55%, 100% { scale: 1; }
-  18% { scale: var(--pop); }
+  18% { scale: 1.085; }
+  36% { scale: 0.99; }
+}
+@keyframes zel-bounce-mid {
+  0%, 55%, 100% { scale: 1; }
+  18% { scale: 1.065; }
+  36% { scale: 0.99; }
+}
+@keyframes zel-bounce-near {
+  0%, 55%, 100% { scale: 1; }
+  18% { scale: 1.045; }
   36% { scale: 0.99; }
 }
 @keyframes zel-wave {
@@ -513,6 +548,7 @@
   .hero-intro .layer-crown { animation: fly-in 1s 0.85s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 1.5; --spin: 12deg; }
   .hero-intro .layer-centre, .hero-intro .zel-face-layer { animation: centre-in 0.7s 1.35s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: center; }
   .hero-intro .zel-whole { animation: whole-in 0.3s 2.05s backwards; }
+  .hero-intro .zel-shadow { animation: whole-in 0.6s 1.7s backwards; }
   .hero-intro .hero-greeting { animation: pop 0.6s 2.1s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: bottom left; }
   .hero .hero-copy { animation: arrive 0.8s 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 }

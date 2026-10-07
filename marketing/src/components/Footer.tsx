@@ -19,7 +19,7 @@ export function Footer() {
           <span className="absolute -top-[18%] right-[78%] hidden rounded-2xl rounded-br-sm border border-border bg-popover px-3.5 py-2 text-sm whitespace-nowrap text-foreground shadow-[0_12px_30px_-14px_rgb(20_43_53/0.4)] sm:block">
             {t.zel.bye} <span className="text-muted-foreground">— Zel</span>
           </span>
-          <Companion mood="wink" follow className="w-full drop-shadow-[0_18px_22px_rgb(11_29_41/0.35)]" />
+          <Companion mood="wink" follow shadow="footer" className="w-full" />
         </span>
       </a>
     </footer>

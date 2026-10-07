@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import { useMotionValueEvent, useScroll } from "motion/react";
+import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { ArrowDown, ChevronDown, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -40,7 +40,7 @@ function Emblem({ reduced }: { reduced: boolean }) {
       onPointerDown={track}
       onPointerLeave={() => setHover(undefined)}
     >
-      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} alt={t.zel.alt} className="size-full drop-shadow-[0_26px_34px_rgb(11_29_41/0.3)]" />
+      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} alt={t.zel.alt} shadow="hero" className="size-full" />
       {/* The layer under the pointer names itself; screen readers get all three below. */}
       {pieces.map((piece) => (
         <span
@@ -85,13 +85,10 @@ function setOut(section: HTMLElement | null, value: string | null) {
 export function Hero({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end start"] });
+  useScrollProgress(section, "past", (progress) => setOut(section.current, Math.min(1, progress * 1.6).toFixed(3)), !reduced);
   useEffect(() => {
-    setOut(section.current, reduced ? null : Math.min(1, scrollYProgress.get() * 1.6).toFixed(3));
-  }, [reduced, scrollYProgress]);
-  useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    if (!reduced) setOut(section.current, Math.min(1, progress * 1.6).toFixed(3));
-  });
+    if (reduced) setOut(section.current, null);
+  }, [reduced]);
   return (
     <section
       ref={section}

@@ -49,7 +49,7 @@ export function Trio({
   const t = useT();
   return (
     <div className={cn("tile relative aspect-square", mode === "intro" ? "tile-intro" : "tile-scroll", focus && `focus-${focus}`, found ? "zel-found" : "zel-hiding", className)}>
-      <Companion mood={mood} follow alt={t.zel.alt} className="size-full drop-shadow-[0_22px_28px_rgb(11_29_41/0.3)]" />
+      <Companion mood={mood} follow alt={t.zel.alt} shadow="tile" className="size-full" />
       {pieces.map((piece) => (
         <span
           key={piece}
