@@ -34,8 +34,8 @@ and Zel, the mascot, is the centre that holds them together.
    marks live in `src/components/providers.tsx`.
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,
    both set in `src/site.ts`, beside a mosaic panel still being laid
-   (`src/components/TileInProgress.tsx`): one piece hovers over its gap and sets
-   into place when you hover the section.
+   (`src/components/TileInProgress.tsx`): as it comes into view the pieces slot in
+   one by one; the corner's piece hovers over its place until you hover the section.
 
 The header (`src/layout/Header.tsx`) carries the logo (Zel beside the wordmark)
 and links named like each page's label; on phones they sit in a menu, each with a

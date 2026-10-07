@@ -183,11 +183,11 @@
   .tile-build > :nth-child(n + 5) { background-position-y: 33.333%; }
   .tile-build > :nth-child(n + 9) { background-position-y: 66.667%; }
   .tile-build > :nth-child(n + 13) { background-position-y: 100%; }
+  /* The corner's place: darker, waiting for its piece. */
   .tile-build > .tile-gap {
     background-image: none;
-    box-shadow: none;
-    outline: 1.5px dashed rgb(201 169 98 / 0.55);
-    outline-offset: -4px;
+    background-color: rgb(0 0 0 / 0.35);
+    box-shadow: inset 0 2px 8px rgb(0 0 0 / 0.6);
   }
   .tile-piece {
     position: absolute;
@@ -321,8 +321,28 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Contact: once the panel is in view, its pieces slot in one by one, row by row;
+     the corner's piece then bobs over its place until it is set. */
+  [data-reveal]:not(.reveal-ready) .tile-build > span:not(.tile-gap) {
+    animation: slot-in 0.55s cubic-bezier(0.3, 1.35, 0.5, 1) backwards;
+  }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(1):not(.tile-gap) { animation-delay: 0.23s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(2):not(.tile-gap) { animation-delay: 0.31s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(3):not(.tile-gap) { animation-delay: 0.39s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(4):not(.tile-gap) { animation-delay: 0.47s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(5):not(.tile-gap) { animation-delay: 0.55s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(6):not(.tile-gap) { animation-delay: 0.63s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(7):not(.tile-gap) { animation-delay: 0.71s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(8):not(.tile-gap) { animation-delay: 0.79s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(9):not(.tile-gap) { animation-delay: 0.87s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(10):not(.tile-gap) { animation-delay: 0.95s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(11):not(.tile-gap) { animation-delay: 1.03s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(12):not(.tile-gap) { animation-delay: 1.11s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(13):not(.tile-gap) { animation-delay: 1.19s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(14):not(.tile-gap) { animation-delay: 1.27s; }
+  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(15):not(.tile-gap) { animation-delay: 1.35s; }
   /* Contact: the waiting piece bobs over its gap until it is set. */
-  .tile-piece { animation: piece-bob 2.8s ease-in-out infinite; }
+  .tile-piece { animation: piece-bob 2.8s 1.6s ease-in-out infinite backwards; }
   #contacto:is(:hover, :focus-within) .tile-piece { animation: none; }
   /* The whole tile: as the last layers land around Zel, the impact rings out
      through the crown, the blue and the green in turn, and a brass ring spreads. */
@@ -353,6 +373,10 @@
 @keyframes twinkle {
   0%, 100% { scale: 1; opacity: 1; }
   50% { scale: 0.82; opacity: 0.7; }
+}
+@keyframes slot-in {
+  from { opacity: 0; translate: 0 -60%; rotate: -12deg; }
+  40% { opacity: 1; }
 }
 @keyframes piece-bob {
   50% { translate: -10% -46%; }

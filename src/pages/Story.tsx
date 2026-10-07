@@ -105,8 +105,9 @@ export function Story({ reduced }: { reduced: boolean }) {
           className={cn(
             gutter,
             "grid content-start gap-x-[6vw] gap-y-4 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center",
-            // Below the fixed header, which is 68 px tall (76 px from sm).
-            live ? "sticky top-[68px] h-[calc(100svh-68px)] pt-6 pb-4 sm:top-[76px] sm:h-[calc(100svh-76px)] lg:content-center" : "pt-20 pb-16",
+            // Below the fixed header, which is 68 px tall (76 px from sm). As tall as its
+            // content, so the next part follows it as soon as the story ends.
+            live ? "sticky top-[68px] pt-6 pb-4 sm:top-[76px]" : "pt-20 pb-10",
           )}
         >
           <h2 id="piezas-title" className="text-[clamp(32px,8vw,44px)] leading-[1.02] lg:col-start-1 lg:row-start-1 lg:self-end lg:text-[clamp(44px,4.2vw,68px)]">

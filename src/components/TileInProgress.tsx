@@ -1,11 +1,10 @@
 /*
- * A mosaic panel still being laid: sixteen squares cut from the brand's ceramic
- * (styles.css, .tile-build), the bottom-right corner still open and one piece
- * hovering over its gap. Hovering the section, or focusing a link in it, sets the
- * piece into place: your piece.
+ * A mosaic panel being laid: sixteen squares cut from the brand's ceramic
+ * (styles.css, .tile-build). As the section comes into view the pieces slot in one
+ * by one; the last, the corner, hovers over its place until you hover the section
+ * or focus a link in it: your piece.
  */
-const GAPS = new Set([11, 12, 15, 16]);
-const PIECE = 11;
+const PIECE = 16;
 
 export function TileInProgress({ className }: { className?: string }) {
   return (
@@ -14,7 +13,7 @@ export function TileInProgress({ className }: { className?: string }) {
         {Array.from({ length: 16 }, (_, index) => {
           const cell = index + 1;
           return (
-            <span key={cell} className={GAPS.has(cell) ? "tile-gap" : undefined}>
+            <span key={cell} className={cell === PIECE ? "tile-gap" : undefined}>
               {cell === PIECE && <span className="tile-piece" />}
             </span>
           );
