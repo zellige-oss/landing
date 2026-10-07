@@ -28,6 +28,7 @@ const es = {
       body: "Un mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
     },
     title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "en un solo sitio abierto." },
+    bring: ["Trae tu harness", "Trae tu suscripción", "Trae tu clave de API"],
     next: "Ir a la siguiente sección",
   },
   zel: {
@@ -43,18 +44,28 @@ const es = {
     progress: "Pasos de la historia",
     goTo: "Ir al paso",
     title: "Cómo funciona",
+    hover: "Pasa el ratón por el azulejo para ver cada capa.",
+    workings: {
+      title: "Por dentro",
+      nodes: [
+        ["Tus dispositivos", "Las apps de escritorio y de móvil, para todas las plataformas, y la web."],
+        ["Tailscale", "Una red privada entre tus dispositivos y tu servidor, estés donde estés."],
+        ["Tu servidor", "Zellige: el chat, el gestor de harness y tu agente personal, con una sola historia que es tuya."],
+        ["Los modelos", "Por API, con tus propias claves; o con tu suscripción, iniciando sesión con OAuth."],
+      ] as [string, string][],
+    },
     steps: {
       crown: {
         title: "Chat",
-        body: "Habla con el modelo que elijas, como en cualquier chat de IA, sin que la conversación se quede encerrada en una app.",
+        body: "Habla con el modelo que elijas desde el harness que traigas, como en cualquier chat de IA, sin que la conversación se quede encerrada en una app.",
       },
       cobalt: {
         title: "Gestor de harness",
-        body: "Orquesta modelos, herramientas y agentes de código en un mismo flujo para desarrollar software.",
+        body: "Añade el harness que quieras y orquesta modelos, herramientas y agentes de código en un mismo flujo para desarrollar software.",
       },
       points: {
         title: "Agente personal",
-        body: "Sale, recuerda, avisa y hace recados por ti.",
+        body: "Sale, recuerda, avisa y hace recados por ti. Usa un harness por defecto o elige otro sobre la marcha, mientras lo usas.",
       },
       tile: {
         title: "Zellige es todo esto",
@@ -66,9 +77,9 @@ const es = {
     headline: { lead: "Tres maneras de usar la IA,", turn: "un solo sitio." },
     // [icon, layer of the tile it belongs to, use, title, body]
     pillars: [
-      ["chat", "crown", "Chat", "El chat de siempre", "Piensa en voz alta con el modelo que elijas, como en cualquier chat de IA, pero sin que la conversación se quede encerrada en una app."],
-      ["harness", "cobalt", "Gestor de harness", "Desarrollo de software con agentes", "Orquesta modelos, herramientas y agentes de código en un mismo flujo para construir software."],
-      ["agent", "points", "Agente personal", "Tu agente personal", "Sale, recuerda, avisa y hace recados por ti."],
+      ["chat", "crown", "Chat", "El chat de siempre", "Piensa en voz alta con el modelo que elijas desde el harness que traigas, como en cualquier chat de IA, pero sin que la conversación se quede encerrada en una app."],
+      ["harness", "cobalt", "Gestor de harness", "Desarrollo de software con agentes", "Orquesta modelos, herramientas y agentes de código en un mismo flujo para construir software. Añade el harness que quieras: Claude Code, Codex, OpenCode u otro."],
+      ["agent", "points", "Agente personal", "Tu agente personal", "Sale, recuerda, avisa y hace recados por ti. Usa un harness por defecto o elige otro sobre la marcha."],
     ] as [FeatureIcon, "crown" | "cobalt" | "points", string, string, string][],
     together: {
       title: "Y las tres, juntas",
@@ -133,6 +144,7 @@ const en = {
       body: "A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
     },
     title: { lead: "Chat, software development with agents and a personal agent,", turn: "in one open place." },
+    bring: ["Bring your own harness", "Bring your own sub", "Bring your own API key"],
     next: "Go to the next section",
   },
   zel: {
@@ -148,18 +160,28 @@ const en = {
     progress: "Story steps",
     goTo: "Go to step",
     title: "How it works",
+    hover: "Point at the tile to see each layer.",
+    workings: {
+      title: "Under the hood",
+      nodes: [
+        ["Your devices", "The desktop and mobile apps, on every platform, and the web."],
+        ["Tailscale", "A private network between your devices and your server, wherever you are."],
+        ["Your server", "Zellige: the chat, the harness manager and your personal agent, with one story that is yours."],
+        ["The models", "Through their APIs, with your own keys; or with your subscription, signing in with OAuth."],
+      ] as [string, string][],
+    },
     steps: {
       crown: {
         title: "Chat",
-        body: "Talk to the model you choose, like in any AI chat, without the conversation being locked inside one app.",
+        body: "Talk to the model you choose through the harness you bring, like in any AI chat, without the conversation being locked inside one app.",
       },
       cobalt: {
         title: "Harness manager",
-        body: "Orchestrate models, tools and coding agents in one flow to build software.",
+        body: "Add any harness you like and orchestrate models, tools and coding agents in one flow to build software.",
       },
       points: {
         title: "Personal agent",
-        body: "It goes out, remembers, reminds and runs errands for you.",
+        body: "It goes out, remembers, reminds and runs errands for you. It uses a default harness, or pick another as you go.",
       },
       tile: {
         title: "Zellige is all of this",
@@ -170,9 +192,9 @@ const en = {
   features: {
     headline: { lead: "Three ways to use AI,", turn: "one place." },
     pillars: [
-      ["chat", "crown", "Chat", "The chat you know", "Think out loud with the model you choose, like any AI chat, but without the conversation being locked inside one app."],
-      ["harness", "cobalt", "Harness manager", "Software development with agents", "Orchestrate models, tools and coding agents in one flow to build software."],
-      ["agent", "points", "Personal agent", "Your personal agent", "It goes out, remembers, reminds and runs errands for you."],
+      ["chat", "crown", "Chat", "The chat you know", "Think out loud with the model you choose through the harness you bring, like any AI chat, but without the conversation being locked inside one app."],
+      ["harness", "cobalt", "Harness manager", "Software development with agents", "Orchestrate models, tools and coding agents in one flow to build software. Add any harness you like: Claude Code, Codex, OpenCode or another."],
+      ["agent", "points", "Personal agent", "Your personal agent", "It goes out, remembers, reminds and runs errands for you. It uses a default harness, or pick another as you go."],
     ] as [FeatureIcon, "crown" | "cobalt" | "points", string, string, string][],
     together: {
       title: "And all three, together",
