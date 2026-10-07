@@ -51,3 +51,20 @@ export function distanceTo(mask, width, height) {
   for (let k = 0; k < dist.length; k += 1) dist[k] = Math.sqrt(dist[k]);
   return dist;
 }
+
+// The mask with every hole filled: whatever the background around it can't reach.
+export function fillHoles(mask, width, height) {
+  const outside = new Uint8Array(width * height);
+  const stack = [0];
+  while (stack.length) {
+    const k = stack.pop();
+    if (outside[k] || mask[k]) continue;
+    outside[k] = 1;
+    const x = k % width, y = (k - x) / width;
+    if (x > 0) stack.push(k - 1);
+    if (x < width - 1) stack.push(k + 1);
+    if (y > 0) stack.push(k - width);
+    if (y < height - 1) stack.push(k + width);
+  }
+  return outside.map((value) => 1 - value);
+}

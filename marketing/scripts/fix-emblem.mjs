@@ -10,7 +10,7 @@
 import { copyFile, access } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
-import { distanceTo, grow } from './mask.mjs';
+import { distanceTo, fillHoles, grow } from './mask.mjs';
 import { RIM, rimColour, rimProfiles } from './rim.mjs';
 
 const emblem = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
@@ -105,21 +105,7 @@ for (const [fx, fy] of [[0.28, 0.31], [0.72, 0.31], [0.28, 0.72], [0.72, 0.72]])
   const closed = grow(grow(square, W, H, 4).map((v) => 1 - v), W, H, 4).map((v) => 1 - v);
   for (let k = 0; k < N; k += 1) if (closed[k] || square[k]) squares[k] = 1;
 }
-{
-  const outside = new Uint8Array(N);
-  const stack = [0];
-  while (stack.length) {
-    const k = stack.pop();
-    if (outside[k] || squares[k]) continue;
-    outside[k] = 1;
-    const x = k % W, y = (k - x) / W;
-    if (x > 0) stack.push(k - 1);
-    if (x < W - 1) stack.push(k + 1);
-    if (y > 0) stack.push(k - W);
-    if (y < H - 1) stack.push(k + W);
-  }
-  for (let k = 0; k < N; k += 1) if (!outside[k]) squares[k] = 1;
-}
+squares.set(fillHoles(squares, W, H));
 
 // Euclidean distance to the transparent background (Felzenszwalb–Huttenlocher), so
 // only the outer sides get a rim; the inner sides already meet their neighbours' rims.
