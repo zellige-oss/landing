@@ -105,12 +105,20 @@ export function Hero({ reduced }: { reduced: boolean }) {
       <p className="hero-copy relative z-[2] max-w-[22ch] text-[clamp(26px,3.4vw,42px)] leading-[1.08] tracking-[-0.045em] text-balance">
         {t.hero.title.lead} <em className="text-accent">{t.hero.title.turn}</em>
       </p>
+      <ul className="hero-copy relative z-[2] mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-muted-foreground sm:text-[15px]">
+        {t.hero.bring.map((item, index) => (
+          <li key={item} className="flex items-center gap-3">
+            {index > 0 && <span aria-hidden="true" className="size-1.5 rotate-45 bg-brass" />}
+            {item}
+          </li>
+        ))}
+      </ul>
       {/* Next section: a quiet cue at the bottom edge. */}
       <a
         href="#piezas"
         aria-label={t.hero.next}
         title={t.hero.next}
-        className="hero-copy absolute bottom-4 left-1/2 z-[2] grid size-10 -translate-x-1/2 place-items-center rounded-full border border-border bg-popover/80 text-muted-foreground transition-colors hover:border-brass hover:text-foreground sm:bottom-6"
+        className="hero-copy absolute bottom-4 left-1/2 z-[2] grid size-10 [@media(max-height:700px)]:hidden -translate-x-1/2 place-items-center rounded-full border border-border bg-popover/80 text-muted-foreground transition-colors hover:border-brass hover:text-foreground sm:bottom-6"
       >
         <ChevronDown aria-hidden="true" className="size-5 motion-safe:animate-bounce" />
       </a>

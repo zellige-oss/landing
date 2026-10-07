@@ -4,6 +4,7 @@ import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
 import type { Mood } from "@/components/Companion";
 import { LayerGlyph, Trio, type Piece } from "@/components/Trio";
+import { Workings } from "@/components/Workings";
 import { useT } from "@/i18n";
 
 const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
@@ -92,21 +93,27 @@ export function Story({ reduced }: { reduced: boolean }) {
   const gutter = "px-6 sm:px-[clamp(24px,4.5vw,80px)] min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]";
   return (
     <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
-      <div className={cn(gutter, "pt-20 pb-4 lg:pb-8")}>
-        <h2 id="piezas-title" className="text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
-          {t.story.title}
-        </h2>
-      </div>
       <div ref={track} className={cn(live && "h-[300vh]")}>
+        {/* The title stays with the story: on phones above the tile and the step, on
+            wide screens above the steps, with the tile beside them. */}
         <div
           className={cn(
             gutter,
-            "grid items-center gap-5 lg:grid-cols-[1fr_1fr] lg:gap-[6vw]",
+            "grid content-start gap-x-[6vw] gap-y-4 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center",
             // Below the fixed header, which is 68 px tall (76 px from sm).
-            live ? "sticky top-[68px] h-[calc(100svh-68px)] content-start py-4 sm:top-[76px] sm:h-[calc(100svh-76px)]" : "pt-6 pb-20",
+            live ? "sticky top-[68px] h-[calc(100svh-68px)] pt-6 pb-4 sm:top-[76px] sm:h-[calc(100svh-76px)] lg:content-center" : "pt-20 pb-16",
           )}
         >
-          <div>
+          <h2 id="piezas-title" className="text-[clamp(32px,8vw,44px)] leading-[1.02] lg:col-start-1 lg:row-start-1 lg:self-end lg:text-[clamp(44px,4.2vw,68px)]">
+            {t.story.title}
+          </h2>
+          <Trio
+            mood={steps[stage ?? steps.length - 1].mood}
+            show={show}
+            onPick={(piece) => { if (live) goTo(steps.findIndex((step) => step.layer === piece)); }}
+            className="mx-auto w-[min(62vw,32svh,300px)] sm:w-[min(62vw,38svh,380px)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:w-[min(84%,460px,60svh)]"
+          />
+          <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
             {live && (
               <ol aria-label={t.story.progress} className="mb-4 flex items-center gap-2 max-lg:justify-center">
                 {steps.map((step, index) => (
@@ -149,19 +156,19 @@ export function Story({ reduced }: { reduced: boolean }) {
                 );
               })}
             </ol>
+            {/* With a mouse, the whole tile explains each layer on hover (Trio.tsx). */}
+            {(!live || stage === steps.length - 1) && (
+              <p aria-hidden="true" className="mt-4 hidden text-sm text-muted-foreground lg:pointer-fine:block">{t.story.hover}</p>
+            )}
             {live && (
               <p aria-hidden="true" className={cn("mt-4 flex items-center gap-2 text-sm text-muted-foreground transition-opacity duration-500 max-lg:justify-center", !atStart && "opacity-0")}>
                 <ChevronDown className="size-4 motion-safe:animate-bounce" /> {t.story.hint}
               </p>
             )}
           </div>
-          <Trio
-            mood={steps[stage ?? steps.length - 1].mood}
-            show={show}
-            className="mx-auto w-[min(66vw,34svh,300px)] max-lg:order-first sm:w-[min(66vw,40svh,380px)] lg:w-[min(84%,460px,62svh)]"
-          />
         </div>
       </div>
+      <Workings className={gutter} />
     </section>
   );
 }

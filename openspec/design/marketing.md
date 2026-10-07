@@ -15,14 +15,14 @@ and Zel, the mascot, is the centre that holds them together.
    `src/components/WhyZellige.tsx`). The emblem's layers fly in and lock around
    Zel, who wakes up. As the hero scrolls away, Zel flies, shrinking, into the
    header's logo; scrolling back flies it home.
-2. **How it works** (`src/pages/Story.tsx`): what Zellige is. Zel stays in the centre
-   of the tile and each scroll step shows one layer around it, one way of using
-   Zel: the ivory crown is chat, the blue is the harness manager for building
-   software with agents, the green points are the personal agent. The last step
-   puts the whole tile together: set up your own server and reach all of it
-   through Tailscale, from the desktop and mobile apps and the web. The story
-   plays once; after the reader scrolls past, it settles into a still summary.
-   Without JavaScript or with reduced motion it is a plain list.
+2. **How it works** (`src/pages/Story.tsx`): the title stays in the sticky panel
+   with the story. Zel stays in the centre of the tile and each scroll step shows
+   one layer around it: chat (crown), the harness manager (blue), the personal
+   agent (green); the last puts the whole tile together. Each layer uses a harness
+   you bring. With a mouse, pointing at a layer lifts it and explains it; clicking
+   or tapping one jumps to its step. Below, "Under the hood" draws the path: your
+   devices, Tailscale, your server, the models (by API or OAuth). The story plays
+   once, then settles; without JavaScript or with reduced motion it is a list.
 3. **Features** (`src/pages/Features.tsx`): one pillar per layer, then what joins
    them: one story, on your own server, change models without losing it.
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,
