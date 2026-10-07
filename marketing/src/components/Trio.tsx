@@ -18,7 +18,7 @@ export const pieces: Piece[] = ["crown", "cobalt", "points"];
 const labelPlacement: Record<Piece, string> = {
   crown: "-left-[2%] bottom-[2%] sm:-left-[10%] sm:bottom-[6%]",
   cobalt: "left-[0%] -top-[4%] sm:-left-[8%] sm:top-[2%]",
-  points: "-right-[2%] top-[12%] sm:-right-[12%] sm:top-[66%]",
+  points: "-right-[2%] top-[66%] sm:-right-[12%]",
 };
 
 /** One layer of the emblem, small, to name it in labels and lists. */

@@ -2,5 +2,5 @@
 export const site = {
   repository: "https://github.com/zellige-oss/Zellige",
   /** The project's contact address. Empty hides the email link. */
-  email: "",
+  email: "socials@zellige.dev",
 };

@@ -231,6 +231,8 @@
   .tile-scroll.focus-crown .label-crown,
   .tile-scroll.focus-cobalt .label-cobalt,
   .tile-scroll.focus-points .label-points { opacity: var(--p); }
+  /* The whole tile, at the end of the story and once it has settled, names every layer. */
+  .tile-scroll.zel-found:not(.focus-crown, .focus-cobalt, .focus-points) .tile-label { opacity: 1; }
   /* The layer being explained glows; the rest of the emblem steps back, keeping its
      colour so it reads as placed and waiting, not missing. */
   .focus-crown .zel-layer:not(.layer-centre, .layer-crown),
@@ -526,19 +528,6 @@
   .hero-zel .layer-cobalt { scale: calc(1 + var(--out, 0) * 0.42); opacity: calc(1 - var(--out, 0) * 0.9); }
   .hero-zel .layer-crown { scale: calc(1 + var(--out, 0) * 0.26); opacity: calc(1 - var(--out, 0) * 0.7); }
   /* .hero-zel fades as the hero scrolls away: Hero.tsx sets its opacity. */
-  /* Pointing at a layer lifts it and dims the rest. */
-  .hero-zel .zel-layer { transition: translate 0.35s ease, filter 0.35s ease; }
-  .lift-crown .zel-layer:not(.layer-centre, .layer-crown),
-  .lift-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
-  .lift-points .zel-layer:not(.layer-centre, .layer-points) { filter: saturate(0.3) brightness(0.92); opacity: 0.45; }
   .hero-zel .zel-whole { opacity: calc(1 - var(--out, 0) * 100); transition: none; }
-  .lift-crown .zel-whole, .lift-cobalt .zel-whole, .lift-points .zel-whole { opacity: 0; }
-  .lift-crown .layer-crown, .lift-cobalt .layer-cobalt, .lift-points .layer-points {
-    translate: 0 -6px;
-    filter: drop-shadow(0 10px 14px rgb(11 29 41 / 0.35)) drop-shadow(0 0 16px rgb(212 182 120 / 0.55));
-  }
-  .hero-label-crown { left: 50%; top: 74%; translate: -50% 0; }
-  .hero-label-cobalt { left: 2%; top: 4%; }
-  .hero-label-points { right: -4%; top: 60%; }
   .hero { background-image: radial-gradient(60% 50% at 50% 46%, rgb(201 169 98 / 0.12), transparent 70%); }
 }
