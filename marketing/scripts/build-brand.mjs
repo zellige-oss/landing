@@ -4,7 +4,7 @@
 //   brand/zel/zel-<mood>.png   Zel (emblem + face), one per mood, 1254 px
 //   marketing/src/assets/emblem.webp       landing emblem, 320 px
 //   marketing/public/favicon.png           landing favicon, 64 px
-//   brand/logo/zellige-logo-{horizontal,stacked}{,-night}.png   Zel + wordmark
+//   brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png   Zel + wordmark
 // (The emblem layers come from build-layers.mjs, which `npm run brand` runs first.)
 import { mkdir, rm } from 'node:fs/promises';
 import sharp from 'sharp';
@@ -21,8 +21,8 @@ for (const [mood, svg] of Object.entries(faces())) {
   console.log(`zel-${mood}.png`);
 }
 
-// Logo lockups: Zel, looking ahead, with the wordmark, beside it or above it, on a
-// transparent ground. Laid out in wordmark units (its viewBox: 0 40 1480 730;
+// Logo lockups: Zel, looking ahead, with the wordmark beside it, below it or above
+// it, on a transparent ground. Laid out in wordmark units (its viewBox: 0 40 1480 730;
 // ascenders from y 200, baseline at 568, descender and stars inside the box).
 const zel = await sharp(path('../../brand/zel/zel-look.png')).trim().toBuffer({ resolveWithObject: true });
 const zelRatio = zel.info.width / zel.info.height;
@@ -38,12 +38,21 @@ const lockups = {
     };
   },
   // Zel above the word, centred on its letters (x 15 to 1454).
-  stacked: () => {
+  'zel-top': () => {
     const height = 720, width = height * zelRatio, gap = 90, pad = 60;
     return {
       width: WORD.width + 2 * pad, height: pad + height + gap + WORD.height + pad,
       zel: { left: pad + 734 - width / 2, top: pad, width, height },
       word: { left: pad, top: pad + height + gap },
+    };
+  },
+  // The word above Zel; the word's box already leaves room under the g's descender.
+  'wordmark-top': () => {
+    const height = 720, width = height * zelRatio, gap = 20, pad = 60;
+    return {
+      width: WORD.width + 2 * pad, height: pad + WORD.height + gap + height + pad,
+      zel: { left: pad + 734 - width / 2, top: pad + WORD.height + gap, width, height },
+      word: { left: pad, top: pad },
     };
   },
 };
