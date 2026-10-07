@@ -30,13 +30,27 @@ function Emblem({ reduced }: { reduced: boolean }) {
 // the place of the hero's and flies, shrinking, into the logo; scrolling back up
 // flies it home. Geometry is measured on load and resize only, never while
 // scrolling (that would force the page to lay out on every frame).
+// Where the browser has scroll timelines, the trip is an animation on the page's
+// scroll, which the browser runs alongside scrolling itself: driven from scroll
+// events instead, it trails the finger on phones, a frame or more behind.
 // The emblem's whole Zel inside its square image (scripts/build-brand.mjs trims it).
 const ZEL_BOX = { x: 67 / 1254, y: 92 / 1254, w: 1119 / 1254, h: 1082 / 1254 };
 /** The trip takes the first half of the hero's scroll. */
 const TRIP = 0.5;
+/** Keyframes along the trip: enough that its easing reads as a curve. */
+const STEPS = 24;
+
+type Trip = { from: DOMRect; to: DOMRect; zel: HTMLElement; mark: HTMLElement };
+/** Where the header's Zel sits at `e` of the way (eased) with the page scrolled to `y`. */
+function transformAt({ from, to }: Trip, e: number, y: number) {
+  const x = from.x + (to.x - from.x) * e;
+  const top = from.y - y + (to.y - (from.y - y)) * e;
+  const width = from.width + (to.width - from.width) * e;
+  return `translate(${(x - to.x).toFixed(1)}px, ${(top - to.y).toFixed(1)}px) scale(${(width / to.width).toFixed(4)})`;
+}
 
 function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
-  const geometry = useRef<{ from: DOMRect; to: DOMRect; zel: HTMLElement; mark: HTMLElement } | null>(null);
+  const geometry = useRef<Trip | null>(null);
   const last = useRef(-1);
   const place = useCallback((progress: number) => {
     const g = geometry.current;
@@ -44,36 +58,66 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
     const e = ease(progress / TRIP);
     if (e === last.current) return;
     last.current = e;
-    const { from, to, zel, mark } = g;
+    const { zel, mark } = g;
     // At home the hero's own, living Zel shows; once it leaves, the header's flies.
     zel.style.setProperty("opacity", e > 0 ? "0" : "1");
     mark.style.setProperty("opacity", e > 0 ? "1" : "0");
     if (e <= 0 || e >= 1) { mark.style.removeProperty("transform"); return; }
-    const x = from.x + (to.x - from.x) * e;
-    const y = from.y - scrollY + (to.y - (from.y - scrollY)) * e;
-    const width = from.width + (to.width - from.width) * e;
-    mark.style.setProperty("transform", `translate(${(x - to.x).toFixed(1)}px, ${(y - to.y).toFixed(1)}px) scale(${(width / to.width).toFixed(4)})`);
+    mark.style.setProperty("transform", transformAt(g, e, scrollY));
   }, []);
 
   useEffect(() => {
-    const zel = section.current?.querySelector<HTMLElement>(".hero-zel");
+    const hero = section.current;
+    const zel = hero?.querySelector<HTMLElement>(".hero-zel");
     const mark = document.getElementById("header-zel");
-    if (reduced || !zel || !mark) return;
+    if (reduced || !hero || !zel || !mark) return;
+    const timeline = "ScrollTimeline" in window ? new ScrollTimeline({ source: document.documentElement, axis: "block" }) : null;
+    let animations: Animation[] = [];
     const measure = () => {
+      for (const animation of animations) animation.cancel();
+      animations = [];
       mark.style.removeProperty("transform");
       const tile = zel.getBoundingClientRect();
       // The hero's Zel in page coordinates; the header's in the viewport (it is fixed).
       const from = new DOMRect(tile.left + tile.width * ZEL_BOX.x, tile.top + scrollY + tile.height * ZEL_BOX.y, tile.width * ZEL_BOX.w, tile.height * ZEL_BOX.h);
-      geometry.current = { from, to: mark.getBoundingClientRect(), zel, mark };
+      const trip = { from, to: mark.getBoundingClientRect(), zel, mark };
       last.current = -1;
+      if (!timeline) {
+        geometry.current = trip;
+        return;
+      }
+      // The timeline runs over the page's whole scroll; the trip is its first stretch.
+      const top = hero.getBoundingClientRect().top + scrollY;
+      const range = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+      const at = (y: number) => Math.min(1, Math.max(0, y / range));
+      const frames: Keyframe[] = Array.from({ length: STEPS + 1 }, (_, i) => {
+        const y = top + (i / STEPS) * TRIP * hero.offsetHeight;
+        return { offset: at(y), transform: i === STEPS ? "none" : transformAt(trip, ease(i / STEPS), y) };
+      });
+      frames.push({ offset: 1, transform: "none" });
+      // As soon as the page moves, the header's Zel stands in for the hero's.
+      const swap = (shown: boolean): Keyframe[] => [
+        { offset: 0, opacity: shown ? 0 : 1 }, { offset: at(top + 1), opacity: shown ? 1 : 0 }, { offset: 1, opacity: shown ? 1 : 0 },
+      ];
+      animations = [
+        mark.animate(frames, { timeline, fill: "both" }),
+        mark.animate(swap(true), { timeline, fill: "both" }),
+        zel.animate(swap(false), { timeline, fill: "both" }),
+      ];
     };
     mark.style.setProperty("transition", "none");
     measure();
     addEventListener("resize", measure);
     addEventListener("load", measure);
+    // The page's height sets where the trip falls on the timeline (the story below
+    // gets shorter once it has played).
+    const observer = timeline ? new ResizeObserver(() => measure()) : null;
+    observer?.observe(document.documentElement);
     return () => {
       removeEventListener("resize", measure);
       removeEventListener("load", measure);
+      observer?.disconnect();
+      for (const animation of animations) animation.cancel();
       geometry.current = null;
       for (const prop of ["transition", "transform", "opacity"]) mark.style.removeProperty(prop);
       zel.style.removeProperty("opacity");
