@@ -30,9 +30,12 @@ function Emblem({ reduced }: { reduced: boolean }) {
 // the place of the hero's and flies, shrinking, into the logo; scrolling back up
 // flies it home. Geometry is measured on load and resize only, never while
 // scrolling (that would force the page to lay out on every frame).
-// Where the browser has scroll timelines, the trip is an animation on the page's
-// scroll, which the browser runs alongside scrolling itself: driven from scroll
-// events instead, it trails the finger on phones, a frame or more behind.
+// Where the browser has scroll timelines with ranges, the trip is an animation on
+// the page's scroll, which the browser runs alongside scrolling itself: driven from
+// scroll events instead, it trails the finger on phones, a frame or more behind.
+// The flight's transform applies only during the trip: while an animation that
+// scales an element up is in effect, the browser draws it at its largest and shrinks
+// it on the GPU, which left the landed logo jagged.
 // The emblem's whole Zel inside its square image (scripts/build-brand.mjs trims it).
 const ZEL_BOX = { x: 67 / 1254, y: 92 / 1254, w: 1119 / 1254, h: 1082 / 1254 };
 /** The trip takes the first half of the hero's scroll. */
@@ -71,7 +74,8 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
     const zel = hero?.querySelector<HTMLElement>(".hero-zel");
     const mark = document.getElementById("header-zel");
     if (reduced || !hero || !zel || !mark) return;
-    const timeline = "ScrollTimeline" in window ? new ScrollTimeline({ source: document.documentElement, axis: "block" }) : null;
+    const ranged = "ScrollTimeline" in window && CSS.supports("animation-range", "0px 1px");
+    const timeline = ranged ? new ScrollTimeline({ source: document.documentElement, axis: "block" }) : null;
     let animations: Animation[] = [];
     const measure = () => {
       for (const animation of animations) animation.cancel();
@@ -86,33 +90,28 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
         geometry.current = trip;
         return;
       }
-      // The timeline runs over the page's whole scroll; the trip is its first stretch.
+      // The trip is the stretch of the page's scroll from the hero's top. Past it, the
+      // transform no longer applies (no forward fill), and the logo is drawn as is.
       const top = hero.getBoundingClientRect().top + scrollY;
-      const range = Math.max(1, document.documentElement.scrollHeight - innerHeight);
-      const at = (y: number) => Math.min(1, Math.max(0, y / range));
-      const frames: Keyframe[] = Array.from({ length: STEPS + 1 }, (_, i) => {
-        const y = top + (i / STEPS) * TRIP * hero.offsetHeight;
-        return { offset: at(y), transform: i === STEPS ? "none" : transformAt(trip, ease(i / STEPS), y) };
-      });
-      frames.push({ offset: 1, transform: "none" });
+      const length = TRIP * hero.offsetHeight;
+      const frames: Keyframe[] = Array.from({ length: STEPS + 1 }, (_, i) => ({
+        transform: i === STEPS ? "none" : transformAt(trip, ease(i / STEPS), top + (i / STEPS) * length),
+      }));
       // As soon as the page moves, the header's Zel stands in for the hero's.
-      const swap = (shown: boolean): Keyframe[] => [
-        { offset: 0, opacity: shown ? 0 : 1 }, { offset: at(top + 1), opacity: shown ? 1 : 0 }, { offset: 1, opacity: shown ? 1 : 0 },
-      ];
+      const swap = { timeline, rangeStart: `${top}px`, rangeEnd: `${top + 1}px`, fill: "both" } as const;
       animations = [
-        mark.animate(frames, { timeline, fill: "both" }),
-        mark.animate(swap(true), { timeline, fill: "both" }),
-        zel.animate(swap(false), { timeline, fill: "both" }),
+        mark.animate(frames, { timeline, rangeStart: `${top}px`, rangeEnd: `${top + length}px`, fill: "backwards" }),
+        mark.animate([{ opacity: 0 }, { opacity: 1 }], swap),
+        zel.animate([{ opacity: 1 }, { opacity: 0 }], swap),
       ];
     };
     mark.style.setProperty("transition", "none");
     measure();
     addEventListener("resize", measure);
     addEventListener("load", measure);
-    // The page's height sets where the trip falls on the timeline (the story below
-    // gets shorter once it has played).
+    // The trip's stretch of scroll follows the hero's size.
     const observer = timeline ? new ResizeObserver(() => measure()) : null;
-    observer?.observe(document.documentElement);
+    observer?.observe(hero);
     return () => {
       removeEventListener("resize", measure);
       removeEventListener("load", measure);
