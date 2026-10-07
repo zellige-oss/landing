@@ -10,6 +10,7 @@
 import { copyFile, access } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
+import { grow } from './mask.mjs';
 
 const emblem = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
 const original = fileURLToPath(new URL('../../docs/design/proposals/zellige-emblem-original.png', import.meta.url));
@@ -97,28 +98,10 @@ const fill = (seed, accept) => {
   }
   return mask;
 };
-function grow(mask, radius) {
-  const reach = Uint8Array.from(mask);
-  let frontier = [];
-  for (let k = 0; k < N; k += 1) if (mask[k]) frontier.push(k);
-  for (let step = 0; step < radius; step += 1) {
-    const next = [];
-    for (const k of frontier) {
-      const x = k % W, y = (k - x) / W;
-      for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
-        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-        const n = ny * W + nx;
-        if (!reach[n]) { reach[n] = 1; next.push(n); }
-      }
-    }
-    frontier = next;
-  }
-  return reach;
-}
 const squares = new Uint8Array(N);
 for (const [fx, fy] of [[0.28, 0.31], [0.72, 0.31], [0.28, 0.72], [0.72, 0.72]]) {
   const square = fill(Math.round(H * fy) * W + Math.round(W * fx), cobalt);
-  const closed = grow(grow(square, 4).map((v) => 1 - v), 4).map((v) => 1 - v);
+  const closed = grow(grow(square, W, H, 4).map((v) => 1 - v), W, H, 4).map((v) => 1 - v);
   for (let k = 0; k < N; k += 1) if (closed[k] || square[k]) squares[k] = 1;
 }
 {

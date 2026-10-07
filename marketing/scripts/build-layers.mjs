@@ -9,6 +9,7 @@
 // the thin gold crackle lines inside pieces are smoothed into the glaze.
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
+import { grow } from './mask.mjs';
 
 const source = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
 const out = (name) => fileURLToPath(new URL(`../src/assets/layer-${name}.webp`, import.meta.url));
@@ -40,28 +41,10 @@ for (let k = 0; k < N; k += 1) {
 
 // Opening (erode then dilate, radius 5): thin pale crackle lines and rim highlights
 // look "ivory" by colour, but only real pieces survive being shrunk and regrown.
-function grow(mask, radius) {
-  const reach = new Uint8Array(N);
-  let frontier = [];
-  for (let k = 0; k < N; k += 1) if (mask[k]) { reach[k] = 1; frontier.push(k); }
-  for (let step = 0; step < radius; step += 1) {
-    const next = [];
-    for (const k of frontier) {
-      const x = k % W, y = (k - x) / W;
-      for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
-        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-        const n = ny * W + nx;
-        if (!reach[n]) { reach[n] = 1; next.push(n); }
-      }
-    }
-    frontier = next;
-  }
-  return reach;
-}
 for (const id of [1, 2, 3]) {
   const mask = kind.map((value) => (value === id ? 1 : 0));
-  const eroded = grow(mask.map((value) => 1 - value), 5).map((value) => 1 - value);
-  const opened = grow(eroded, 5);
+  const eroded = grow(mask.map((value) => 1 - value), W, H, 5).map((value) => 1 - value);
+  const opened = grow(eroded, W, H, 5);
   for (let k = 0; k < N; k += 1) if (kind[k] === id && !opened[k]) kind[k] = 9;
 }
 
