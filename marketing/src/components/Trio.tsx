@@ -3,13 +3,14 @@ import { useT } from "@/i18n";
 import { Companion, layers, type Layer, type Mood } from "./Companion";
 
 /*
- * Zel is the standard emblem; the tile assembles around its centre one colour
- * layer at a time, each layer a way of using AI:
+ * Zel is the standard emblem; the tile assembles one colour layer at a time, each
+ * layer a way of using AI, and in the scroll story Zel fills the centre last:
  *   crown  (ivory kites, closest to Zel)      → chat
  *   cobalt (blue corners and top point)       → chat managers and meta-harnesses
  *   points (outer teal points, reaching out)  → personal agents
- * Motion is CSS only: the intro plays once; the scroll story drives --p1..--p3 from
- * JS. Without JS or with reduced motion, the emblem is simply whole.
+ * Motion is CSS only: the intro plays once; the scroll story drives --p2 and --p3
+ * from JS (the crown is its base). Without JS or with reduced motion, the emblem is
+ * simply whole.
  */
 export type Piece = Exclude<Layer, "centre">;
 export const pieces: Piece[] = ["crown", "cobalt", "points"];
@@ -17,7 +18,7 @@ export const pieces: Piece[] = ["crown", "cobalt", "points"];
 const labelPlacement: Record<Piece, string> = {
   crown: "-left-[2%] bottom-[2%] sm:-left-[10%] sm:bottom-[6%]",
   cobalt: "left-[0%] -top-[4%] sm:-left-[8%] sm:top-[2%]",
-  points: "-right-[2%] top-[12%] sm:-right-[12%] sm:top-[66%]",
+  points: "-right-[2%] top-[66%] sm:-right-[12%]",
 };
 
 /** One layer of the emblem, small, to name it in labels and lists. */
@@ -35,20 +36,20 @@ export function Trio({
   className,
 }: {
   mood: Mood;
-  /** intro: assembles once on load; scroll: follows --p1..--p3 set on an ancestor. */
+  /** intro: assembles once on load; scroll: follows --p2 and --p3 set on an ancestor. */
   mode: "intro" | "scroll";
   /** The layer being explained: it glows while the others step back. */
   focus?: Piece;
   /** Zel introduces itself in a bubble once the tile is complete. */
   greeting?: boolean;
-  /** Whether Zel's face shows; when it appears, Zel startles at being found. */
+  /** Whether Zel fills the centre; in the scroll story it drops in when found. */
   found?: boolean;
   className?: string;
 }) {
   const t = useT();
   return (
     <div className={cn("tile relative aspect-square", mode === "intro" ? "tile-intro" : "tile-scroll", focus && `focus-${focus}`, found ? "zel-found" : "zel-hiding", className)}>
-      <Companion mood={mood} follow alt={t.zel.alt} className="size-full drop-shadow-[0_22px_28px_rgb(11_29_41/0.3)]" />
+      <Companion mood={mood} follow alt={t.zel.alt} shadow="tile" className="size-full" />
       {pieces.map((piece) => (
         <span
           key={piece}

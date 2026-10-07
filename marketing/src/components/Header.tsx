@@ -3,7 +3,7 @@ import { Moon, Sun } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
-import { emblem } from "./brand";
+import { zelMark } from "./brand";
 import { Wordmark } from "./Wordmark";
 
 export function Header() {
@@ -20,7 +20,7 @@ export function Header() {
   // The section in view gets the mosaic strip under its link.
   const [current, setCurrent] = useState<string>();
   useEffect(() => {
-    const ids = ["piezas", "ramas", "proyecto"];
+    const ids = ["piezas", "funciones", "contacto"];
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) setCurrent(`#${entry.target.id}`);
@@ -35,16 +35,19 @@ export function Header() {
   }, []);
   const links = [
     ["#piezas", t.header.links.idea],
-    ["#ramas", t.header.links.branches],
-    ["#proyecto", t.header.links.project],
+    ["#funciones", t.header.links.features],
+    ["#contacto", t.header.links.contact],
   ];
   return (
     <header className={cn("fixed inset-x-0 top-0 z-10 flex items-center gap-4 px-[22px] py-3 transition-[background-color,border-color] duration-300 sm:gap-8 sm:px-[30px] sm:py-4", heroMark ? "border-b border-transparent" : "border-b border-border/70 bg-background/85 backdrop-blur-md")}>
-      <a className={cn("inline-flex items-center gap-2.5 transition-[opacity,translate] duration-300", heroMark && "pointer-events-none -translate-y-1 opacity-0")} href="#inicio" aria-label={t.header.home} tabIndex={heroMark ? -1 : undefined}>
-        <img src={emblem} width="38" height="38" alt="" className="w-[34px] sm:w-[38px]" />
-        <span className="hidden sm:block"><Wordmark className="h-9 w-auto" /></span>
+      {/* The logo: Zel beside the wordmark, as in brand/logo/zellige-logo-horizontal.png.
+          On phones Zel is a little larger than the logo's proportion so its face reads,
+          and the wordmark joins it from 375 px, where it fits beside the links. */}
+      <a className={cn("inline-flex shrink-0 items-center gap-1 transition-[opacity,translate] duration-300 sm:gap-1.5", heroMark && "pointer-events-none -translate-y-1 opacity-0")} href="#inicio" aria-label={t.header.home} tabIndex={heroMark ? -1 : undefined}>
+        <img src={zelMark} width="132" height="128" alt="" className="h-[26px] w-auto sm:h-[31px]" />
+        <span className="hidden min-[375px]:block"><Wordmark className="h-5 w-auto sm:h-10" /></span>
       </a>
-      <nav aria-label={t.header.nav} className="ml-auto flex gap-[18px] sm:gap-[30px]">
+      <nav aria-label={t.header.nav} className="ml-auto flex gap-3 min-[400px]:gap-[18px] sm:gap-[30px]">
         {links.map(([href, label]) => (
           <a
             key={href}

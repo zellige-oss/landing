@@ -17,10 +17,16 @@ export type { Mood };
  * so they can also be shown one by one; each is a whole tile with its own rim, and
  * the assembled emblem, with its drawn rims, covers them while they rest in place
  * (.zel-whole in styles.css). The face is SVG, so Zel can change
- * expression, blink and look around (ZelFace.tsx).
- * Positions are set only through CSS custom properties from JS, never inline
- * style attributes, to stay within the landing's CSP.
+ * expression, blink and look around (ZelFace.tsx); each mood also moves the tiles
+ * in its own way (.zel-mood-* in styles.css), so Zel speaks with its body too.
+ * Positions are set from JS through the CSS object model, never inline style
+ * attributes in the markup, to stay within the landing's CSP.
  */
+// Each Zel blinks on its own rhythm: a golden-ratio sequence spreads the gaps
+// between blinks evenly without Math.random (which code scanners flag as insecure).
+let blinkSeed = 0;
+const nextBlinkPhase = () => (blinkSeed = (blinkSeed + 0.6180339887) % 1);
+
 export type Layer = "centre" | "crown" | "cobalt" | "points";
 export const layers: { name: Layer; src: string }[] = [
   { name: "points", src: layerPoints },
@@ -35,6 +41,7 @@ export function Companion({
   follow = false,
   lively = false,
   motionDelay = 0,
+  shadow,
 }: {
   mood: Mood;
   className?: string;
@@ -44,26 +51,74 @@ export function Companion({
   /** Play the expressive motion study once the surrounding assembly has landed. */
   lively?: boolean;
   motionDelay?: number;
+  /** A soft shadow under Zel, sized for where it sits (.zel-shadow-* in styles.css). */
+  shadow?: "hero" | "tile" | "footer";
 }) {
   const root = useRef<HTMLDivElement>(null);
   useZelMotion(root, lively, motionDelay);
   useEffect(() => {
     const node = root.current;
     if (lively || !follow || !node || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    function look(event: PointerEvent) {
+    // At most once a frame, only while Zel is on screen, and never for touch: a
+    // finger is scrolling, and measuring Zel on every touch move forces the page to
+    // lay out again each time, which makes scrolling stutter on phones.
+    let visible = false, frame = 0, x = 0, y = 0;
+    function aim() {
+      frame = 0;
       const rect = node!.getBoundingClientRect();
-      const dx = event.clientX - (rect.left + rect.width / 2);
-      const dy = event.clientY - (rect.top + rect.height * 0.5);
+      const dx = x - (rect.left + rect.width / 2);
+      const dy = y - (rect.top + rect.height * 0.5);
       const length = Math.hypot(dx, dy) || 1;
       const reach = Math.min(1, length / 400);
-      node!.style.setProperty("--look-x", `${((dx / length) * reach * 70).toFixed(1)}px`);
-      node!.style.setProperty("--look-y", `${((dy / length) * reach * 50).toFixed(1)}px`);
+      // Onto the eyes themselves, not as variables on Zel: that would restyle all of it.
+      const offset = `${((dx / length) * reach * 70).toFixed(1)}px ${((dy / length) * reach * 50).toFixed(1)}px`;
+      for (const eyes of node!.querySelectorAll<SVGGElement>(".companion-look")) eyes.style.setProperty("translate", offset);
     }
+    function look(event: PointerEvent) {
+      if (!visible || event.pointerType === "touch") return;
+      x = event.clientX;
+      y = event.clientY;
+      if (!frame) frame = requestAnimationFrame(aim);
+    }
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
+    observer.observe(node);
     addEventListener("pointermove", look, { passive: true });
-    return () => removeEventListener("pointermove", look);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      removeEventListener("pointermove", look);
+    };
   }, [follow, lively]);
+  // Blinks: a short animation switched on for each blink, every few seconds, only
+  // while Zel is on screen. An endless CSS animation on the SVG lids would make the
+  // browser restyle and repaint the face on every frame, blinking or not.
+  useEffect(() => {
+    const node = root.current;
+    if (lively || !node || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let visible = false, timer = 0, open = 0;
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
+    observer.observe(node);
+    const blink = () => {
+      if (visible && !document.hidden) {
+        node.classList.add("zel-blinking");
+        open = window.setTimeout(() => node.classList.remove("zel-blinking"), 320);
+      }
+      timer = window.setTimeout(blink, 4000 + nextBlinkPhase() * 2500);
+    };
+    timer = window.setTimeout(blink, 1500 + nextBlinkPhase() * 2500);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+      window.clearTimeout(open);
+      node.classList.remove("zel-blinking");
+    };
+  }, [lively]);
   return (
-    <div ref={root} className={cn("relative", lively && "zel-lively", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
+    <div ref={root} className={cn("relative", `zel-mood-${mood}`, lively && "zel-lively", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
+      {/* The shadow is a still, blurred silhouette under Zel, painted once. A CSS
+          drop-shadow on Zel would re-blur everything inside it on every animation
+          frame, which phones cannot keep up with. */}
+      {shadow && <img src={layerWhole} width="960" height="960" alt="" draggable={false} className={`zel-shadow zel-shadow-${shadow} absolute inset-0 size-full`} />}
       {/* Square box holding the stacked emblem layers. */}
       <div className="relative aspect-square w-full">
         {layers.map(({ name, src }) => (
