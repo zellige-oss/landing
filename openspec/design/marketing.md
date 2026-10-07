@@ -15,13 +15,14 @@ and Zel, the mascot, is the centre that holds them together.
    which the story then fills in. The emblem's layers fly in and lock around Zel,
    who wakes up and says hello. As the hero scrolls away, Zel flies, shrinking,
    into the header's logo; scrolling back flies it home.
-2. **The idea** (`src/pages/Story.tsx`): what Zellige is. A scroll story builds
-   the tile layer by layer, each layer a use of AI: the crown is the chat you
-   know, the blue is the meta-harness for building software with agents, the
-   points are the personal agent. Zel jumps from the header into the empty
-   centre last. The
-   story plays once; after the reader scrolls past, it settles into a still
-   summary. Without JavaScript or with reduced motion it is a plain list.
+2. **The idea** (`src/pages/Story.tsx`): what Zellige is. Zel stays in the centre
+   of the tile and each scroll step shows one layer around it, one way of using
+   Zel: the ivory crown is chat, the blue is the meta-harness for building
+   software with agents, the green points are the personal agent. The last step
+   puts the whole tile together: set up your own server and reach all of it
+   through Tailscale, from the desktop and mobile apps and the web. The story
+   plays once; after the reader scrolls past, it settles into a still summary.
+   Without JavaScript or with reduced motion it is a plain list.
 3. **Features** (`src/pages/Features.tsx`): one pillar per layer, then what joins
    them: one story, on your own server, change models without losing it.
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,

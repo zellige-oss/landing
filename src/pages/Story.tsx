@@ -13,33 +13,16 @@ const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
   { key: "tile", mood: "hello" },
 ];
 
-const clamp = (value: number) => Math.min(1, Math.max(0, value));
-// Each layer's progress goes only onto the elements that use it (the layer, its
-// label, the assembled emblem), not the section: a variable on the section would
-// restyle the whole section on every scroll event, which phones cannot keep up with.
-const users = { "--p2": ".layer-cobalt, .label-cobalt, .zel-whole", "--p3": ".layer-points, .label-points, .zel-whole" };
-// Most scroll events leave a layer's progress where it was (0 or 1); skip those.
-const written = new WeakMap<HTMLElement, Partial<Record<keyof typeof users, string | null>>>();
-function setProgress(section: HTMLElement, name: keyof typeof users, value: string | null) {
-  const last = written.get(section) ?? {};
-  if (last[name] === value) return;
-  written.set(section, { ...last, [name]: value });
-  for (const element of section.querySelectorAll<HTMLElement>(users[name])) {
-    if (value === null) element.style.removeProperty(name);
-    else element.style.setProperty(name, value);
-  }
-}
-/** The step where Zel arrives: the whole tile, once every layer is in place. */
-const FOUND = steps.findIndex((step) => step.key === "tile");
-/** Each step takes a quarter of the story's scroll; a layer lands just before its step. */
+/** Each step takes a quarter of the story's scroll. */
 const SHARE = 1 / steps.length;
 const stepAt = (t: number) => Math.min(steps.length - 1, Math.floor(t / SHARE));
 
 /*
- * Scroll story: each kind of AI use arrives as a layer of the emblem until the tile
- * is complete. The title scrolls past first; then, while the story plays, the screen
- * holds only the tile, where you are (four dots, which jump to a step) and the
- * current step, so every scroll visibly changes something.
+ * Scroll story: Zel stays in the centre of the tile and each step shows one layer
+ * around it, one way of using Zel, then the whole tile and how to reach it. The
+ * title scrolls past first; then, while the story plays, the screen holds only the
+ * tile, where you are (four dots, which jump to a step) and the current step, so
+ * every scroll visibly changes something.
  */
 export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
@@ -47,12 +30,6 @@ export function Story({ reduced }: { reduced: boolean }) {
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number>();
   const [atStart, setAtStart] = useState(true);
-  // The crown is the base; the blue and the points close in around an empty centre,
-  // and only the last step drops Zel into it, wide-eyed for a moment from the landing.
-  // Scrolling back empties the centre again, so the arrival replays.
-  const [startled, setStartled] = useState(false);
-  const wasFound = useRef(false);
-  const calm = useRef<number>(undefined);
   // The story plays once. After the reader has seen the whole tile and scrolled on
   // past it, it settles into a still summary (every step, the whole tile, every
   // label), so coming back up never replays it.
@@ -63,23 +40,11 @@ export function Story({ reduced }: { reduced: boolean }) {
   const anchor = useRef<{ element: Element; top: number } | null>(null);
   // With reduced motion the tile simply stays assembled and the steps read as a list.
   useScrollProgress(track, "through", (t) => {
-    const node = section.current;
-    if (!node) return;
-    setProgress(node, "--p2", clamp((t - (SHARE - 0.08)) / 0.08).toFixed(3));
-    setProgress(node, "--p3", clamp((t - (2 * SHARE - 0.08)) / 0.08).toFixed(3));
     const step = stepAt(t);
     setActive(step);
     if (step === steps.length - 1) seenEnd.current = true;
     setAtStart(t < 0.06);
-    const isFound = step >= FOUND;
-    if (isFound !== wasFound.current) {
-      wasFound.current = isFound;
-      window.clearTimeout(calm.current);
-      setStartled(isFound);
-      if (isFound) calm.current = window.setTimeout(() => setStartled(false), 1300);
-    }
   }, !reduced && !settled);
-  useEffect(() => () => window.clearTimeout(calm.current), []);
   useEffect(() => {
     const node = section.current;
     if (reduced || settled || !node) return;
@@ -114,35 +79,8 @@ export function Story({ reduced }: { reduced: boolean }) {
   // (and before hydration) it is a plain list next to the whole tile.
   const live = !reduced && !settled;
   const stage = live ? active ?? 0 : null;
-  const focus = live && active !== undefined ? steps[active].layer : undefined;
-  const found = !live || (stage ?? 0) >= FOUND;
-  useEffect(() => {
-    const node = section.current;
-    if (!node) return;
-    for (const name of ["--p2", "--p3"] as const) setProgress(node, name, live ? "0" : null);
-  }, [live]);
-
-  // Zel waits in the header while the tile is built, then jumps from there into the
-  // empty centre: the arrival starts from the header logo's place and size (styles.css,
-  // zel-set). Measured once, as Zel is found, before the frame that starts the jump.
-  useLayoutEffect(() => {
-    if (!live || !found) return;
-    const mark = document.getElementById("header-zel")?.getBoundingClientRect();
-    const centre = section.current?.querySelector<HTMLElement>(".tile-scroll .zel-face-layer");
-    if (!mark || !centre || !mark.width) return;
-    const box = centre.getBoundingClientRect();
-    // The centre star sits at (625, 644) of the emblem's 1254-unit square and is 381 tall;
-    // in the header's trimmed Zel (1082 tall) the star is 381 of 1082.
-    const starX = box.left + box.width * (625 / 1254), starY = box.top + box.height * (644 / 1254);
-    const scale = (mark.height * 381 / 1082) / (box.height * 381 / 1254);
-    for (const element of section.current!.querySelectorAll<HTMLElement>(".tile-scroll :is(.layer-centre, .zel-face-layer)")) {
-      element.style.setProperty("--from-x", `${(mark.left + mark.width / 2 - starX).toFixed(1)}px`);
-      element.style.setProperty("--from-y", `${(mark.top + mark.height / 2 - starY).toFixed(1)}px`);
-      element.style.setProperty("--from-scale", scale.toFixed(4));
-    }
-  }, [live, found]);
-
-  /** Scrolls to where a step has just begun (its layer already in place). */
+  const show = live && active !== undefined ? steps[active].layer : undefined;
+  /** Scrolls to where a step has just begun. */
   function goTo(index: number) {
     const node = track.current;
     if (!node) return;
@@ -220,10 +158,8 @@ export function Story({ reduced }: { reduced: boolean }) {
             )}
           </div>
           <Trio
-            mood={live && startled ? "surprised" : steps[stage ?? 3].mood}
-            focus={focus}
-            found={found}
-           
+            mood={steps[stage ?? steps.length - 1].mood}
+            show={show}
             className="mx-auto w-[min(66vw,34svh,300px)] max-lg:order-first sm:w-[min(66vw,40svh,380px)] lg:w-[min(84%,460px,62svh)]"
           />
         </div>

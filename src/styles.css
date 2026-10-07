@@ -183,54 +183,40 @@
     mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
     box-shadow: inset 0 6px 10px -6px rgb(0 0 0 / 0.35), inset 0 -6px 10px -6px rgb(0 0 0 / 0.35);
   }
-  /* The emblem assembles around Zel layer by layer (crown, cobalt, points). */
+  /* The emblem's colour layers around Zel. */
   .zel-layer {
     transform-origin: center;
     transition: opacity 0.4s ease, filter 0.4s ease;
   }
-  .tile .layer-crown { --p: var(--p1, 1); --from: 1.18; }
-  .tile .layer-cobalt { --p: var(--p2, 1); --from: 1.28; }
-  .tile .layer-points { --p: var(--p3, 1); --from: 1.4; }
-  .label-crown { --p: var(--p1, 1); }
-  .label-cobalt { --p: var(--p2, 1); }
-  .label-points { --p: var(--p3, 1); }
+  /* Story (Trio.tsx): Zel stays in the centre; each step brings one layer in around
+     it, and the last puts them all together. */
+  .tile .layer-crown { --from: 1.18; }
+  .tile .layer-cobalt { --from: 1.28; }
+  .tile .layer-points { --from: 1.4; }
   .tile-scroll .zel-layer:not(.layer-centre) {
-    scale: calc(1 + (var(--from) - 1) * (1 - var(--p)));
-    opacity: var(--p);
+    opacity: 0;
+    scale: var(--from);
+    transition: opacity 0.35s ease, scale 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-  /* Story: only the layer being explained is named, next to it. */
+  .tile-scroll.show-crown .layer-crown,
+  .tile-scroll.show-cobalt .layer-cobalt,
+  .tile-scroll.show-points .layer-points,
+  .tile-scroll.show-all .zel-layer:not(.layer-centre) { opacity: 1; scale: 1; }
+  /* Only the layer on show is named, next to it; the whole tile names them all. */
   .tile-scroll .tile-label {
     opacity: 0;
-    translate: 0 calc((1 - var(--p)) * 12px);
-    transition: opacity 0.3s ease;
+    translate: 0 12px;
+    transition: opacity 0.3s ease, translate 0.3s ease;
   }
-  .tile-scroll.focus-crown .label-crown,
-  .tile-scroll.focus-cobalt .label-cobalt,
-  .tile-scroll.focus-points .label-points { opacity: var(--p); }
-  /* The whole tile, at the end of the story and once it has settled, names every layer. */
-  .tile-scroll.zel-found:not(.focus-crown, .focus-cobalt, .focus-points) .tile-label { opacity: 1; }
-  /* The layer being explained glows; the rest of the emblem steps back, keeping its
-     colour so it reads as placed and waiting, not missing. */
-  .focus-crown .zel-layer:not(.layer-centre, .layer-crown),
-  .focus-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
-  .focus-points .zel-layer:not(.layer-centre, .layer-points) {
-    opacity: calc(var(--p) * 0.45);
-  }
-  .focus-crown .layer-crown,
-  .focus-cobalt .layer-cobalt,
-  .focus-points .layer-points {
-    filter: drop-shadow(0 0 14px rgb(212 182 120 / 0.65));
-  }
-  /* The assembled emblem keeps its drawn rims: it covers the layers while they rest
-     in place and gives way to them, each a whole tile, as soon as one moves. */
+  .show-crown .label-crown,
+  .show-cobalt .label-cobalt,
+  .show-points .label-points,
+  .show-all .tile-label { opacity: 1; translate: 0 0; }
+  /* The assembled emblem keeps its drawn rims: it covers the layers once they have
+     all landed, and gives way to them as soon as one moves. */
   .zel-whole { transition: opacity 0.3s ease; }
-  .tile-scroll .zel-whole {
-    opacity: calc((min(var(--p1, 1), var(--p2, 1), var(--p3, 1)) - 0.99) * 100);
-    transition: none;
-  }
-  .focus-crown .zel-whole,
-  .focus-cobalt .zel-whole,
-  .focus-points .zel-whole { opacity: 0; }
+  .tile-scroll .zel-whole { opacity: 0; transition: none; }
+  .tile-scroll.show-all .zel-whole { opacity: 1; transition: opacity 0.3s 0.6s ease; }
   /* Where the eyes look: JS sets their translate (Companion.tsx, zel-motion.ts). */
   .companion-look { transition: translate 0.25s ease-out; }
   /* Eyelids close over the eye and meet a little below its middle, where the eye
@@ -247,9 +233,9 @@
   .zel-shadow { pointer-events: none; filter: brightness(0) blur(var(--shadow-blur)); opacity: var(--shadow-alpha); translate: 0 var(--shadow-y); }
   .zel-shadow-hero { --shadow-y: 26px; --shadow-blur: 17px; --shadow-alpha: 0.3; }
   .zel-shadow-tile { --shadow-y: 22px; --shadow-blur: 14px; --shadow-alpha: 0.3; }
-  /* In the story the shadow belongs to the whole tile, so it waits for Zel. */
-  .tile-scroll.zel-hiding .zel-shadow { opacity: 0; transition: opacity 0.3s ease; }
-  .tile-scroll .zel-shadow { transition: opacity 0.6s 0.9s ease; }
+  /* In the story the shadow is the whole tile's, so it waits for every layer. */
+  .tile-scroll:not(.show-all) .zel-shadow { opacity: 0; transition: opacity 0.3s ease; }
+  .tile-scroll .zel-shadow { transition: opacity 0.6s 0.4s ease; }
   /* Moving pieces get their own GPU layers, so moving them never repaints them. */
   .zel-lively .zel-piece { will-change: transform; }
   .tile-scroll .zel-layer { will-change: scale, opacity; }
@@ -266,9 +252,6 @@
   .zel-lively { --lid-shut: 1; }
   .zel-lively .companion-lid { animation: none; translate: 0 calc(var(--lid-shut) * var(--lid-travel)); }
   .zel-lively .companion-lid-lower { animation: none; translate: 0 calc(var(--lid-shut) * var(--lid-rise) * -1); }
-  /* Story: until Zel arrives, the layers frame an empty centre. */
-  .zel-hiding :is(.layer-centre, .zel-face-layer) { opacity: 0; scale: 0.7; transition: opacity 0.3s ease, scale 0.3s ease; }
-  .tile-scroll.zel-hiding .zel-whole { opacity: 0; }
   /* Hero: during a greeting, drawn eyes (redrawn each frame by the motion) stand in
      for the open eyes and turn into the happy ∩ and back. */
   .zel-greeting-eyes { opacity: 0; }
@@ -302,16 +285,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* Found: Zel drops into the empty centre spinning, like a tile being set, and
-     squashes as it lands; the impact rings out through the crown, the blue and
-     the points in turn, and a brass ring spreads. The assembled emblem, with its
-     drawn rims, takes over once everything has settled. */
-  .tile-scroll.zel-found :is(.layer-centre, .zel-face-layer) { animation: zel-set 1s both; transform-origin: 50% 51.4%; }
-  .tile-scroll.zel-found .layer-crown .zel-piece { animation: zel-ripple 0.5s 0.5s ease-out; }
-  .tile-scroll.zel-found .layer-cobalt .zel-piece { animation: zel-ripple 0.5s 0.58s ease-out; }
-  .tile-scroll.zel-found .layer-points .zel-piece { animation: zel-ripple 0.5s 0.66s ease-out; }
-  .tile-scroll.zel-found .zel-whole { animation: whole-in 0.3s 1.25s backwards; }
-  .tile-scroll.zel-found::after {
+  /* The whole tile: as the last layers land around Zel, the impact rings out
+     through the crown, the blue and the green in turn, and a brass ring spreads. */
+  .tile-scroll.show-all .layer-crown .zel-piece { animation: zel-ripple 0.5s 0.35s ease-out; }
+  .tile-scroll.show-all .layer-cobalt .zel-piece { animation: zel-ripple 0.5s 0.43s ease-out; }
+  .tile-scroll.show-all .layer-points .zel-piece { animation: zel-ripple 0.5s 0.51s ease-out; }
+  .tile-scroll.show-all::after {
     content: "";
     position: absolute;
     inset: 30%;
@@ -319,7 +298,7 @@
     border-radius: 50%;
     pointer-events: none;
     opacity: 0;
-    animation: zel-ring 0.8s 0.5s ease-out;
+    animation: zel-ring 0.8s 0.35s ease-out;
   }
 }
 /* Story on phones: each step's card rises in as it becomes the current one. */
@@ -331,15 +310,6 @@
 }
 @keyframes centre-in {
   from { opacity: 0; scale: 0.6; }
-}
-/* The centre star has eightfold symmetry, so a quarter turn lands it exactly in place. */
-@keyframes zel-set {
-  from { opacity: 1; translate: var(--from-x, 0) var(--from-y, -75%); scale: var(--from-scale, 1.3); rotate: -90deg; animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6); }
-  50% { translate: 0 0; scale: 1; rotate: 0deg; animation-timing-function: ease-out; }
-  62% { scale: 1.12 0.86; }
-  76% { scale: 0.95 1.05; }
-  88% { scale: 1.02 0.98; }
-  to { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; }
 }
 @keyframes zel-ripple {
   35% { scale: 1.045; }
