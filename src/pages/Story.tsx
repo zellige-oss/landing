@@ -122,6 +122,26 @@ export function Story({ reduced }: { reduced: boolean }) {
     for (const name of ["--p2", "--p3"] as const) setProgress(node, name, live ? "0" : null);
   }, [live]);
 
+  // Zel waits in the header while the tile is built, then jumps from there into the
+  // empty centre: the arrival starts from the header logo's place and size (styles.css,
+  // zel-set). Measured once, as Zel is found, before the frame that starts the jump.
+  useLayoutEffect(() => {
+    if (!live || !found) return;
+    const mark = document.getElementById("header-zel")?.getBoundingClientRect();
+    const centre = section.current?.querySelector<HTMLElement>(".tile-scroll .zel-face-layer");
+    if (!mark || !centre || !mark.width) return;
+    const box = centre.getBoundingClientRect();
+    // The centre star sits at (625, 644) of the emblem's 1254-unit square and is 381 tall;
+    // in the header's trimmed Zel (1082 tall) the star is 381 of 1082.
+    const starX = box.left + box.width * (625 / 1254), starY = box.top + box.height * (644 / 1254);
+    const scale = (mark.height * 381 / 1082) / (box.height * 381 / 1254);
+    for (const element of section.current!.querySelectorAll<HTMLElement>(".tile-scroll :is(.layer-centre, .zel-face-layer)")) {
+      element.style.setProperty("--from-x", `${(mark.left + mark.width / 2 - starX).toFixed(1)}px`);
+      element.style.setProperty("--from-y", `${(mark.top + mark.height / 2 - starY).toFixed(1)}px`);
+      element.style.setProperty("--from-scale", scale.toFixed(4));
+    }
+  }, [live, found]);
+
   /** Scrolls to where a step has just begun (its layer already in place). */
   function goTo(index: number) {
     const node = track.current;

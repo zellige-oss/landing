@@ -5,7 +5,7 @@
 //   src/assets/emblem.webp       landing emblem, 320 px
 //   public/favicon.png           landing favicon, 64 px
 //   public/brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png   Zel + wordmark
-//   src/assets/zel-mark.webp     Zel for the header's logo, 128 px tall
+//   src/assets/zel-mark.webp     Zel for the header's logo, 512 px tall (it also flies there from the hero)
 // (The emblem layers come from build-layers.mjs, which `npm run brand` runs first.)
 import { mkdir, rm } from 'node:fs/promises';
 import sharp from 'sharp';
@@ -28,7 +28,7 @@ for (const [mood, svg] of Object.entries(faces())) {
 const zel = await sharp(path('../public/brand/zel/zel-look.png')).trim().toBuffer({ resolveWithObject: true });
 const zelRatio = zel.info.width / zel.info.height;
 // The header's logo is this same Zel next to the wordmark (Header.tsx).
-await sharp(zel.data).resize({ height: 128 }).webp({ quality: 90 }).toFile(path('../src/assets/zel-mark.webp'));
+await sharp(zel.data).resize({ height: 512 }).webp({ quality: 88 }).toFile(path('../src/assets/zel-mark.webp'));
 const WORD = { x: 0, y: 40, width: 1480, height: 730 };
 const lockups = {
   // Zel taller than the ascenders, centred a little above the x-height's middle.

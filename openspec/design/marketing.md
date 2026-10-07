@@ -10,12 +10,16 @@ allows only `'self'`. `public/locale.js` sends `/` to the browser's language.
 Zellige is a tile made of many small stones; each stone is a way of using AI,
 and Zel, the mascot, is the centre that holds them together.
 
-1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel and one line. The
-   emblem's layers fly in and lock around Zel, who wakes up and says hello.
+1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel, one line and where
+   the name comes from (a mosaic of pieces that only make a pattern together),
+   which the story then fills in. The emblem's layers fly in and lock around Zel,
+   who wakes up and says hello. As the hero scrolls away, Zel flies, shrinking,
+   into the header's logo; scrolling back flies it home.
 2. **The idea** (`src/pages/Story.tsx`): what Zellige is. A scroll story builds
    the tile layer by layer, each layer a use of AI: the crown is the chat you
    know, the blue is the meta-harness for building software with agents, the
-   points are the personal agent. Zel drops into the empty centre last. The
+   points are the personal agent. Zel jumps from the header into the empty
+   centre last. The
    story plays once; after the reader scrolls past, it settles into a still
    summary. Without JavaScript or with reduced motion it is a plain list.
 3. **Features** (`src/pages/Features.tsx`): one pillar per layer, then what joins
@@ -24,7 +28,8 @@ and Zel, the mascot, is the centre that holds them together.
    both set in `src/site.ts`.
 
 The header (`src/layout/Header.tsx`) carries the logo (Zel beside the wordmark)
-and links named like each page's label. The footer (`src/layout/Footer.tsx`) is
+and links named like each page's label; on phones the links, and an icon button
+to the GitHub repository, sit in a menu. The footer (`src/layout/Footer.tsx`) is
 one line: logo, tagline, GitHub, email, back to top. A mosaic band
 (`src/components/Band.tsx`) separates the pages.
 
