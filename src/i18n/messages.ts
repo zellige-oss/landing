@@ -2,7 +2,6 @@
 // its shape exactly (the `satisfies` check fails the build if a key is missing).
 // Headlines are { lead, turn }: the plain line, then the serif-italic turn.
 
-export type FeatureIcon = "chat" | "harness" | "agent";
 
 const es = {
   meta: {
@@ -74,35 +73,28 @@ const es = {
     },
   },
   features: {
-    headline: { lead: "Tres maneras de usar la IA,", turn: "un solo sitio." },
-    // [icon, layer of the tile it belongs to, use, title, body]
-    pillars: [
-      ["chat", "crown", "Chat", "El chat de siempre", "Piensa en voz alta con el modelo que elijas desde el harness que traigas, como en cualquier chat de IA, pero sin que la conversación se quede encerrada en una app."],
-      ["harness", "cobalt", "Gestor de harness", "Desarrollo de software con agentes", "Orquesta modelos, herramientas y agentes de código en un mismo flujo para construir software. Añade el harness que quieras: Claude Code, Codex, OpenCode u otro."],
-      ["agent", "points", "Agente personal", "Tu agente personal", "Sale, recuerda, avisa y hace recados por ti. Usa un harness por defecto o elige otro sobre la marcha."],
-    ] as [FeatureIcon, "crown" | "cobalt" | "points", string, string, string][],
-    together: {
-      title: "Y las tres, juntas",
-      items: [
-        ["Una sola memoria", "El chat, el gestor de harness y tu agente comparten lo que saben, en lugar de empezar cada uno desde cero."],
-        ["En tu servidor", "Un proyecto abierto y autoalojado: tus datos se guardan en tu propio servidor, no en el de un proveedor."],
-        ["Cambia de modelo sin perder nada", "Los modelos y las herramientas pueden cambiar sin llevarse por delante lo que has construido."],
-      ] as [string, string][],
+    title: "Trae lo tuyo",
+    key: {
+      tag: "BYOK",
+      title: "Tu clave de API",
+      body: "Precio por token, a la vista. Una suscripción es un cristal opaco: no ves sus límites y cambian sin avisar.",
     },
-    api: {
-      title: "Por qué API y no suscripción",
-      paragraphs: [
-        "Una suscripción es un cristal opaco: ves el servicio, pero no lo que hay detrás. No sabes cuánto puedes usar de verdad, los límites no se publican con claridad y pueden cambiar de un día para otro sin que te des cuenta.",
-        "Una API, en cambio, publica su precio: tanto por cada token de entrada y tanto por cada token de salida. Sabes qué pagas y por qué. En Zellige creemos que el futuro va por ahí, así que conectas tus modelos con tus propias claves de API.",
-      ],
-      sub: {
-        title: "Usa tu suscripción… o no",
-        body: "Si ya pagas una, Zellige la aprovecha: inicias sesión igual que en cada herramienta, con OAuth.",
-        google: "Inicio de sesión con Google",
-      },
-      providers: "Herramientas con inicio de sesión OAuth",
-      trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
+    sub: {
+      tag: "BYOS",
+      title: "Tu suscripción… o no",
+      body: "Si ya pagas una, inicia sesión con OAuth.",
+      google: "con Google",
     },
+    harness: {
+      tag: "BYOH",
+      title: "Tu harness",
+      body: "Chat, gestor y agente, con el harness que elijas.",
+      open: "Open source",
+      more: "y otros",
+    },
+    points: ["En tu servidor", "Una sola memoria", "Cambia de modelo sin perder nada"],
+    providers: "Herramientas con inicio de sesión OAuth",
+    trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
   },
   contact: {
     headline: { lead: "¿Quieres poner", turn: "tu pieza?" },
@@ -190,34 +182,28 @@ const en = {
     },
   },
   features: {
-    headline: { lead: "Three ways to use AI,", turn: "one place." },
-    pillars: [
-      ["chat", "crown", "Chat", "The chat you know", "Think out loud with the model you choose through the harness you bring, like any AI chat, but without the conversation being locked inside one app."],
-      ["harness", "cobalt", "Harness manager", "Software development with agents", "Orchestrate models, tools and coding agents in one flow to build software. Add any harness you like: Claude Code, Codex, OpenCode or another."],
-      ["agent", "points", "Personal agent", "Your personal agent", "It goes out, remembers, reminds and runs errands for you. It uses a default harness, or pick another as you go."],
-    ] as [FeatureIcon, "crown" | "cobalt" | "points", string, string, string][],
-    together: {
-      title: "And all three, together",
-      items: [
-        ["One memory", "The chat, the harness manager and your agent share what they know, instead of each starting from scratch."],
-        ["On your server", "An open, self-hosted project: your data is kept on your own server, not a provider's."],
-        ["Change models without losing anything", "Models and tools can change without taking what you've built with them."],
-      ] as [string, string][],
+    title: "Bring your own",
+    key: {
+      tag: "BYOK",
+      title: "Your API key",
+      body: "Price per token, in the open. A subscription is frosted glass: you can't see its limits, and they change without notice.",
     },
-    api: {
-      title: "Why APIs, not subscriptions",
-      paragraphs: [
-        "A subscription is frosted glass: you see the service, but not what's behind it. You don't really know how much you can use, the limits aren't clearly published, and they can change from one day to the next without you noticing.",
-        "An API, on the other hand, publishes its price: so much per input token and so much per output token. You know what you pay and why. At Zellige we believe that is where things are heading, so you connect your models with your own API keys.",
-      ],
-      sub: {
-        title: "Bring your own sub… or don't",
-        body: "If you already pay for one, Zellige puts it to use: you sign in just as you do in each tool, with OAuth.",
-        google: "Google sign-in",
-      },
-      providers: "Tools with OAuth sign-in",
-      trademarks: "Trademarks belong to their respective owners.",
+    sub: {
+      tag: "BYOS",
+      title: "Your sub… or don't",
+      body: "Already paying for one? Sign in with OAuth.",
+      google: "with Google",
     },
+    harness: {
+      tag: "BYOH",
+      title: "Your harness",
+      body: "Chat, manager and agent, on the harness you choose.",
+      open: "Open source",
+      more: "and more",
+    },
+    points: ["On your server", "One memory", "Change models without losing anything"],
+    providers: "Tools with OAuth sign-in",
+    trademarks: "Trademarks belong to their respective owners.",
   },
   contact: {
     headline: { lead: "Want to add", turn: "your piece?" },
