@@ -22,6 +22,11 @@ export type { Mood };
  * Positions are set from JS through the CSS object model, never inline style
  * attributes in the markup, to stay within the landing's CSP.
  */
+// Each Zel blinks on its own rhythm: a golden-ratio sequence spreads the gaps
+// between blinks evenly without Math.random (which code scanners flag as insecure).
+let blinkSeed = 0;
+const nextBlinkPhase = () => (blinkSeed = (blinkSeed + 0.6180339887) % 1);
+
 export type Layer = "centre" | "crown" | "cobalt" | "points";
 export const layers: { name: Layer; src: string }[] = [
   { name: "points", src: layerPoints },
@@ -98,9 +103,9 @@ export function Companion({
         node.classList.add("zel-blinking");
         open = window.setTimeout(() => node.classList.remove("zel-blinking"), 320);
       }
-      timer = window.setTimeout(blink, 4000 + Math.random() * 2500);
+      timer = window.setTimeout(blink, 4000 + nextBlinkPhase() * 2500);
     };
-    timer = window.setTimeout(blink, 1500 + Math.random() * 2500);
+    timer = window.setTimeout(blink, 1500 + nextBlinkPhase() * 2500);
     return () => {
       observer.disconnect();
       window.clearTimeout(timer);
