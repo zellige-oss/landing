@@ -14,8 +14,9 @@ and Zel, the mascot, is the centre that holds them together.
    (self-hosted and open source) and "Bring your own: harness · sub · API key",
    kept in English as the jargon is. "Why Zellige?" beside the wordmark opens
    where the name comes from (`src/components/WhyZellige.tsx`): the literal
-   meaning ("tile"), a line of history and a fun fact. It sits beside the
-   wordmark on wide screens and in the flow on smaller ones, never over Zel. As
+   meaning ("tile") and one line of history. It sits beside the wordmark on
+   wide screens; smaller ones have no room to spare, so it opens over Zel,
+   under the link, rather than pushing Zel down. As
    the hero scrolls away, Zel flies, shrinking, into the header's logo.
 2. **What is Zellige?** (`src/pages/Story.tsx`): the title stays in the sticky
    panel with the story. Zel stays in the centre of the tile and each scroll step

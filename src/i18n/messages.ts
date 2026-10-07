@@ -7,7 +7,7 @@ const es = {
   meta: {
     title: "Zellige — Chat, harness y agente personal en tu servidor",
     description:
-      "Zellige. Un proyecto abierto y autoalojado que junta el chat, el desarrollo con agentes y tu agente personal en tu propio servidor.",
+      "Zellige es un proyecto open source y autoalojado que reúne tu chat de IA, tus agentes de código y tu agente personal en tu propio servidor.",
   },
   skip: "Ir al contenido",
   header: {
@@ -24,9 +24,8 @@ const es = {
     why: {
       title: "¿Por qué Zellige?",
       from: "Del árabe",
-      meaning: "que significa literalmente «azulejo»: la palabra española viene de ahí.",
-      history: "Lleva siglos vistiendo Fez y la Alhambra: barro esmaltado que un maestro corta a mano, pieza a pieza, con un martillo afilado.",
-      fact: { label: "Curiosidad:", body: "los paneles se montan bocabajo, así que el artesano no ve el dibujo hasta que les da la vuelta." },
+      meaning: "«azulejo».",
+      history: "Barro esmaltado, cortado a mano pieza a pieza, que viste Fez y la Alhambra desde hace siglos.",
     },
     title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "self\u2011hosted y open source." },
     bring: { lead: "Bring your own", items: ["harness", "sub", "API key"] },
@@ -48,16 +47,16 @@ const es = {
     hover: "Pasa el ratón por el azulejo o por cada parte para verla.",
     workings: {
       title: "¿Cómo funciona?",
-      body: "Configura tu servidor personal y conecta tus modelos por API, o con tu suscripción. A través de Tailscale entras desde las apps de escritorio y de móvil, para todas las plataformas, y desde la web.",
+      body: "Monta tu propio servidor y conecta tus modelos por API o con la suscripción que ya tienes. Tailscale lo mantiene privado, y entras desde las apps de escritorio y móvil, en cualquier plataforma, o desde la web.",
       devices: { title: "Tus dispositivos", items: ["Escritorio", "Móvil", "Web"] },
       tunnel: { title: "Tailscale", body: "Red privada" },
       server: { title: "Tu servidor", memory: "Memoria compartida" },
-      models: { title: "Los modelos", api: ["API", "Tus API keys"], oauth: ["OAuth", "Tu suscripción"] },
+      models: { title: "Tus modelos", api: ["API", "Tus API keys"], oauth: ["OAuth", "Tu suscripción"] },
     },
     steps: {
       crown: {
         title: "Chat",
-        body: "Habla con el modelo que elijas desde el harness que traigas, como en cualquier chat de IA, sin que la conversación se quede encerrada en una app.",
+        body: "Habla con el modelo que quieras a través del harness que traigas, como en cualquier chat de IA, pero sin que tus conversaciones queden encerradas en una app.",
       },
       cobalt: {
         title: "Gestor de harness",
@@ -65,7 +64,7 @@ const es = {
       },
       points: {
         title: "Agente personal",
-        body: "Sale, recuerda, avisa y hace recados por ti. Usa un harness por defecto o elige otro sobre la marcha, mientras lo usas.",
+        body: "Recuerda, te avisa y hace recados por ti. Viene con un harness por defecto y puedes cambiarlo cuando quieras.",
       },
       tile: {
         title: "Zellige es todo esto",
@@ -78,13 +77,13 @@ const es = {
     access: {
       tag: "BYOK · BYOS",
       title: "Tu API key… o tu suscripción",
-      body: "Con una API pagas por token, con el precio a la vista. Una suscripción es un cristal opaco: no ves sus límites y cambian sin avisar. Aun así, si ya pagas una, inicia sesión con OAuth.",
+      body: "Con una API pagas por token y el precio está a la vista. Una suscripción es una caja negra: no ves sus límites y cambian sin avisar. Aun así, si ya pagas una, inicia sesión con OAuth.",
       google: "con Google",
     },
     harness: {
       tag: "BYOH",
       title: "Tu harness open source… o el de tu suscripción",
-      body: "El chat, el gestor de harness y tu agente funcionan con el harness open source que elijas, o con el que va acoplado a tu suscripción, como Claude Code o Codex CLI.",
+      body: "El chat, el gestor de harness y tu agente funcionan con el harness open source que elijas, o con el que incluye tu suscripción, como Claude Code o Codex CLI.",
       more: "Y otros harness open source.",
     },
     points: ["En tu servidor", "Una sola memoria", "Cambia de modelo sin perder nada"],
@@ -129,9 +128,8 @@ const en = {
     why: {
       title: "Why Zellige?",
       from: "From the Arabic",
-      meaning: "meaning “tile” (it’s also where the Spanish word azulejo comes from).",
-      history: "For centuries it has covered the walls of Fez and the Alhambra: glazed clay, cut by hand, piece by piece, by a master craftsman with a sharpened hammer.",
-      fact: { label: "Fun fact:", body: "the panels are set face down, so the craftsman doesn’t see the pattern until they flip it over." },
+      meaning: "“tile.”",
+      history: "Glazed clay, cut by hand piece by piece, that has covered Fez and the Alhambra for centuries.",
     },
     title: { lead: "AI chat, coding agents and your own personal agent,", turn: "self\u2011hosted and open source." },
     bring: { lead: "Bring your own", items: ["harness", "sub", "API key"] },
