@@ -37,9 +37,9 @@ const stepAt = (t: number) => Math.min(steps.length - 1, Math.floor(t / SHARE));
 
 /*
  * Scroll story: each kind of AI use arrives as a layer of the emblem until the tile
- * is complete. The title and the dictionary entry scroll past first; then, while the
- * story plays, the screen holds only the tile, where you are (four dots, which jump
- * to a step) and the current step, so every scroll visibly changes something.
+ * is complete. The title scrolls past first; then, while the story plays, the screen
+ * holds only the tile, where you are (four dots, which jump to a step) and the
+ * current step, so every scroll visibly changes something.
  */
 export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
@@ -139,15 +139,6 @@ export function Story({ reduced }: { reduced: boolean }) {
         <h2 id="piezas-title" className="mt-4 text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
           {t.story.headline.lead}<br /><em className="text-accent">{t.story.headline.turn}</em>
         </h2>
-        {/* A dictionary entry: where the name, and the metaphor, come from. */}
-        <dl className="mt-6 max-w-[52ch] border-l-2 border-brass pl-4">
-          <dt className="flex flex-wrap items-baseline gap-x-2.5 text-sm">
-            <span className="font-semibold">zel·li·ge</span>
-            <span className="text-muted-foreground">/zɛˈliːʒ/</span>
-            <span lang="ar" dir="rtl" className="text-muted-foreground">الزليج</span>
-          </dt>
-          <dd className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{t.story.definition}</dd>
-        </dl>
       </div>
       <div ref={track} className={cn(live && "h-[300vh]")}>
         <div
