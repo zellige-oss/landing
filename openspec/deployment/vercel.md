@@ -7,18 +7,20 @@ and Vercel project do not need to change.
 
 ## Automatic deployment
 
-`CI marketing` runs once for every push to `main`, including direct commits and
-pull request merges. Opening or updating a PR does not trigger it. CI runs the
-landing checks and requires SonarQube Cloud's Quality Gate for that exact commit.
-The Sonar job waits for the existing automatic analysis and checks its immutable
-analysis ID; an older passing result cannot approve the pushed revision. A failed
-gate, missing analysis, or unavailable Sonar service blocks deployment.
-After all validations pass, CI calls the reusable `Deploy marketing to Vercel` workflow.
-Both workflows check out the exact pushed commit, and CD confirms that it is
-still the current `main` before publishing.
-Pilot releases use their own CD and cannot be blocked by a landing deployment
-failure. Deployments to `marketing-production` are queued without interrupting
-a running publication.
+Two workflows:
+
+- **`CI`** (`.github/workflows/ci.yml`) runs on every pull request to `main` and
+  every push to `main`: lint, build, tests and the packaged landing. On a push to
+  `main` it keeps the package as an artifact and requires SonarQube Cloud's Quality
+  Gate for that exact commit: the Sonar job waits for the automatic analysis and
+  checks its immutable analysis ID, so an older passing result cannot approve the
+  pushed revision. A failed gate, missing analysis, or unavailable Sonar service
+  blocks deployment. Pull requests get SonarCloud's own check instead.
+- **`CD`** (`.github/workflows/cd.yml`) runs when `CI` succeeds on a push to
+  `main`. It confirms that the commit is still the tip of `main` (a newer commit
+  deploys itself), downloads the package that CI built and deploys it to
+  production. Deployments to `marketing-production` are queued without
+  interrupting a running publication.
 
 ## Vercel and GitHub configuration
 
@@ -56,8 +58,9 @@ production domains; it does not modify DNS or attach domains.
 
 The landing is a Vite + React + Tailwind/shadcn app in `marketing/`. Its build
 prerenders the page to static HTML (content, anchors and disclosures work without
-JavaScript) and hydrates it on the client. The workflow builds it, checks the
-prerendered page, then packages `marketing/dist/` unchanged.
+JavaScript) and hydrates it on the client. CI builds it, checks the
+prerendered page, then packages `marketing/dist/` unchanged; CD deploys that
+package without rebuilding.
 
 From the repository root, using Node.js 24:
 

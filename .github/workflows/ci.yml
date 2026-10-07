@@ -1,0 +1,68 @@
+name: CI
+
+# Pull requests and pushes to main: lint, build, tests and the packaged landing.
+# On main the commit must also pass Sonar's quality gate; CD (cd.yml) then deploys
+# the exact package built here.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: marketing/package-lock.json
+      - run: npm ci
+        working-directory: marketing
+      - run: npm run lint
+        working-directory: marketing
+      - run: npm run build
+        working-directory: marketing
+      - run: node --test tests/*.test.mjs
+      - run: node deploy/build-marketing.mjs
+      - name: Keep the package for CD
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: landing
+          path: .output/marketing/.vercel/output
+          include-hidden-files: true
+          retention-days: 3
+
+  sonar:
+    name: Sonar quality gate
+    # Pull requests get SonarCloud's own check; main must pass before deploying.
+    if: github.event_name == 'push'
+    needs: [checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+      - name: Wait for this commit's quality gate
+        env:
+          SONAR_PROJECT_KEY: zellige-oss_landing
+          APPROVED_SHA: ${{ github.sha }}
+        run: node deploy/sonar-quality-gate.mjs

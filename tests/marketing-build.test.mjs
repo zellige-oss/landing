@@ -133,29 +133,30 @@ test('all paths get the landing security headers', async () => {
   ]);
 });
 
-test('landing CD waits for main push validation and checks the same commit', async () => {
-  const workflow = await readFile(join(repositoryRoot, '.github/workflows/deploy-marketing.yml'), 'utf8');
-  const ci = await readFile(join(repositoryRoot, '.github/workflows/ci-marketing.yml'), 'utf8');
-  assert.match(ci, /on:\n\s+push:\n\s+branches: \[main\]/);
-  assert.match(ci, /publish:\n\s+name: Deploy validated landing\n\s+needs: \[required\]\n\s+if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'\n\s+uses: \.\/\.github\/workflows\/deploy-marketing\.yml/);
-  assert.match(ci, /required:\n\s+name: Marketing CI required\n\s+if: \$\{\{ always\(\) \}\}\n\s+needs: \[marketing, sonar\]/);
-  assert.match(workflow, /on:\n\s+workflow_call:/);
-  assert.match(workflow, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
-  for (const config of [ci, workflow]) {
-    assert.doesNotMatch(config, /^\s{2}(?:pull_request|workflow_run|workflow_dispatch):/m);
-    assert.match(config, /ref: \$\{\{ github\.sha \}\}/);
+test('CI validates PRs and main; CD deploys the package of a passing main push', async () => {
+  const ci = await readFile(join(repositoryRoot, '.github/workflows/ci.yml'), 'utf8');
+  const cd = await readFile(join(repositoryRoot, '.github/workflows/cd.yml'), 'utf8');
+  assert.match(ci, /on:\n\s+pull_request:\n\s+branches: \[main\]\n\s+push:\n\s+branches: \[main\]/);
+  for (const step of ['npm run lint', 'npm run build', 'node --test tests/\\*\\.test\\.mjs', 'node deploy/build-marketing\\.mjs']) {
+    assert.match(ci, new RegExp(`run: ${step}$`, 'm'));
   }
-  assert.match(workflow, /if \[ "\$latest_sha" != "\$APPROVED_SHA" \]/);
-  assert.match(workflow, /^\s+VERCEL_ORG_ID: \$\{\{ vars\.VERCEL_ORG_ID \}\}$/m);
-  assert.match(workflow, /^\s+VERCEL_PROJECT_ID: \$\{\{ vars\.VERCEL_PROJECT_ID \}\}$/m);
-  assert.match(workflow, /^\s+VERCEL_TOKEN: \$\{\{ secrets\.VERCEL_TOKEN \}\}$/m);
-  assert.match(workflow, /vercel deploy --prebuilt --prod --yes --meta sourceSha="\$APPROVED_SHA" --token="\$VERCEL_TOKEN" >"\$deployment_log" 2>&1/);
-  assert.match(workflow, /trap 'rm -f "\$deployment_log"' EXIT/);
+  assert.match(ci, /sonar:\n(?:.*\n)*?\s+if: github\.event_name == 'push'\n\s+needs: \[checks\]/);
+  assert.match(ci, /run: node deploy\/sonar-quality-gate\.mjs/);
+  assert.match(cd, /on:\n\s+workflow_run:\n\s+workflows: \[CI\]\n\s+types: \[completed\]\n\s+branches: \[main\]/);
+  assert.match(cd, /if: github\.event\.workflow_run\.conclusion == 'success' && github\.event\.workflow_run\.event == 'push'/);
+  assert.match(cd, /cancel-in-progress: false/);
+  assert.match(cd, /if \[ "\$tip" = "\$APPROVED_SHA" \]/);
+  assert.match(cd, /run-id: \$\{\{ github\.event\.workflow_run\.id \}\}/);
+  assert.match(cd, /^\s+VERCEL_ORG_ID: \$\{\{ vars\.VERCEL_ORG_ID \}\}$/m);
+  assert.match(cd, /^\s+VERCEL_PROJECT_ID: \$\{\{ vars\.VERCEL_PROJECT_ID \}\}$/m);
+  assert.match(cd, /^\s+VERCEL_TOKEN: \$\{\{ secrets\.VERCEL_TOKEN \}\}$/m);
+  assert.match(cd, /vercel deploy --prebuilt --prod --yes --meta sourceSha="\$APPROVED_SHA" --token="\$VERCEL_TOKEN" >"\$deployment_log" 2>&1/);
+  assert.match(cd, /trap 'rm -f "\$deployment_log"' EXIT/);
 });
 
 test('CD files do not publish installation identifiers or internal deployment URLs', async () => {
   for (const path of [
-    '.github/workflows/deploy-marketing.yml', 'deploy/build-marketing.mjs',
+    '.github/workflows/ci.yml', '.github/workflows/cd.yml', 'deploy/build-marketing.mjs',
     'deploy/vercel-marketing.json', 'openspec/deployment/vercel.md',
     'tests/marketing-build.test.mjs',
   ]) {
