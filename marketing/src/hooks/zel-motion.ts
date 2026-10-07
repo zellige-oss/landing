@@ -15,18 +15,28 @@ function reaction(t: number) {
   };
 }
 
-// Waking up, over the first WAKE seconds: the eyes crack open drowsily (looking down),
-// sag shut, try again, blink and open wide with a little overshoot, while the tiles
-// stretch apart as if Zel were waking from a nap. [seconds, eye openness]
-const WAKE = 2.3;
-const eyelids: [number, number][] = [[0, .09], [.25, .09], [.75, .4], [1.05, .2], [1.4, .62], [1.52, .1], [1.66, .1], [1.92, 1.08], [2.1, 1]];
+// Waking up, over the first WAKE seconds, told in beats: asleep; the eyes crack open
+// looking down while Zel stretches (tiles rise and part); a nod-off, eyes sagging shut
+// as the body drops and the tiles hang in; a jolt awake, eyes wide, a hop and the
+// tiles popping out; a head shake to shake off sleep; one blink, awake.
+const WAKE = 2.7;
+// [seconds, eye openness]; above 1 is wide open.
+const eyelids: [number, number][] = [[0, .09], [.3, .09], [.8, .42], [1, .38], [1.35, .1], [1.52, .1], [1.64, 1.24], [1.85, 1], [2.36, 1], [2.43, .12], [2.53, 1]];
 function wake(t: number) {
   let open = 1;
   for (let i = 1; i < eyelids.length; i += 1) {
     const [a, from] = eyelids[i - 1], [b, to] = eyelids[i];
     if (t < b) { open = from + (to - from) * ramp(t, a, b); break; }
   }
-  return { open, drowsy: 1 - ramp(t, 1.1, 1.8), stretch: bump(t, .7, 1.3, 2.1) };
+  const shaking = t > 1.85 && t < 2.45 ? Math.sin(2 * Math.PI * (t - 1.85) / .3) * (1 - (t - 1.85) / .6) : 0;
+  return {
+    open,
+    drowsy: 1 - ramp(t, 1.5, 1.66),
+    stretch: bump(t, .3, .8, 1.15),
+    nod: bump(t, 1, 1.32, 1.56),
+    jolt: bump(t, 1.54, 1.72, 2.02),
+    shake: shaking,
+  };
 }
 
 const pieces = [
@@ -98,12 +108,16 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           // Eyes lead, then the centre, then the outer pieces. Tiles stay rigid.
           part.tilt += (gazeX * 3.2 - part.tilt) * (1 - Math.exp(-dt / (.13 + part.delay)));
           const turn = part.tilt - pose.anticipation * 2.4 + pose.hop * 2;
-          const stretch = waking.stretch * (part.spread ? 1 : 0);
-          const rise = (-1.7 * breath + 3.5 * pose.anticipation - 16 * pose.hop - 5 * stretch) / 470 * 100;
+          // While waking, each layer follows the centre a little later than when awake.
+          const w = awake ? null : wake(elapsed - part.delay * 2.5);
+          const wakeTurn = w ? 6 * w.shake - 4 * w.nod : 0;
+          const wakeRise = w ? -10 * w.stretch + 14 * w.nod - 22 * w.jolt : 0;
+          const wakeSpread = w ? 2 * w.stretch - 1.2 * w.nod + 2.6 * w.jolt : 0;
+          const rise = (-1.7 * breath + 3.5 * pose.anticipation - 16 * pose.hop + wakeRise) / 470 * 100;
           for (const element of part.nodes) {
-            element.style.setProperty("--zel-turn", `${turn.toFixed(3)}deg`);
+            element.style.setProperty("--zel-turn", `${(turn + wakeTurn).toFixed(3)}deg`);
             element.style.setProperty("--zel-rise", `${rise.toFixed(3)}%`);
-            element.style.setProperty("--zel-spread", (1 + (pose.spread + .7 * stretch) * part.spread).toFixed(4));
+            element.style.setProperty("--zel-spread", (1 + (pose.spread + wakeSpread) * part.spread).toFixed(4));
           }
         }
       }
