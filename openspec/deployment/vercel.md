@@ -7,18 +7,21 @@ and Vercel project do not need to change.
 
 ## Automatic deployment
 
-`CI marketing` runs once for every push to `main`, including direct commits and
-pull request merges. Opening or updating a PR does not trigger it. CI runs the
-landing checks and requires SonarQube Cloud's Quality Gate for that exact commit.
-The Sonar job waits for the existing automatic analysis and checks its immutable
-analysis ID; an older passing result cannot approve the pushed revision. A failed
-gate, missing analysis, or unavailable Sonar service blocks deployment.
-After all validations pass, CI calls the reusable `Deploy marketing to Vercel` workflow.
-Both workflows check out the exact pushed commit, and CD confirms that it is
-still the current `main` before publishing.
-Pilot releases use their own CD and cannot be blocked by a landing deployment
-failure. Deployments to `marketing-production` are queued without interrupting
-a running publication.
+Two workflows:
+
+- **`CI`** (`.github/workflows/ci.yml`) runs on every pull request to `main` and
+  every push to `main`: lint, build, tests and the packaged landing. On a push to
+  `main` it keeps the package as an artifact and requires SonarQube Cloud's Quality
+  Gate for that exact commit: the Sonar job waits for the automatic analysis and
+  checks its immutable analysis ID, so an older passing result cannot approve the
+  pushed revision. A failed gate, missing analysis, or unavailable Sonar service
+  blocks deployment. Pull requests get SonarCloud's own check instead.
+- **`CD`** (`.github/workflows/cd.yml`) runs when `CI` succeeds on a push to
+  `main`. It confirms that the commit is still the tip of `main` (a newer commit
+  deploys itself), downloads the package that CI built and deploys it to
+  production. Deployments to `marketing-production` are queued with `queue: max`
+  without interrupting a running publication or replacing a pending one when an
+  older CI completes later.
 
 ## Vercel and GitHub configuration
 
@@ -56,13 +59,14 @@ production domains; it does not modify DNS or attach domains.
 
 The landing is a Vite + React + Tailwind/shadcn app in `marketing/`. Its build
 prerenders the page to static HTML (content, anchors and disclosures work without
-JavaScript) and hydrates it on the client. The workflow builds it, checks the
-prerendered page, then packages `marketing/dist/` unchanged.
+JavaScript) and hydrates it on the client. CI builds it, checks the
+prerendered page, then packages `marketing/dist/` unchanged; CD deploys that
+package without rebuilding.
 
 From the repository root, using Node.js 24:
 
 ```sh
-(cd marketing && npm ci && npm run build)
+(cd marketing && npm ci --ignore-scripts && npm run build)
 node --test tests/marketing.test.mjs tests/marketing-build.test.mjs
 node deploy/build-marketing.mjs
 ```
@@ -90,13 +94,14 @@ The deployment command runs from `.output/marketing` with the three settings
 already available in its environment:
 
 ```sh
-npm exec --yes --package=vercel@62.2.0 -- vercel deploy --prebuilt --prod --yes
+npm exec --ignore-scripts --yes --package=vercel@62.2.0 -- vercel deploy --prebuilt --prod --yes
 ```
 
 The CLI version is pinned, runs without a global installation, and waits for
-deployment completion. The workflow captures CLI output in a temporary runner
-file, deletes it on exit, and reports only success or failure. It does not
-publish raw logs or deployment URLs as Actions artifacts or step output.
+deployment completion. Both CI's `npm ci` and CD's `npm exec` use `--ignore-scripts`
+to disable dependency installation hooks. The workflow captures CLI output in a
+temporary runner file, deletes it on exit, and reports only success or failure.
+It does not publish raw logs or deployment URLs as Actions artifacts or step output.
 For failures, inspect the private provider dashboard and Actions settings.
 This avoids publishing deployment metadata, not discovery of the hosting
 provider through the public site's DNS or HTTP behavior. No

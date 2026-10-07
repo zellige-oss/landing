@@ -12,8 +12,9 @@ Specs, design notes and deployment docs live in `openspec/`, not in `docs/`:
 
 ## Before every push
 
-Every push to `main`, including merging a PR on GitHub, runs CI and, if it
-passes, deploys the landing to production. A push must never break `main`.
+CI (`.github/workflows/ci.yml`) runs on every PR and every push to `main`. Every
+push to `main`, including merging a PR on GitHub, also deploys the landing to
+production once CI passes (`cd.yml`). A push must never break `main`.
 
 Before every `git push` or PR merge, run the same checks as CI and check each
 exit code. Do not push if any of them fails:

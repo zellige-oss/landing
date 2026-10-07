@@ -32,8 +32,8 @@ The application retains its own copies of the brand assets it uses.
 
 ## Deployment
 
-See [Vercel setup](openspec/deployment/vercel.md). CI runs for PRs and pushes to
-`main`; production deployment follows successful push CI on the same commit.
+See [Vercel setup](openspec/deployment/vercel.md). CI (`ci.yml`) runs for PRs and pushes
+to `main`; CD (`cd.yml`) deploys the package CI built once CI passes on `main`.
 GitHub Actions variables and secrets must be configured in this repository;
 they are not transferred with Git history.
 
