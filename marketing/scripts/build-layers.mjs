@@ -10,7 +10,7 @@
 // lines inside pieces are smoothed into the glaze.
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
-import { distanceTo, grow } from './mask.mjs';
+import { distanceTo, fillHoles, grow } from './mask.mjs';
 import { RIM, facing, rimColour, rimProfiles } from './rim.mjs';
 
 const source = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
@@ -198,26 +198,11 @@ function mitred(polygons, euclidean) {
   }
   return field;
 }
-// Fills the holes left in a mask by crackle nodes, so no rim is drawn around them.
-function fillHoles(mask) {
-  const outside = new Uint8Array(N);
-  const stack = [0];
-  while (stack.length) {
-    const k = stack.pop();
-    if (outside[k] || mask[k]) continue;
-    outside[k] = 1;
-    const x = k % W;
-    if (x > 0) stack.push(k - 1);
-    if (x < W - 1) stack.push(k + 1);
-    if (k >= W) stack.push(k - W);
-    if (k < N - W) stack.push(k + W);
-  }
-  return outside.map((value) => 1 - value);
-}
 const fields = {};
 for (const id of STACK) {
   const glaze = layer.map((value) => (value === id ? 1 : 0));
-  const closed = fillHoles(grow(grow(glaze, W, H, 3).map((value) => 1 - value), W, H, 3).map((value) => 1 - value));
+  // Holes left by crackle nodes are filled, so no rim is drawn around them.
+  const closed = fillHoles(grow(grow(glaze, W, H, 3).map((value) => 1 - value), W, H, 3).map((value) => 1 - value), W, H);
   if (id === 1) {
     fields[id] = distanceTo(closed, W, H);
     continue;
