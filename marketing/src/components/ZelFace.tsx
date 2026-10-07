@@ -28,14 +28,18 @@ function Arc({ x, up = true }: { x: number; up?: boolean }) {
 
 /*
  * An open eye under obsidian lids. Blinks and sleep lower the upper lid (and raise a
- * short lower one) over the eye instead of squashing it; at rest the upper lid just
- * shows along the top edge, with a rim of light and a soft shadow for relief. The
- * lids are drawn open, so without CSS (the generated mood images) the eye is open.
+ * short lower one) over the eye instead of squashing it. At rest both lids and
+ * the upper lid's shadow sit outside the socket, leaving the whole bead visible.
+ * The lids are drawn open, including without CSS (the generated mood images).
  * CSS moves them by the travel set for each eye height (.lid-13, .lid-40, ...).
  */
 function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number; ry?: number; squint?: boolean }) {
   const id = useId().replaceAll(":", "");
-  const h = squint ? 13 : ry, left = x - rx - 8, right = x + rx + 8, top = EYE_Y - h, bottom = EYE_Y + h;
+  const h = squint ? 13 : ry;
+  // Clear the curved edge and its shadow; CSS adds this gap to the closing travel.
+  const clearance = Math.ceil(h * .3 + 5);
+  const left = x - rx - 8, right = x + rx + 8;
+  const top = EYE_Y - h - clearance, bottom = EYE_Y + h + clearance;
   return (
     <g className="companion-eye">
       <defs>

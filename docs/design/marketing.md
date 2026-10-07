@@ -24,18 +24,20 @@ HTML and hydrates it; everything ships under the existing CSP (`'self'` only).
 - `marketing/src/components/Companion.tsx`: Zel, the mascot, with eight expressions
   (`hello`, `look`, `thinking`, `excited`, `curious`, `focused`, `wink`, `content`).
   The face is redrawn in SVG over the original artwork, so it blinks and its open
-  eyes can follow the pointer. `Guide.tsx` is the small companion that accompanies
+  eyes can follow the pointer. Both lids fully clear the glazed eye when awake;
+  their closing travel includes that clearance. `Guide.tsx` accompanies
   the reader between hero and footer, changing mood and line per section.
 - Narrative: zellige is a tile made of many small stones; each stone is a way of
-  using AI. `Trio.tsx` draws three stones (personal agents, chat managers and
-  meta-harnesses, chat) as thirds of a twelve-point star around the companion.
-  The hero assembles it once on load (CSS only); `Story.tsx` (section 01) brings in
-  one stone per scroll step while the companion changes mood. Without JS or with
+  using AI. `Trio.tsx` assembles the ivory crown (chat), cobalt corners (chat
+  managers and meta-harnesses), then teal points (personal agents), leaving a
+  central hole. Zel's centre rim and obsidian face appear together once the points
+  land. The hero assembles it once on load; `Story.tsx` (section 01) brings in
+  one layer per scroll step while the companion changes mood. Without JS or with
   reduced motion the tile is shown assembled and the steps read as a list. The
   arch survives only as a faint outline behind the hero tile.
 - Hero (2026-10-03, "direction 1"): centred like the emblem — wordmark, Zel, one
-  line, one button. The emblem's layers fly in from beyond the screen and lock
-  around Zel; pointing at a layer lifts it and names it (no permanent labels);
+  line, one button. Crown, cobalt and points fly in, in that order; Zel fills the
+  centre last and then wakes. Pointing at a layer lifts it and names it;
   scrolling away lets the layers fall and fade toward section 01. The dictionary
   entry for "zellige" lives in section 01.
 - Languages: `/es/` and `/en/` are prerendered; `/` serves Spanish without JS and

@@ -13,8 +13,9 @@ export type { Mood };
 
 /*
  * Zel is the standard emblem itself, with an obsidian face on its centre star.
- * The body is the emblem's four colour layers (scripts/build-layers.mjs), stacked
- * so they can also be shown one by one; each is a whole tile with its own rim, and
+ * The body is the emblem's three outer colour layers (scripts/build-layers.mjs),
+ * stacked so they can also be shown one by one; each is a whole tile with its rim.
+ * The centre rim and obsidian face form one layer, revealed after the body, and
  * the assembled emblem, with its drawn rims, covers them while they rest in place
  * (.zel-whole in styles.css). The face is SVG, so Zel can change
  * expression, blink and look around (ZelFace.tsx).
@@ -66,18 +67,19 @@ export function Companion({
     <div ref={root} className={cn("relative", lively && "zel-lively", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
       {/* Square box holding the stacked emblem layers. */}
       <div className="relative aspect-square w-full">
-        {layers.map(({ name, src }) => (
+        {layers.filter(({ name }) => name !== "centre").map(({ name, src }) => (
           <div key={name} className={`zel-layer layer-${name} absolute inset-0 size-full`}>
             <div className="zel-piece size-full" data-zel-motion={name}>
               <img src={src} width="960" height="960" alt="" draggable={false} className="size-full" />
             </div>
           </div>
         ))}
-        <img src={layerWhole} width="960" height="960" alt="" draggable={false} className="zel-whole absolute inset-0 size-full" />
+        {!lively && <img src={layerWhole} width="960" height="960" alt="" draggable={false} className="zel-whole absolute inset-0 size-full" />}
       </div>
       <div className="zel-face-layer absolute inset-0 size-full" aria-hidden="true">
-        <div className="zel-piece size-full" data-zel-motion="centre">
-          <svg viewBox="0 0 1254 1254" className="size-full">
+        <div className="zel-piece relative size-full" data-zel-motion="centre">
+          <img src={layerCentre} width="960" height="960" alt="" draggable={false} className="size-full" />
+          <svg viewBox="0 0 1254 1254" className="absolute inset-0 size-full">
             <ZelFace mood={mood} lively={lively} />
           </svg>
         </div>

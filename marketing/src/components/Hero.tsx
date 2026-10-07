@@ -10,7 +10,8 @@ import { Wordmark } from "./Wordmark";
 
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
- * The emblem's layers fly in from beyond the screen and lock around Zel (CSS);
+ * Crown, cobalt and points fly in from beyond the screen; Zel fills their centre
+ * once all three have landed (CSS), then wakes up;
  * pointing at a layer lifts it and names it; scrolling away lets the layers drift
  * apart toward the story below, where they assemble again step by step.
  */
@@ -40,7 +41,7 @@ function Emblem({ reduced }: { reduced: boolean }) {
       onPointerDown={track}
       onPointerLeave={() => setHover(undefined)}
     >
-      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} alt={t.zel.alt} className="size-full drop-shadow-[0_26px_34px_rgb(11_29_41/0.3)]" />
+      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={2800} alt={t.zel.alt} className="size-full drop-shadow-[0_26px_34px_rgb(11_29_41/0.3)]" />
       {/* The layer under the pointer names itself; screen readers get all three below. */}
       {pieces.map((piece) => (
         <span

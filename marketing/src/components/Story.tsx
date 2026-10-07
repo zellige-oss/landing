@@ -21,7 +21,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
   const [active, setActive] = useState<number>();
-  // Zel hides in the centre tile until the personal-agents step finds it, and is
+  // The centre stays empty until the personal-agents step finds Zel, which is
   // startled for a moment; scrolling back hides it again, so the surprise replays.
   const [startled, setStartled] = useState(false);
   const wasFound = useRef(false);

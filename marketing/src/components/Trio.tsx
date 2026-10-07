@@ -3,8 +3,8 @@ import { useT } from "@/i18n";
 import { Companion, layers, type Layer, type Mood } from "./Companion";
 
 /*
- * Zel is the standard emblem; the tile assembles around its centre one colour
- * layer at a time, each layer a way of using AI:
+ * The emblem assembles one outer colour layer at a time, leaving its centre empty
+ * until Zel appears. Each layer is a way of using AI:
  *   crown  (ivory kites, closest to Zel)      → chat
  *   cobalt (blue corners and top point)       → chat managers and meta-harnesses
  *   points (outer teal points, reaching out)  → personal agents
