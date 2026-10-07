@@ -163,8 +163,8 @@
   .ceramic {
     background: var(--ceramic-base) url("./assets/ceramic.webp");
   }
-  /* Contact (TileInProgress.tsx): a mosaic panel being laid, one piece hovering over
-     its gap. Each square shows its own part of the ceramic. */
+  /* Contact (TileInProgress.tsx): a mosaic panel being laid, its last piece set in
+     its corner. Each square shows its own part of the ceramic. */
   .tile-build {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -196,14 +196,6 @@
     background: url("./assets/ceramic.webp");
     background-size: inherit;
     background-position: inherit;
-    box-shadow: 0 14px 18px -8px #000c, inset 0 0 0 1px rgb(201 169 98 / 0.7);
-    translate: -10% -38%;
-    rotate: -8deg;
-    transition: translate 0.5s cubic-bezier(0.3, 1.4, 0.5, 1), rotate 0.5s ease, box-shadow 0.5s ease;
-  }
-  #contacto:is(:hover, :focus-within) .tile-piece {
-    translate: 0 0;
-    rotate: 0deg;
     box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25);
   }
   /* Mosaic band: brass-edged, fading out at both ends so the page can breathe. */
@@ -327,29 +319,16 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* Contact: once the panel is in view, its pieces slot in one by one, row by row;
-     the corner's piece then bobs over its place until it is set. */
-  [data-reveal]:not(.reveal-ready) .tile-build > span:not(.tile-gap) {
-    animation: slot-in 0.55s cubic-bezier(0.3, 1.35, 0.5, 1) backwards;
+  /* Contact: the panel arrives whole with its section, its last piece held just
+     above its corner. A moment after the section is in view the piece settles into
+     place, once; until the section comes into view it waits, lifted. */
+  .tile-piece { transition: translate 0.7s 0.9s cubic-bezier(0.25, 1.25, 0.5, 1), rotate 0.7s 0.9s ease, box-shadow 0.7s 0.9s ease; }
+  [data-reveal].reveal-ready .tile-piece {
+    translate: -6% -28%;
+    rotate: -6deg;
+    box-shadow: 0 12px 16px -8px #000c, inset 0 0 0 1px rgb(201 169 98 / 0.7);
+    transition: none;
   }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(1):not(.tile-gap) { animation-delay: 0.23s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(2):not(.tile-gap) { animation-delay: 0.31s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(3):not(.tile-gap) { animation-delay: 0.39s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(4):not(.tile-gap) { animation-delay: 0.47s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(5):not(.tile-gap) { animation-delay: 0.55s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(6):not(.tile-gap) { animation-delay: 0.63s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(7):not(.tile-gap) { animation-delay: 0.71s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(8):not(.tile-gap) { animation-delay: 0.79s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(9):not(.tile-gap) { animation-delay: 0.87s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(10):not(.tile-gap) { animation-delay: 0.95s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(11):not(.tile-gap) { animation-delay: 1.03s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(12):not(.tile-gap) { animation-delay: 1.11s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(13):not(.tile-gap) { animation-delay: 1.19s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(14):not(.tile-gap) { animation-delay: 1.27s; }
-  [data-reveal]:not(.reveal-ready) .tile-build > span:nth-child(15):not(.tile-gap) { animation-delay: 1.35s; }
-  /* Contact: the waiting piece bobs over its gap until it is set. */
-  .tile-piece { animation: piece-bob 2.8s 1.6s ease-in-out infinite backwards; }
-  #contacto:is(:hover, :focus-within) .tile-piece { animation: none; }
   /* The whole tile: as the last layers land around Zel, the impact rings out
      through the crown, the blue and the green in turn, and a brass ring spreads. */
   .tile-scroll.show-all .layer-crown .zel-piece { animation: zel-ripple 0.5s 0.35s ease-out; }
@@ -383,13 +362,6 @@
 @keyframes twinkle {
   0%, 100% { scale: 1; opacity: 1; }
   50% { scale: 0.82; opacity: 0.7; }
-}
-@keyframes slot-in {
-  from { opacity: 0; translate: 0 -60%; rotate: -12deg; }
-  40% { opacity: 1; }
-}
-@keyframes piece-bob {
-  50% { translate: -10% -46%; }
 }
 @keyframes zel-ripple {
   35% { scale: 1.045; }

@@ -1,8 +1,7 @@
 /*
  * A mosaic panel being laid: sixteen squares cut from the brand's ceramic
- * (styles.css, .tile-build). As the section comes into view the pieces slot in one
- * by one; the last, the corner, hovers over its place until you hover the section
- * or focus a link in it: your piece.
+ * (styles.css, .tile-build). It arrives whole with its section, and a moment later
+ * the last piece, the corner, settles into its place: your piece.
  */
 const PIECE = 16;
 
