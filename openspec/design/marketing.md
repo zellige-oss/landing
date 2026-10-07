@@ -20,8 +20,9 @@ and Zel, the mascot, is the centre that holds them together.
    one layer around it: chat (crown), the harness manager (blue), the personal
    agent (green); the last puts the whole tile together. Each layer uses a harness
    you bring. With a mouse, pointing at a layer lifts it and explains it; clicking
-   or tapping one jumps to its step. Below, "Under the hood" draws the path: your
-   devices, Tailscale, your server, the models (by API or OAuth). The story plays
+   or tapping one jumps to its step. Below, "Under the hood" is the architecture:
+   your devices reach your server over Tailscale; the server runs Zellige (its
+   three layers on one shared memory) and reaches the models by API or OAuth. The story plays
    once, then settles; without JavaScript or with reduced motion it is a list.
 3. **Features** (`src/pages/Features.tsx`): "Bring your own", three short cards.
    BYOK: your API keys, priced per token in the open, unlike a subscription's
