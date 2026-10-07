@@ -37,29 +37,29 @@ const es = {
   layers: {
     crown: { name: "Corona", use: "Chat" },
     cobalt: { name: "Azul", use: "Meta-harness" },
-    points: { name: "Puntas", use: "Agentes personales" },
+    points: { name: "Verde", use: "Agente personal" },
   },
   story: {
-    hint: "Desliza para montar el azulejo",
+    hint: "Desliza para ver cada capa",
     progress: "Pasos de la historia",
     goTo: "Ir al paso",
-    headline: { lead: "Cada capa del azulejo", turn: "es una forma de usar la\u00a0IA." },
+    headline: { lead: "Zel en el centro,", turn: "y una capa para cada\u00a0uso." },
     steps: {
       crown: {
         title: "La corona",
-        body: "Lo primero que rodea a Zel: las piezas de marfil. Es el chat, donde piensas en voz alta con el modelo que elijas. La pieza más cercana.",
+        body: "Zel y la corona de marfil: el chat. Hablas con Zel usando el modelo que elijas, como en cualquier chat de IA.",
       },
       cobalt: {
         title: "El azul",
-        body: "Las esquinas que sujetan el conjunto. Es el meta-harness para desarrollar software con agentes: orquesta modelos, herramientas y flujos para que todo encaje.",
+        body: "Zel y las piezas de cobalto: el meta-harness para desarrollar software con agentes. Zel orquesta modelos, herramientas y agentes de código en un mismo flujo.",
       },
       points: {
-        title: "Las puntas",
-        body: "Lo que mira hacia fuera. Tus agentes personales: salen, recuerdan, avisan y hacen recados por ti.",
+        title: "El verde",
+        body: "Zel y las puntas verdes: tu agente personal. Sale, recuerda, avisa y hace recados por ti.",
       },
       tile: {
-        title: "El azulejo",
-        body: "Corona, azul y puntas, cada capa con su papel, encajadas alrededor de Zel. Él guarda tu historia para todas. Cambia una capa sin empezar de cero.",
+        title: "Todo el azulejo, en tu servidor",
+        body: "Configura tu servidor personal y tendrás las tres capas. A través de Tailscale entras desde las apps de escritorio y de móvil, para todas las plataformas, y desde la web.",
       },
     },
   },
@@ -129,29 +129,29 @@ const en = {
   layers: {
     crown: { name: "Crown", use: "Chat" },
     cobalt: { name: "Blue", use: "Meta-harness" },
-    points: { name: "Points", use: "Personal agents" },
+    points: { name: "Green", use: "Personal agent" },
   },
   story: {
-    hint: "Scroll to build the tile",
+    hint: "Scroll to see each layer",
     progress: "Story steps",
     goTo: "Go to step",
-    headline: { lead: "Each layer of the tile", turn: "is a way to use\u00a0AI." },
+    headline: { lead: "Zel in the centre,", turn: "and a layer for each\u00a0use." },
     steps: {
       crown: {
         title: "The crown",
-        body: "The first ring around Zel: the ivory pieces. That's chat, where you think out loud with the model you choose. The closest layer.",
+        body: "Zel and the ivory crown: chat. You talk to Zel with the model you choose, like in any AI chat.",
       },
       cobalt: {
         title: "The blue",
-        body: "The corners that hold it all together. The meta-harness for building software with agents: it orchestrates models, tools and flows so everything fits.",
+        body: "Zel and the cobalt pieces: the meta-harness for building software with agents. Zel orchestrates models, tools and coding agents in one flow.",
       },
       points: {
-        title: "The points",
-        body: "What faces outward. Your personal agents: they go out, remember, remind and run errands for you.",
+        title: "The green",
+        body: "Zel and the green points: your personal agent. It goes out, remembers, reminds and runs errands for you.",
       },
       tile: {
-        title: "The tile",
-        body: "Crown, blue and points, each layer with its role, fitted around Zel, who keeps your story for all of them. Swap a layer without starting over.",
+        title: "The whole tile, on your server",
+        body: "Set up your personal server and you get all three layers. Through Tailscale you reach them from the desktop and mobile apps, on every platform, and from the web.",
       },
     },
   },
