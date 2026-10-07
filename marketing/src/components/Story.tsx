@@ -58,7 +58,9 @@ export function Story({ reduced }: { reduced: boolean }) {
   // label), so coming back up never replays it.
   const [settled, setSettled] = useState(false);
   const seenEnd = useRef(false);
-  const collapsedFrom = useRef(0);
+  // What the reader is looking at when the story settles (the next section) and
+  // where it was on screen, to put it back exactly there afterwards.
+  const anchor = useRef<{ element: Element; top: number } | null>(null);
   // With reduced motion the tile simply stays assembled and the steps read as a list.
   useScrollProgress(track, "through", (t) => {
     const node = section.current;
@@ -85,19 +87,28 @@ export function Story({ reduced }: { reduced: boolean }) {
       // Settle only once the whole section is above the screen, so the change in
       // height happens out of sight.
       if (entry.isIntersecting || entry.boundingClientRect.bottom > 0 || !seenEnd.current) return;
-      collapsedFrom.current = track.current?.offsetHeight ?? 0;
+      const next = node.nextElementSibling;
+      if (next) anchor.current = { element: next, top: next.getBoundingClientRect().top };
+      // The browser's own scroll anchoring would also make up for the lost height;
+      // with ours on top, the page jumped twice as far. Only ours runs.
+      document.documentElement.style.setProperty("overflow-anchor", "none");
       setSettled(true);
     });
     observer.observe(node);
     return () => observer.disconnect();
   }, [reduced, settled]);
-  // The section got shorter above the screen: scroll up by as much, so what the
-  // reader is looking at stays exactly where it was.
+  // The section got shorter above the screen: scroll by however far the next section
+  // moved, so what the reader is looking at stays exactly where it was.
   useLayoutEffect(() => {
-    if (!settled || !collapsedFrom.current) return;
-    const delta = collapsedFrom.current - (track.current?.offsetHeight ?? 0);
-    collapsedFrom.current = 0;
-    if (delta > 0) scrollBy({ top: -delta, behavior: "instant" });
+    if (!settled) return;
+    const held = anchor.current;
+    anchor.current = null;
+    if (held) {
+      const moved = held.element.getBoundingClientRect().top - held.top;
+      if (Math.abs(moved) > 0.5) scrollBy({ top: moved, behavior: "instant" });
+    }
+    const frame = requestAnimationFrame(() => document.documentElement.style.removeProperty("overflow-anchor"));
+    return () => cancelAnimationFrame(frame);
   }, [settled]);
   // The story only runs with motion allowed, and only until it has settled; otherwise
   // (and before hydration) it is a plain list next to the whole tile.
