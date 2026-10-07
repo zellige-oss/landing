@@ -10,7 +10,7 @@
 import { copyFile, access } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
-import { grow } from './mask.mjs';
+import { distanceTo, grow } from './mask.mjs';
 
 const emblem = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
 const original = fileURLToPath(new URL('../../docs/design/proposals/zellige-emblem-original.png', import.meta.url));
@@ -122,31 +122,7 @@ for (const [fx, fy] of [[0.28, 0.31], [0.72, 0.31], [0.28, 0.72], [0.72, 0.72]])
 
 // Euclidean distance to the transparent background (Felzenszwalb–Huttenlocher), so
 // only the outer sides get a rim; the inner sides already meet their neighbours' rims.
-const INF = 1e12;
-const dist = new Float64Array(N);
-for (let k = 0; k < N; k += 1) dist[k] = data[k * 4 + 3] < 40 ? 0 : INF;
-const edt1d = (get, set, n) => {
-  const f = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
-  for (let q = 0; q < n; q += 1) f[q] = get(q);
-  let j = 0;
-  v[0] = 0; z[0] = -Infinity; z[1] = Infinity;
-  for (let q = 1; q < n; q += 1) {
-    let s;
-    do {
-      const p = v[j];
-      s = ((f[q] + q * q) - (f[p] + p * p)) / (2 * q - 2 * p);
-    } while (s <= z[j] && --j >= 0);
-    j += 1; v[j] = q; z[j] = s; z[j + 1] = Infinity;
-  }
-  j = 0;
-  for (let q = 0; q < n; q += 1) {
-    while (z[j + 1] < q) j += 1;
-    set(q, (q - v[j]) ** 2 + f[v[j]]);
-  }
-};
-for (let x = 0; x < W; x += 1) edt1d((y) => dist[y * W + x], (y, d) => { dist[y * W + x] = d; }, H);
-for (let y = 0; y < H; y += 1) edt1d((x) => dist[y * W + x], (x, d) => { dist[y * W + x] = d; }, W);
-for (let k = 0; k < N; k += 1) dist[k] = Math.sqrt(dist[k]);
+const dist = distanceTo(data.filter((_, i) => i % 4 === 3).map((alpha) => (alpha < 40 ? 1 : 0)), W, H);
 
 // Rim cross-sections from the emblem's own rims, outer edge first, one per facing.
 const RIM = 16;

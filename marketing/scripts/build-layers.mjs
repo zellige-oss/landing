@@ -5,11 +5,12 @@
 //   cobalt  — the four blue corner squares
 //   points  — the four outer teal points (see scripts/fix-emblem.mjs)
 // Every layer keeps the emblem's own pixels and full canvas, so stacked they
-// rebuild the logo exactly. Each gold rim goes to the nearest coloured piece, and
-// the thin gold crackle lines inside pieces are smoothed into the glaze.
+// rebuild the logo exactly. Each piece takes the whole gold rim around it, so it
+// reads as a complete tile when the layers separate, and the thin gold crackle
+// lines inside pieces are smoothed into the glaze.
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
-import { grow } from './mask.mjs';
+import { distanceTo, grow } from './mask.mjs';
 
 const source = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
 const out = (name) => fileURLToPath(new URL(`../src/assets/layer-${name}.webp`, import.meta.url));
@@ -78,24 +79,77 @@ for (let k = 0; k < N; k += 1) {
   else if (kind[k] === 2) layer[k] = 4;
 }
 
-// Gold pixels join the nearest coloured layer (multi-source BFS), and remember how far.
-const dist = new Uint16Array(N).fill(65535);
-let frontier = [];
-for (let k = 0; k < N; k += 1) if (layer[k]) { dist[k] = 0; frontier.push(k); }
-while (frontier.length) {
-  const next = [];
-  for (const k of frontier) {
-    const x = k % W, y = (k - x) / W;
-    for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
-      if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-      const n = ny * W + nx;
-      if (kind[n] !== 9 || dist[n] !== 65535) continue;
-      dist[n] = dist[k] + 1;
-      layer[n] = layer[k];
-      next.push(n);
+// Between two pieces runs one shared rim (glaze, dark line, gold, dark line, glaze),
+// so no single cut can be clean. Instead each piece takes the whole rim around it,
+// like a real tile: a band of RIM px around its glaze, closed over crackle notches,
+// with straight sides, rounded corners and an antialiased edge. Neighbouring bands
+// overlap on identical pixels, so the stacked layers still rebuild the emblem; the
+// few pixels beyond every band (where several rims meet) go to the nearest piece.
+const RIM = 15;
+const STACK = [4, 3, 2, 1]; // bottom to top, as Companion.tsx stacks the layers
+// Every piece but the centre star is convex, so its band is measured from the convex
+// hull of its glaze: straight sides and closed corners, whatever the glaze's edge.
+function hulls(glaze) {
+  const filled = new Uint8Array(N);
+  const seen = new Uint8Array(N);
+  for (let seed = 0; seed < N; seed += 1) {
+    if (!glaze[seed] || seen[seed]) continue;
+    // One piece: its leftmost and rightmost pixel on each row.
+    const left = new Map(), right = new Map();
+    const stack = [seed];
+    seen[seed] = 1;
+    while (stack.length) {
+      const k = stack.pop();
+      const x = k % W, y = (k - x) / W;
+      if (!left.has(y) || x < left.get(y)) left.set(y, x);
+      if (!right.has(y) || x > right.get(y)) right.set(y, x);
+      for (const n of [k - 1, k + 1, k - W, k + W]) {
+        if (n >= 0 && n < N && glaze[n] && !seen[n] && Math.abs((n % W) - x) <= 1) { seen[n] = 1; stack.push(n); }
+      }
+    }
+    if (left.size < 20) continue; // stray specks of glaze colour
+    // Andrew's monotone chain over those extremes, then fill the hull row by row.
+    const points = [...left].map(([y, x]) => [x, y]).concat([...right].map(([y, x]) => [x, y])).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const half = (list) => {
+      const chain = [];
+      for (const p of list) {
+        while (chain.length >= 2 && cross(chain.at(-2), chain.at(-1), p) <= 0) chain.pop();
+        chain.push(p);
+      }
+      return chain.slice(0, -1);
+    };
+    const hull = half(points).concat(half([...points].reverse()));
+    const ys = hull.map(([, y]) => y);
+    for (let y = Math.min(...ys); y <= Math.max(...ys); y += 1) {
+      let from = Infinity, to = -Infinity;
+      for (let i = 0; i < hull.length; i += 1) {
+        const [ax, ay] = hull[i], [bx, by] = hull[(i + 1) % hull.length];
+        if ((y < ay && y < by) || (y > ay && y > by)) continue;
+        const xs = ay === by ? [ax, bx] : [ax + ((y - ay) / (by - ay)) * (bx - ax)];
+        for (const x of xs) { from = Math.min(from, x); to = Math.max(to, x); }
+      }
+      for (let x = Math.ceil(from); x <= Math.floor(to); x += 1) filled[y * W + x] = 1;
     }
   }
-  frontier = next;
+  return filled;
+}
+const fields = {};
+for (const id of STACK) {
+  const glaze = layer.map((value) => (value === id ? 1 : 0));
+  const closed = grow(grow(glaze, W, H, 3).map((value) => 1 - value), W, H, 3).map((value) => 1 - value);
+  fields[id] = distanceTo(id === 1 ? closed : hulls(closed), W, H);
+}
+const coverage = Object.fromEntries(STACK.map((id) => [id, new Float32Array(N)]));
+for (let k = 0; k < N; k += 1) {
+  if (!data[k * 4 + 3]) continue;
+  let near = STACK[0];
+  for (const id of STACK) {
+    if (fields[id][k] < fields[near][k]) near = id;
+    coverage[id][k] = Math.min(1, Math.max(0, RIM + 0.5 - fields[id][k]));
+  }
+  coverage[near][k] = 1;
+  if (kind[k] === 9 || !kind[k]) layer[k] = near;
 }
 
 // Crackle lines: thin gold runs with the same glaze on both sides. Paint them with
@@ -122,8 +176,9 @@ const names = { 1: 'centre', 2: 'crown', 3: 'cobalt', 4: 'points' };
 for (const [id, name] of Object.entries(names)) {
   const cut = Buffer.alloc(N * 4);
   for (let k = 0; k < N; k += 1) {
-    if (layer[k] !== Number(id)) continue;
-    cut.set(pixels.subarray(k * 4, k * 4 + 4), k * 4);
+    if (!coverage[id][k]) continue;
+    cut.set(pixels.subarray(k * 4, k * 4 + 3), k * 4);
+    cut[k * 4 + 3] = Math.round(pixels[k * 4 + 3] * coverage[id][k]);
   }
   const meta = await sharp(cut, { raw: { width: W, height: H, channels: 4 } })
     .resize(SIZE, SIZE)

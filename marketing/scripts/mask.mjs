@@ -20,3 +20,34 @@ export function grow(mask, width, height, radius) {
   }
   return reach;
 }
+
+// Felzenszwalb–Huttenlocher squared distance transform along one row or column.
+function edt1d(get, set, n) {
+  const f = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
+  for (let q = 0; q < n; q += 1) f[q] = get(q);
+  let j = 0;
+  v[0] = 0; z[0] = -Infinity; z[1] = Infinity;
+  for (let q = 1; q < n; q += 1) {
+    let s;
+    do {
+      const p = v[j];
+      s = ((f[q] + q * q) - (f[p] + p * p)) / (2 * q - 2 * p);
+    } while (s <= z[j] && --j >= 0);
+    j += 1; v[j] = q; z[j] = s; z[j + 1] = Infinity;
+  }
+  j = 0;
+  for (let q = 0; q < n; q += 1) {
+    while (z[j + 1] < q) j += 1;
+    set(q, (q - v[j]) ** 2 + f[v[j]]);
+  }
+}
+
+// Euclidean distance from every pixel to the nearest pixel inside the mask.
+export function distanceTo(mask, width, height) {
+  const dist = new Float64Array(width * height);
+  for (let k = 0; k < dist.length; k += 1) dist[k] = mask[k] ? 0 : 1e12;
+  for (let x = 0; x < width; x += 1) edt1d((y) => dist[y * width + x], (y, d) => { dist[y * width + x] = d; }, height);
+  for (let y = 0; y < height; y += 1) edt1d((x) => dist[y * width + x], (x, d) => { dist[y * width + x] = d; }, width);
+  for (let k = 0; k < dist.length; k += 1) dist[k] = Math.sqrt(dist[k]);
+  return dist;
+}
