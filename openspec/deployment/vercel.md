@@ -76,8 +76,8 @@ reference to the pilot, its API or the development domain.
 
 The builder copies these files unchanged and copies
 `deploy/vercel-marketing.json` to `.vercel/output/config.json`. That configuration
-applies the same CSP, `nosniff`, frame denial, and referrer policy as
-`deploy/marketing.Caddyfile`. There is no catch-all page fallback: unknown paths
+applies the landing's CSP, `nosniff`, frame denial, and referrer policy to every
+path (`tests/marketing-build.test.mjs` pins the exact values). There is no catch-all page fallback: unknown paths
 remain 404s. The pilot screenshot, mascot, application, backend, databases,
 documentation, and secrets are excluded by the explicit file allowlist.
 

@@ -37,10 +37,8 @@ See [Vercel setup](openspec/deployment/vercel.md). CI runs for PRs and pushes to
 GitHub Actions variables and secrets must be configured in this repository;
 they are not transferred with Git history.
 
-A local static fallback is available with `docker compose up -d --build` on
-`127.0.0.1:18788`. The optional `compose.tailscale.yaml` retains the existing
-private ingress definition; enrolling or moving a running connector is a
-separate operator action. Do not run two connectors with the same identity.
+To check a production build locally, run `npm --prefix marketing run preview`
+after `npm --prefix marketing run build`.
 
 ## Provenance
 

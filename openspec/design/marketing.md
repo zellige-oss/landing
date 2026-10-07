@@ -51,7 +51,7 @@ HTML and hydrates it; everything ships under the existing CSP (`'self'` only).
 - `marketing/src/assets/{ceramic,emblem}.webp`: web-sized copies of
   `marketing/images/zellige-rosette-ceramic-v1.png` and the pilot's brand PNGs.
 - `marketing/images/`: source artwork. `zellige-rosette-ceramic-v1.png` is the
-  approved mosaic ([prompts](proposals/ceramic-png.md)); `zellige-rosette-v2.svg`,
+  approved mosaic; `zellige-rosette-v2.svg`,
   `ceramic-grain.png` and `zellige-mosaic.png` are superseded studies, never
   published.
 - `marketing/public/fonts/`: local Onest and Cormorant Garamond with SIL OFL licenses.
@@ -62,8 +62,6 @@ HTML and hydrates it; everything ships under the existing CSP (`'self'` only).
   matching, recursive containment and bounded SVG size.
 - `deploy/build-marketing.mjs`: eleven explicit public files; no pilot or private
   repository material is bundled.
-- `compose.lab.yaml`: pilot service plus an optional local marketing fallback.
-  This design iteration did not change containers, DNS or production deployments.
 
 The earlier `marketing/DESIGN.md`, its sidecar, and `marketing-review.md` describe
 older iterations; they are not current acceptance reports for this design.

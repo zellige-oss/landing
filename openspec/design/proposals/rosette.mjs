@@ -1,4 +1,4 @@
-/** Native geometry, not an image-model reconstruction. See fractal-study.md. */
+/** Native geometry of the rosette pattern, not an image-model reconstruction. */
 export const Q = Math.SQRT2;
 export const A = 1 + Q;
 export const S = 1 / Q;
