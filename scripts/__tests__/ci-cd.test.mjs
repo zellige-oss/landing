@@ -33,6 +33,9 @@ test('CI validates PRs and main; CD deploys the package of a passing main push',
   assert.match(cd, /^\s+VERCEL_TOKEN: \$\{\{ secrets\.VERCEL_TOKEN \}\}$/m);
   assert.match(cd, /vercel deploy --prebuilt --prod --yes --meta sourceSha="\$APPROVED_SHA" --token="\$VERCEL_TOKEN" >"\$deployment_log" 2>&1/);
   assert.match(cd, /trap 'rm -f "\$deployment_log"' EXIT/);
+  // A failed deployment publishes only the CLI's error lines, redacted.
+  assert.match(cd, /grep -m 5 -E 'Error\|error:' "\$deployment_log"/);
+  assert.match(cd, /_<redacted>\/g; s#\[\^ \]\*vercel\\\.\(app\|com\)\[\^ \]\*#<vercel-url>#g/);
 });
 
 test('CD files do not publish installation identifiers or internal deployment URLs', async () => {

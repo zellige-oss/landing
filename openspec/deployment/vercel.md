@@ -46,7 +46,12 @@ not masked in Actions logs, so do not print their values in workflow steps.
 
 The workflow reads the token only during deployment, passes it through the
 environment, and never writes it into the artifact. A missing setting fails the
-deployment with the setting name, without printing values. No credentials or
+deployment with the setting name, without printing values. A failed deployment
+prints only the Vercel CLI's error lines, with team, project and deployment IDs and
+Vercel URLs redacted; the rest of its output stays private. On the Hobby plan, a
+failure that leaves no deployment in the dashboard is usually the limit of 100
+deployments a day, which frees up as older deployments leave the 24-hour window;
+re-run CD then. No credentials or
 GitHub settings are created by the files in this change.
 
 For another installation, configure its identifiers in GitHub Actions settings,
