@@ -48,7 +48,7 @@ del encaje, `r = s/a = 1 − 1/√2 ≈ 0,292893`. No se ha elegido una proporci
 - `tests/pattern-geometry.test.mjs`: cobertura, ausencia de solapes positivos, coincidencia de fronteras periódicas, encaje recursivo y límite de tamaño.
 
 ```sh
-node docs/design/proposals/build-rosette.mjs
+node openspec/design/proposals/build-rosette.mjs
 node --test --test-isolation=none tests/pattern-geometry.test.mjs
 ```
 

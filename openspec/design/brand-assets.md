@@ -8,7 +8,7 @@ are not vector originals. The source moodboard is not shipped in the website.
 - `brand/zellige-emblem.png`: 1254 × 1254 RGBA PNG. **The single source**
   for every derived asset. Corrected on 2026-10-03: its top point is teal like the
   other three (it was cobalt, breaking the four-fold symmetry); the uncorrected
-  original is kept at `docs/design/proposals/zellige-emblem-original.png`.
+  original is kept at `openspec/design/proposals/zellige-emblem-original.png`.
 - `brand/zel/zel-<mood>.png`: Zel, the mascot, for each mood (`hello`,
   `look`, `thinking`, `excited`, `curious`, `focused`, `wink`, `content`). Zel is
   the emblem with an obsidian face on the centre star. The pilot uses `zel-hello`.

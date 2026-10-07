@@ -1,11 +1,11 @@
 // Design exploration (not part of the build): several takes on Zel's personality,
-// rendered from the corrected emblem into docs/design/proposals/zel-variants/.
+// rendered from the corrected emblem into openspec/design/proposals/zel-variants/.
 import { mkdir } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
 
 const path = (relative) => fileURLToPath(new URL(relative, import.meta.url));
-const OUT = path('../../docs/design/proposals/zel-variants/');
+const OUT = path('../../openspec/design/proposals/zel-variants/');
 const E = 1254; // emblem size
 const C = 1400; // canvas, with room above for a crest
 const OX = (C - E) / 2, OY = C - E - 40;
@@ -16,7 +16,7 @@ async function raw(file) {
   return data;
 }
 const emblem = await raw(path('../../brand/zellige-emblem.png'));
-const original = await raw(path('../../docs/design/proposals/zellige-emblem-original.png'));
+const original = await raw(path('../../openspec/design/proposals/zellige-emblem-original.png'));
 const points = await raw(path('../src/assets/layer-points.webp'));
 
 // Split the emblem: the body without its top point, and the top point alone (teal or cobalt).

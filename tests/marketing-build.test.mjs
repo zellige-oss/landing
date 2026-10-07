@@ -156,7 +156,7 @@ test('landing CD waits for main push validation and checks the same commit', asy
 test('CD files do not publish installation identifiers or internal deployment URLs', async () => {
   for (const path of [
     '.github/workflows/deploy-marketing.yml', 'deploy/build-marketing.mjs',
-    'deploy/vercel-marketing.json', 'docs/deployment/vercel.md',
+    'deploy/vercel-marketing.json', 'openspec/deployment/vercel.md',
     'tests/marketing-build.test.mjs',
   ]) {
     const contents = await readFile(join(repositoryRoot, path), 'utf8');

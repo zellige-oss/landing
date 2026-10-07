@@ -1,13 +1,13 @@
 // Proposal: the Zellige emblem rebuilt as one cell of the site's mosaic geometry
-// (docs/design/proposals/rosette.mjs), cut like a gem to match the wordmark.
+// (openspec/design/proposals/rosette.mjs), cut like a gem to match the wordmark.
 //   - colour follows symmetry: side points teal, top/bottom points blue;
 //   - it tessellates: emblems placed one period apart share points and corners exactly;
 //   - a second scale: each corner square holds the whole cell again, smaller.
-// Writes docs/design/proposals/emblem-v2.svg (emblem) and emblem-v2-wall.svg (3×3).
+// Writes openspec/design/proposals/emblem-v2.svg (emblem) and emblem-v2-wall.svg (3×3).
 import { Delaunay } from 'd3-delaunay';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { A, PERIOD, Q, S, STAR, turn } from '../../docs/design/proposals/rosette.mjs';
+import { A, PERIOD, Q, S, STAR, turn } from '../../openspec/design/proposals/rosette.mjs';
 
 const U = 100; // geometry units → SVG px
 const e = A - S;
@@ -101,7 +101,7 @@ for (let row = -1; row <= 1; row += 1) for (let col = -1; col <= 1; col += 1) wa
 const W = 1.5 * PERIOD * U;
 const wallSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-W} ${-W} ${2 * W} ${2 * W}">${defs}<rect x="${-W}" y="${-W}" width="${2 * W}" height="${2 * W}" fill="#0b1d29"/>${wall}</svg>`;
 
-const dir = fileURLToPath(new URL('../../docs/design/proposals/', import.meta.url));
+const dir = fileURLToPath(new URL('../../openspec/design/proposals/', import.meta.url));
 writeFileSync(`${dir}emblem-v2.svg`, emblem);
 writeFileSync(`${dir}emblem-v2-wall.svg`, wallSvg);
 console.log(`emblem-v2.svg ${emblem.length} B, emblem-v2-wall.svg ${wallSvg.length} B`);
