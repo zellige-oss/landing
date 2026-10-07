@@ -57,7 +57,7 @@ const es = {
       },
       tile: {
         title: "Zellige es todo esto",
-        body: "Configura tu servidor personal y lo tendrás todo. A través de Tailscale entras desde las apps de escritorio y de móvil, para todas las plataformas, y desde la web.",
+        body: "Configura tu servidor personal, conecta tus modelos por API y lo tendrás todo. A través de Tailscale entras desde las apps de escritorio y de móvil, para todas las plataformas, y desde la web.",
       },
     },
   },
@@ -75,6 +75,7 @@ const es = {
         ["Una sola historia", "El chat, el gestor de harness y tu agente parten de la misma historia, en lugar de empezar cada uno desde cero."],
         ["En tu servidor", "Un proyecto abierto y autoalojado: tu historia se guarda en tu propio servidor, no en el de un proveedor."],
         ["Cambia de modelo, no de historia", "Los modelos y las herramientas pueden cambiar sin llevarse por delante lo que has construido."],
+        ["Por API, no por suscripción", "Conectas los modelos con tus propias claves de API y pagas solo lo que usas. Las suscripciones también tendrán soporte, pero no son lo principal."],
       ] as [string, string][],
     },
   },
@@ -147,7 +148,7 @@ const en = {
       },
       tile: {
         title: "Zellige is all of this",
-        body: "Set up your personal server and you have it all. Through Tailscale you reach it from the desktop and mobile apps, on every platform, and from the web.",
+        body: "Set up your personal server, connect your models through their APIs and you have it all. Through Tailscale you reach it from the desktop and mobile apps, on every platform, and from the web.",
       },
     },
   },
@@ -164,6 +165,7 @@ const en = {
         ["One story", "The chat, the harness manager and your agent start from the same story, instead of each starting from scratch."],
         ["On your server", "An open, self-hosted project: your story is kept on your own server, not a provider's."],
         ["Change models, not your story", "Models and tools can change without taking what you've built with them."],
+        ["Through APIs, not subscriptions", "You connect models with your own API keys and pay only for what you use. Subscriptions will be supported too, but they are not the focus."],
       ] as [string, string][],
     },
   },
