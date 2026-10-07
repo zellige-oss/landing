@@ -1,62 +1,26 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef } from "react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { ArrowDown, ChevronDown, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
 import { Companion } from "./Companion";
-import { LayerGlyph, pieces, type Piece } from "./Trio";
 import { Wordmark } from "./Wordmark";
 
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
- * The emblem's layers fly in from beyond the screen and lock around Zel (CSS);
- * pointing at a layer lifts it and names it; scrolling away lets the layers drift
- * apart toward the story below, where they assemble again step by step.
+ * The emblem's layers fly in from beyond the screen and lock around Zel (CSS), and
+ * Zel says hello; scrolling away lets the layers drift apart toward the story
+ * below, where they assemble again step by step and each one is explained.
  */
-
-/** Which layer the pointer is over, from its position relative to the emblem centre. */
-function layerAt(x: number, y: number): Piece | undefined {
-  const r = Math.hypot(x, y);
-  if (r < 0.26 || r > 0.98) return undefined; // Zel's face (the centre star), or outside the emblem
-  if (Math.abs(x) > 0.2 && Math.abs(y) > 0.2 && Math.abs(Math.abs(x) - Math.abs(y)) < 0.28) {
-    return r < 0.4 ? "crown" : "cobalt"; // the diagonals: kites near the centre, corner squares beyond
-  }
-  return r < 0.46 ? "crown" : "points";
-}
 
 function Emblem({ reduced }: { reduced: boolean }) {
   const t = useT();
-  const [hover, setHover] = useState<Piece>();
-  const shown = hover;
-  function track(event: PointerEvent<HTMLDivElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setHover(layerAt(((event.clientX - rect.left) / rect.width) * 2 - 1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
-  }
+  // The layers are explained in the story below, so the hero's Zel only says hello.
   return (
-    <div
-      className={cn("hero-zel tile relative mx-auto aspect-square w-[min(78vw,clamp(200px,30vh,380px))]", !reduced && "hero-intro", shown && `lift-${shown}`)}
-      onPointerMove={track}
-      onPointerDown={track}
-      onPointerLeave={() => setHover(undefined)}
-    >
+    <div className={cn("hero-zel tile relative mx-auto aspect-square w-[min(78vw,clamp(200px,30vh,380px))]", !reduced && "hero-intro")}>
       <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} alt={t.zel.alt} shadow="hero" className="size-full" />
-      {/* The layer under the pointer names itself; screen readers get all three below. */}
-      {pieces.map((piece) => (
-        <span
-          key={piece}
-          aria-hidden="true"
-          className={cn(
-            `hero-label hero-label-${piece} pointer-events-none absolute flex items-center gap-2 rounded-full border border-brass/60 bg-popover/95 py-1.5 pr-3.5 pl-2 text-[13px] whitespace-nowrap text-foreground shadow-[0_12px_28px_-14px_rgb(20_43_53/0.5)] transition-[opacity,translate] duration-300`,
-            shown === piece ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0",
-          )}
-        >
-          <LayerGlyph layer={piece} className="size-4" />
-          <span><strong className="font-semibold">{t.layers[piece].name}</strong> · {t.layers[piece].use}</span>
-        </span>
-      ))}
-      <p className="sr-only">{pieces.map((piece) => `${t.layers[piece].name}: ${t.layers[piece].use}.`).join(" ")}</p>
-      <p className={cn("hero-greeting absolute transition-opacity duration-300 top-[2%] left-[60%] w-max max-w-[150px] rounded-2xl rounded-bl-sm border border-border bg-popover px-3 py-2 text-left text-[11px] sm:top-[6%] sm:left-[64%] leading-snug text-foreground shadow-[0_12px_30px_-14px_rgb(20_43_53/0.4)] sm:max-w-[220px] sm:px-3.5 sm:py-2.5 sm:text-sm", shown && "opacity-0")}>
+      <p className="hero-greeting absolute top-[2%] left-[60%] w-max max-w-[150px] rounded-2xl rounded-bl-sm border border-border bg-popover px-3 py-2 text-left text-[11px] leading-snug text-foreground shadow-[0_12px_30px_-14px_rgb(20_43_53/0.4)] sm:top-[6%] sm:left-[64%] sm:max-w-[220px] sm:px-3.5 sm:py-2.5 sm:text-sm">
         <strong className="font-semibold">{t.zel.hello}</strong>
         <br />
         {t.zel.helloLine}
@@ -114,7 +78,7 @@ export function Hero({ reduced }: { reduced: boolean }) {
         <a className={cn(buttonVariants({ variant: "cta", size: "cta" }))} href="#piezas">
           <Sparkles aria-hidden="true" /> {t.hero.primary}
         </a>
-        <a className="inline-flex items-center gap-2 text-sm text-muted-foreground decoration-brass underline-offset-[6px] hover:text-foreground hover:underline" href="#proyecto">
+        <a className="inline-flex items-center gap-2 text-sm text-muted-foreground decoration-brass underline-offset-[6px] hover:text-foreground hover:underline" href="#funciones">
           {t.hero.secondary} <ArrowDown aria-hidden="true" className="size-4" />
         </a>
       </div>

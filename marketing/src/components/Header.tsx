@@ -20,7 +20,7 @@ export function Header() {
   // The section in view gets the mosaic strip under its link.
   const [current, setCurrent] = useState<string>();
   useEffect(() => {
-    const ids = ["piezas", "ramas", "proyecto"];
+    const ids = ["piezas", "funciones", "contacto"];
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) setCurrent(`#${entry.target.id}`);
@@ -35,8 +35,8 @@ export function Header() {
   }, []);
   const links = [
     ["#piezas", t.header.links.idea],
-    ["#ramas", t.header.links.branches],
-    ["#proyecto", t.header.links.project],
+    ["#funciones", t.header.links.features],
+    ["#contacto", t.header.links.contact],
   ];
   return (
     <header className={cn("fixed inset-x-0 top-0 z-10 flex items-center gap-4 px-[22px] py-3 transition-[background-color,border-color] duration-300 sm:gap-8 sm:px-[30px] sm:py-4", heroMark ? "border-b border-transparent" : "border-b border-border/70 bg-background/85 backdrop-blur-md")}>

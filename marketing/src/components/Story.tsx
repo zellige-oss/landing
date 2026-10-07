@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
@@ -53,6 +53,12 @@ export function Story({ reduced }: { reduced: boolean }) {
   const [startled, setStartled] = useState(false);
   const wasFound = useRef(false);
   const calm = useRef<number>(undefined);
+  // The story plays once. After the reader has seen the whole tile and scrolled on
+  // past it, it settles into a still summary (every step, the whole tile, every
+  // label), so coming back up never replays it.
+  const [settled, setSettled] = useState(false);
+  const seenEnd = useRef(false);
+  const collapsedFrom = useRef(0);
   // With reduced motion the tile simply stays assembled and the steps read as a list.
   useScrollProgress(track, "through", (t) => {
     const node = section.current;
@@ -61,6 +67,7 @@ export function Story({ reduced }: { reduced: boolean }) {
     setProgress(node, "--p3", clamp((t - (2 * SHARE - 0.08)) / 0.08).toFixed(3));
     const step = stepAt(t);
     setActive(step);
+    if (step === steps.length - 1) seenEnd.current = true;
     setAtStart(t < 0.06);
     const isFound = step >= FOUND;
     if (isFound !== wasFound.current) {
@@ -69,10 +76,32 @@ export function Story({ reduced }: { reduced: boolean }) {
       setStartled(isFound);
       if (isFound) calm.current = window.setTimeout(() => setStartled(false), 1300);
     }
-  }, !reduced);
+  }, !reduced && !settled);
   useEffect(() => () => window.clearTimeout(calm.current), []);
-  // The story only runs with motion allowed; otherwise (and before hydration) it is a plain list.
-  const live = !reduced;
+  useEffect(() => {
+    const node = section.current;
+    if (reduced || settled || !node) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      // Settle only once the whole section is above the screen, so the change in
+      // height happens out of sight.
+      if (entry.isIntersecting || entry.boundingClientRect.bottom > 0 || !seenEnd.current) return;
+      collapsedFrom.current = track.current?.offsetHeight ?? 0;
+      setSettled(true);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [reduced, settled]);
+  // The section got shorter above the screen: scroll up by as much, so what the
+  // reader is looking at stays exactly where it was.
+  useLayoutEffect(() => {
+    if (!settled || !collapsedFrom.current) return;
+    const delta = collapsedFrom.current - (track.current?.offsetHeight ?? 0);
+    collapsedFrom.current = 0;
+    if (delta > 0) scrollBy({ top: -delta, behavior: "instant" });
+  }, [settled]);
+  // The story only runs with motion allowed, and only until it has settled; otherwise
+  // (and before hydration) it is a plain list next to the whole tile.
+  const live = !reduced && !settled;
   const stage = live ? active ?? 0 : null;
   const focus = live && active !== undefined ? steps[active].layer : undefined;
   const found = !live || (stage ?? 0) >= FOUND;
@@ -95,7 +124,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   return (
     <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
       <div className={cn(gutter, "pt-20 pb-4 lg:pb-8")}>
-        <p className="eyebrow"><span className="section-number">01</span> {t.story.eyebrow}</p>
+        <p className="eyebrow">{t.header.links.idea}</p>
         <h2 id="piezas-title" className="mt-4 text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
           {t.story.headline.lead}<br /><em className="text-accent">{t.story.headline.turn}</em>
         </h2>
