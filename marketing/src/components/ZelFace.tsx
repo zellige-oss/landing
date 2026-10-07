@@ -26,11 +26,54 @@ function Arc({ x, up = true }: { x: number; up?: boolean }) {
   return <path d={d} fill="none" stroke="#f8f6ef" strokeWidth="24" strokeLinecap="round" />;
 }
 
-function Open({ x, squint = false, wide = false }: { x: number; squint?: boolean; wide?: boolean }) {
+/*
+ * An open eye under obsidian lids. Blinks and sleep lower the upper lid (and raise a
+ * short lower one) over the eye instead of squashing it; at rest the upper lid just
+ * shows along the top edge, with a rim of light and a soft shadow for relief. The
+ * lids are drawn open, so without CSS (the generated mood images) the eye is open.
+ * CSS moves them by the travel set for each eye height (.lid-13, .lid-40, ...).
+ */
+function Open({ x, rx = 30, ry = 40, squint = false }: { x: number; rx?: number; ry?: number; squint?: boolean }) {
+  const id = useId().replaceAll(":", "");
+  const h = squint ? 13 : ry, left = x - rx - 8, right = x + rx + 8, top = EYE_Y - h, bottom = EYE_Y + h;
   return (
     <g className="companion-eye">
-      <ellipse cx={x} cy={EYE_Y} rx={wide ? 38 : 30} ry={squint ? 13 : wide ? 54 : 40} fill="#f8f6ef" />
-      {!squint && <circle cx={x - 9} cy={EYE_Y - 14} r="8" fill="#0b1d29" opacity=".18" />}
+      <defs>
+        <clipPath id={`${id}-eye`}><ellipse cx={x} cy={EYE_Y} rx={rx} ry={h} /></clipPath>
+        {/* A little wider than the eye, so a shut lid also hides the eye's edge. */}
+        <clipPath id={`${id}-socket`}><ellipse cx={x} cy={EYE_Y} rx={rx + 3} ry={h + 3} /></clipPath>
+        {/* The face's own obsidian gradient, placed where the face draws it, so a
+            shut lid blends into the face and only its crease shows. */}
+        <radialGradient id={`${id}-lid`} gradientUnits="userSpaceOnUse" cx="574" cy="538" r="336">
+          <stop offset="0" stopColor="#1a2433" />
+          <stop offset=".55" stopColor="#05080d" />
+          <stop offset="1" stopColor="#000" />
+        </radialGradient>
+        <radialGradient id={`${id}-glaze`} cx="42%" cy="34%" r="70%">
+          <stop offset="0" stopColor="#fffdf8" />
+          <stop offset=".62" stopColor="#f3ecdd" />
+          <stop offset="1" stopColor="#d8ccb4" />
+        </radialGradient>
+        <filter id={`${id}-shade`} x="-20%" y="-20%" width="140%" height="160%">
+          <feDropShadow dx="0" dy={h * .08} stdDeviation={h * .07} floodColor="#000" floodOpacity=".55" />
+        </filter>
+      </defs>
+      {/* A glazed bead: lit from the top left, warmer towards the edge. */}
+      <ellipse cx={x} cy={EYE_Y} rx={rx} ry={h} fill={`url(#${id}-glaze)`} />
+      <g clipPath={`url(#${id}-socket)`}>
+        <g className={`companion-lid lid-${h}`} filter={`url(#${id}-shade)`}>
+          <path d={`M${left} ${top - 2 * h}H${right}V${top}Q${x} ${top + h * .12} ${left} ${top}Z`} fill={`url(#${id}-lid)`} />
+        </g>
+        <g className={`companion-lid-lower lid-${h}`}>
+          <path d={`M${left} ${bottom}Q${x} ${bottom - h * .12} ${right} ${bottom}V${bottom + h}H${left}Z`} fill={`url(#${id}-lid)`} />
+        </g>
+      </g>
+      {/* The lid's edge catches the light: the crease that stays when the eye shuts. */}
+      <g clipPath={`url(#${id}-eye)`}>
+        <g className={`companion-lid lid-${h}`}>
+          <path d={`M${left} ${top - 1.5}Q${x} ${top + h * .12 - 1.5} ${right} ${top - 1.5}`} fill="none" stroke="#4a6079" strokeOpacity=".9" strokeWidth="4.5" strokeLinecap="round" />
+        </g>
+      </g>
     </g>
   );
 }
@@ -51,7 +94,7 @@ export function Eyes({ mood }: { mood: Mood }) {
         </g>
       );
     case "surprised":
-      return <g className="companion-look"><Open x={EYE_L} wide /><Open x={EYE_R} wide /></g>;
+      return <g className="companion-look"><Open x={EYE_L} rx={38} ry={54} /><Open x={EYE_R} rx={38} ry={54} /></g>;
     case "focused":
       return <g className="companion-look"><Open x={EYE_L} squint /><Open x={EYE_R} squint /></g>;
     case "thinking":
@@ -65,7 +108,7 @@ export function Eyes({ mood }: { mood: Mood }) {
       return (
         <g className="companion-look">
           <Open x={EYE_L} />
-          <g transform={`rotate(-8 ${EYE_R} ${EYE_Y})`}><ellipse cx={EYE_R} cy={EYE_Y} rx="34" ry="46" fill="#f8f6ef" className="companion-eye" /></g>
+          <g transform={`rotate(-8 ${EYE_R} ${EYE_Y})`}><Open x={EYE_R} rx={34} ry={46} /></g>
         </g>
       );
     default:
