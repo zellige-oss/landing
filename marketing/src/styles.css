@@ -254,16 +254,21 @@
     scale: calc(1 + (var(--from) - 1) * (1 - var(--p)));
     opacity: var(--p);
   }
+  /* Story: only the layer being explained is named, next to it. */
   .tile-scroll .tile-label {
-    opacity: var(--p);
+    opacity: 0;
     translate: 0 calc((1 - var(--p)) * 12px);
+    transition: opacity 0.3s ease;
   }
-  /* The layer being explained glows; the rest of the emblem steps back. */
+  .tile-scroll.focus-crown .label-crown,
+  .tile-scroll.focus-cobalt .label-cobalt,
+  .tile-scroll.focus-points .label-points { opacity: var(--p); }
+  /* The layer being explained glows; the rest of the emblem steps back, keeping its
+     colour so it reads as placed and waiting, not missing. */
   .focus-crown .zel-layer:not(.layer-centre, .layer-crown),
   .focus-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
   .focus-points .zel-layer:not(.layer-centre, .layer-points) {
-    filter: saturate(0.25);
-    opacity: calc(var(--p) * 0.3);
+    opacity: calc(var(--p) * 0.45);
   }
   .focus-crown .layer-crown,
   .focus-cobalt .layer-cobalt,
@@ -412,6 +417,13 @@
     opacity: 0;
     animation: zel-ring 0.8s 0.5s ease-out;
   }
+}
+/* Story on phones: each step's card rises in as it becomes the current one. */
+@media (prefers-reduced-motion: no-preference) and (max-width: 1023px) {
+  .story-step[aria-current="step"] { animation: step-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+}
+@keyframes step-in {
+  from { opacity: 0; translate: 0 10px; }
 }
 @keyframes layer-in {
   from { scale: var(--from); opacity: 0; }
