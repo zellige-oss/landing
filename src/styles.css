@@ -233,6 +233,12 @@
   .tile-scroll.show-cobalt .layer-cobalt,
   .tile-scroll.show-points .layer-points,
   .tile-scroll.show-all .zel-layer:not(.layer-centre) { opacity: 1; scale: 1; }
+  /* A layer on its own is its joined piece (Companion.tsx); the whole tile is made of
+     the emblem's own pieces, so the joined one gives way to them as it lands. */
+  .zel-layer .zel-piece > img:is(.zel-split, .zel-joined) { transition: scale 0.6s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.4s ease; }
+  .zel-joined { opacity: 0; }
+  .tile-scroll:not(.show-all) .zel-joined { opacity: 1; }
+  .tile-scroll:not(.show-all) .zel-split { opacity: 0; }
   /* The assembled emblem keeps its drawn rims: it covers the layers once they have
      all landed, and gives way to them as soon as one moves. */
   .zel-whole { transition: opacity 0.3s ease; }

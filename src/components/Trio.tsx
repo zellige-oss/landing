@@ -12,7 +12,9 @@ import glyphPoints from "@/assets/glyph-points.webp";
  *   crown  (ivory kites, closest to Zel)  → chat
  *   cobalt (blue corner squares)          → the harness manager, for building software
  *   points (outer green points)           → the personal agent
- * The scroll story shows one layer around Zel at a time, then all of them. Motion is
+ * The scroll story shows one layer around Zel at a time, then all of them. A layer
+ * the emblem splits into four shows on its own as one joined piece, and splits into
+ * the emblem's pieces once the tile is whole. Motion is
  * CSS only; without JS or with reduced motion, the emblem is simply whole.
  */
 export type Piece = Exclude<Layer, "centre">;
@@ -20,8 +22,8 @@ export const pieces: Piece[] = ["crown", "cobalt", "points"];
 
 /** One layer of the emblem, small, to name it in labels and lists. */
 export function LayerGlyph({ layer, className }: { layer: Piece; className?: string }) {
-  const { src } = layers.find(({ name }) => name === layer)!;
-  return <img src={src} alt="" width="960" height="960" className={cn("size-5 shrink-0", className)} draggable={false} />;
+  const { src, joined } = layers.find(({ name }) => name === layer)!;
+  return <img src={joined ?? src} alt="" width="960" height="960" className={cn("size-5 shrink-0", className)} draggable={false} />;
 }
 
 const glyphs: Record<Piece, string> = { crown: glyphCrown, cobalt: glyphCobalt, points: glyphPoints };
@@ -82,7 +84,7 @@ export function Trio({
       onPointerLeave={() => setHover(undefined)}
       onClick={(event) => { const piece = pieceAt(event); if (piece) onPick?.(piece); }}
     >
-      <Companion mood={mood} follow alt={t.zel.alt} shadow="tile" className="size-full" />
+      <Companion mood={mood} follow joined alt={t.zel.alt} shadow="tile" className="size-full" />
     </div>
   );
 }
