@@ -4,6 +4,7 @@ import layerCentre from "@/assets/layer-centre.webp";
 import layerCobalt from "@/assets/layer-cobalt.webp";
 import layerCrown from "@/assets/layer-crown.webp";
 import layerPoints from "@/assets/layer-points.webp";
+import layerWhole from "@/assets/layer-whole.webp";
 
 import { ZelFace, type Mood } from "./ZelFace";
 
@@ -12,7 +13,9 @@ export type { Mood };
 /*
  * Zel is the standard emblem itself, with an obsidian face on its centre star.
  * The body is the emblem's four colour layers (scripts/build-layers.mjs), stacked
- * so they can also be shown one by one; the face is SVG, so Zel can change
+ * so they can also be shown one by one; each is a whole tile with its own rim, and
+ * the assembled emblem, with its drawn rims, covers them while they rest in place
+ * (.zel-whole in styles.css). The face is SVG, so Zel can change
  * expression, blink and look around (ZelFace.tsx).
  * Positions are set only through CSS custom properties from JS, never inline
  * style attributes, to stay within the landing's CSP.
@@ -59,6 +62,7 @@ export function Companion({
         {layers.map(({ name, src }) => (
           <img key={name} src={src} width="960" height="960" alt="" draggable={false} className={`zel-layer layer-${name} absolute inset-0 size-full`} />
         ))}
+        <img src={layerWhole} width="960" height="960" alt="" draggable={false} className="zel-whole absolute inset-0 size-full" />
       </div>
       <svg viewBox="0 0 1254 1254" className="zel-face-layer absolute inset-0 size-full" aria-hidden="true">
         <ZelFace mood={mood} />

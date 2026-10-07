@@ -11,6 +11,7 @@ import { copyFile, access } from 'node:fs/promises';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
 import { distanceTo, grow } from './mask.mjs';
+import { RIM, rimColour, rimProfiles } from './rim.mjs';
 
 const emblem = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
 const original = fileURLToPath(new URL('../../docs/design/proposals/zellige-emblem-original.png', import.meta.url));
@@ -124,22 +125,7 @@ for (const [fx, fy] of [[0.28, 0.31], [0.72, 0.31], [0.28, 0.72], [0.72, 0.72]])
 // only the outer sides get a rim; the inner sides already meet their neighbours' rims.
 const dist = distanceTo(data.filter((_, i) => i % 4 === 3).map((alpha) => (alpha < 40 ? 1 : 0)), W, H);
 
-// Rim cross-sections from the emblem's own rims, outer edge first, one per facing.
-const RIM = 16;
-const section = (x, y, dx, dy) => Array.from({ length: RIM }, (_, i) => {
-  const k = ((y + dy * i) * W + x + dx * i) * 4;
-  return [data[k], data[k + 1], data[k + 2]];
-});
-const profiles = {
-  left: section(454, 400, 1, 0), // the top point's left side
-  right: section(797, 400, -1, 0), // the top point's right side
-  top: section(330, 481, 0, 1), // the upper-left kite's top side
-  bottom: section(330, 803, 0, -1), // the lower-left kite's bottom side
-};
-const at = (profile, t, c) => {
-  const i = Math.min(RIM - 1, Math.floor(t)), f = Math.min(1, t - i);
-  return profile[i][c] * (1 - f) + profile[Math.min(RIM - 1, i + 1)][c] * f;
-};
+const profiles = rimProfiles(data, W);
 // Steps from (x, y) to the background along (dx, dy), capped past the rim's width.
 const run = (x, y, dx, dy) => {
   let s = 1;
@@ -170,12 +156,7 @@ for (let k = 0; k < N; k += 1) {
     t = Math.min(tx, ty);
     weights = { [tx < ty ? sideX : sideY]: 1 };
   }
-  const total = Object.values(weights).reduce((a, b) => a + b, 0);
-  for (let c = 0; c < 3; c += 1) {
-    let v = 0;
-    for (const [side, w] of Object.entries(weights)) v += at(profiles[side], Math.max(0, t), c) * w;
-    fixed[k * 4 + c] = Math.round(v / total);
-  }
+  fixed.set(rimColour(profiles, Math.max(0, t), weights), k * 4);
   rimmed += 1;
 }
 console.log(`Gilded ${rimmed} px of rim on the four cobalt squares`);

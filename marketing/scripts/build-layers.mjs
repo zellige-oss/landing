@@ -11,6 +11,7 @@
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
 import { distanceTo, grow } from './mask.mjs';
+import { RIM, facing, rimColour, rimProfiles } from './rim.mjs';
 
 const source = fileURLToPath(new URL('../../brand/zellige-emblem.png', import.meta.url));
 const out = (name) => fileURLToPath(new URL(`../src/assets/layer-${name}.webp`, import.meta.url));
@@ -80,18 +81,17 @@ for (let k = 0; k < N; k += 1) {
 }
 
 // Between two pieces runs one shared rim (glaze, dark line, gold, dark line, glaze),
-// so no single cut can be clean. Instead each piece takes the whole rim around it,
-// like a real tile: a band of RIM px around its glaze, closed over crackle notches,
-// with straight sides, rounded corners and an antialiased edge. Neighbouring bands
-// overlap on identical pixels, so the stacked layers still rebuild the emblem; the
-// few pixels beyond every band (where several rims meet) go to the nearest piece.
-const RIM = 15;
+// and rims differ in width, so no cut of the drawn rims makes clean pieces. Each
+// layer keeps its pieces' glaze and paints them a new rim instead, with the emblem's
+// own cross-section, all around: separated, every piece is a whole, even tile. The
+// assembled emblem is shown from layer-whole.webp, so it keeps the drawn rims.
 const STACK = [4, 3, 2, 1]; // bottom to top, as Companion.tsx stacks the layers
-// Every piece but the centre star is convex, so its band is measured from the convex
-// hull of its glaze: straight sides and closed corners, whatever the glaze's edge.
+// Every piece but the centre star is convex, so its rim follows the convex hull of
+// its glaze, simplified to straight sides: clean edges whatever the glaze's outline.
 function hulls(glaze) {
   const filled = new Uint8Array(N);
   const seen = new Uint8Array(N);
+  const polygons = [];
   for (let seed = 0; seed < N; seed += 1) {
     if (!glaze[seed] || seen[seed]) continue;
     // One piece: its leftmost and rightmost pixel on each row.
@@ -119,9 +119,10 @@ function hulls(glaze) {
       }
       return chain.slice(0, -1);
     };
-    const hull = half(points).concat(half([...points].reverse()));
+    const hull = simplify(half(points).concat(half([...points].reverse())));
+    polygons.push(hull);
     const ys = hull.map(([, y]) => y);
-    for (let y = Math.min(...ys); y <= Math.max(...ys); y += 1) {
+    for (let y = Math.ceil(Math.min(...ys)); y <= Math.max(...ys); y += 1) {
       let from = Infinity, to = -Infinity;
       for (let i = 0; i < hull.length; i += 1) {
         const [ax, ay] = hull[i], [bx, by] = hull[(i + 1) % hull.length];
@@ -132,24 +133,102 @@ function hulls(glaze) {
       for (let x = Math.ceil(from); x <= Math.floor(to); x += 1) filled[y * W + x] = 1;
     }
   }
-  return filled;
+  return { filled, polygons };
+}
+// Reduces a hull to one vertex per real corner: drops vertices that barely turn
+// (under 10°), then squares off the short sides that the glaze's rounded corners
+// leave, by extending the sides on either side of them until they meet.
+function simplify(polygon) {
+  const result = [...polygon];
+  const turn = (i) => {
+    const [ax, ay] = result.at(i - 1), [px, py] = result[i], [bx, by] = result[(i + 1) % result.length];
+    const a1 = Math.atan2(py - ay, px - ax), a2 = Math.atan2(by - py, bx - px);
+    return Math.abs(Math.atan2(Math.sin(a2 - a1), Math.cos(a2 - a1)));
+  };
+  for (let i = 0; i < result.length && result.length > 3;) {
+    if (turn(i) < (10 * Math.PI) / 180) result.splice(i, 1);
+    else i += 1;
+  }
+  for (let changed = true; changed && result.length > 3;) {
+    changed = false;
+    for (let i = 0; i < result.length; i += 1) {
+      const j = (i + 1) % result.length;
+      const [ax, ay] = result[i], [bx, by] = result[j];
+      if (Math.hypot(bx - ax, by - ay) >= 26) continue;
+      // Lines through the sides before i and after j.
+      const [px, py] = result.at(i - 1), [qx, qy] = result[(j + 1) % result.length];
+      const d1 = [ax - px, ay - py], d2 = [qx - bx, qy - by];
+      const det = d1[0] * d2[1] - d1[1] * d2[0];
+      if (Math.abs(det) < 1e-9) continue;
+      const t = ((bx - px) * d2[1] - (by - py) * d2[0]) / det;
+      const corner = [px + d1[0] * t, py + d1[1] * t];
+      if (Math.hypot(corner[0] - (ax + bx) / 2, corner[1] - (ay + by) / 2) > 25) continue;
+      if (j > i) result.splice(i, 2, corner);
+      else { result.splice(i, 1, corner); result.shift(); }
+      changed = true;
+      break;
+    }
+  }
+  return result;
+}
+// Distance out from convex polygons with mitred corners: the largest distance past
+// any side's line, so corners stay sharp, but never under the true distance / MITER,
+// which blunts the ivory kites' acute tips instead of drawing long spikes.
+const MITER = 1.6;
+function mitred(polygons, euclidean) {
+  const field = Float64Array.from(euclidean, (d) => d / MITER);
+  for (const polygon of polygons) {
+    const area = polygon.reduce((sum, [ax, ay], i) => { const [bx, by] = polygon[(i + 1) % polygon.length]; return sum + ax * by - bx * ay; }, 0);
+    const sides = polygon.map(([ax, ay], i) => {
+      const [bx, by] = polygon[(i + 1) % polygon.length];
+      const length = Math.hypot(bx - ax, by - ay), sign = area > 0 ? 1 : -1;
+      return [ax, ay, (sign * (by - ay)) / length, (sign * (ax - bx)) / length];
+    });
+    const xs = polygon.map(([x]) => x), ys = polygon.map(([, y]) => y);
+    const reach = RIM * MITER + 2;
+    for (let y = Math.max(0, Math.floor(Math.min(...ys) - reach)); y <= Math.min(H - 1, Math.max(...ys) + reach); y += 1) {
+      for (let x = Math.max(0, Math.floor(Math.min(...xs) - reach)); x <= Math.min(W - 1, Math.max(...xs) + reach); x += 1) {
+        const k = y * W + x;
+        if (!euclidean[k] || euclidean[k] > reach) continue;
+        let out = -Infinity;
+        for (const [ax, ay, nx, ny] of sides) out = Math.max(out, (x - ax) * nx + (y - ay) * ny);
+        field[k] = Math.max(field[k], Math.min(out, euclidean[k]));
+      }
+    }
+  }
+  return field;
+}
+// Fills the holes left in a mask by crackle nodes, so no rim is drawn around them.
+function fillHoles(mask) {
+  const outside = new Uint8Array(N);
+  const stack = [0];
+  while (stack.length) {
+    const k = stack.pop();
+    if (outside[k] || mask[k]) continue;
+    outside[k] = 1;
+    const x = k % W;
+    if (x > 0) stack.push(k - 1);
+    if (x < W - 1) stack.push(k + 1);
+    if (k >= W) stack.push(k - W);
+    if (k < N - W) stack.push(k + W);
+  }
+  return outside.map((value) => 1 - value);
 }
 const fields = {};
 for (const id of STACK) {
   const glaze = layer.map((value) => (value === id ? 1 : 0));
-  const closed = grow(grow(glaze, W, H, 3).map((value) => 1 - value), W, H, 3).map((value) => 1 - value);
-  fields[id] = distanceTo(id === 1 ? closed : hulls(closed), W, H);
-}
-const coverage = Object.fromEntries(STACK.map((id) => [id, new Float32Array(N)]));
-for (let k = 0; k < N; k += 1) {
-  if (!data[k * 4 + 3]) continue;
-  let near = STACK[0];
-  for (const id of STACK) {
-    if (fields[id][k] < fields[near][k]) near = id;
-    coverage[id][k] = Math.min(1, Math.max(0, RIM + 0.5 - fields[id][k]));
+  const closed = fillHoles(grow(grow(glaze, W, H, 3).map((value) => 1 - value), W, H, 3).map((value) => 1 - value));
+  if (id === 1) {
+    fields[id] = distanceTo(closed, W, H);
+    continue;
   }
-  coverage[near][k] = 1;
-  if (kind[k] === 9 || !kind[k]) layer[k] = near;
+  const { filled, polygons } = hulls(closed);
+  fields[id] = mitred(polygons, distanceTo(filled, W, H));
+}
+// Crackle lines inside a piece belong to it.
+for (let k = 0; k < N; k += 1) {
+  if (kind[k] !== 9) continue;
+  for (const id of STACK) if (!fields[id][k]) layer[k] = id;
 }
 
 // Crackle lines: thin gold runs with the same glaze on both sides. Paint them with
@@ -172,17 +251,33 @@ for (let k = 0; k < N; k += 1) {
   }
 }
 
-const names = { 1: 'centre', 2: 'crown', 3: 'cobalt', 4: 'points' };
-for (const [id, name] of Object.entries(names)) {
-  const cut = Buffer.alloc(N * 4);
-  for (let k = 0; k < N; k += 1) {
-    if (!coverage[id][k]) continue;
-    cut.set(pixels.subarray(k * 4, k * 4 + 3), k * 4);
-    cut[k * 4 + 3] = Math.round(pixels[k * 4 + 3] * coverage[id][k]);
-  }
-  const meta = await sharp(cut, { raw: { width: W, height: H, channels: 4 } })
+const save = async (name, raw) => {
+  const meta = await sharp(raw, { raw: { width: W, height: H, channels: 4 } })
     .resize(SIZE, SIZE)
     .webp({ quality: 88, alphaQuality: 92 })
     .toFile(out(name));
   console.log(`${name}: ${meta.size} bytes`);
+};
+await save('whole', pixels);
+
+// Each layer: its pieces' glaze, then the new rim out to RIM px with an antialiased
+// edge, shaded by the facing of the outward normal (the distance field's gradient).
+const profiles = rimProfiles(data, W);
+const names = { 1: 'centre', 2: 'crown', 3: 'cobalt', 4: 'points' };
+for (const [id, name] of Object.entries(names)) {
+  const d = fields[id];
+  const cut = Buffer.alloc(N * 4);
+  for (let k = 0; k < N; k += 1) {
+    if (!d[k]) {
+      cut.set(pixels.subarray(k * 4, k * 4 + 4), k * 4);
+      continue;
+    }
+    if (d[k] >= RIM + 0.5) continue;
+    const x = k % W, y = (k - x) / W;
+    const nx = d[y * W + Math.min(W - 1, x + 2)] - d[y * W + Math.max(0, x - 2)];
+    const ny = d[Math.min(H - 1, y + 2) * W + x] - d[Math.max(0, y - 2) * W + x];
+    cut.set(rimColour(profiles, Math.max(0, RIM - d[k]), nx || ny ? facing(nx, ny) : { top: 1 }), k * 4);
+    cut[k * 4 + 3] = Math.round(255 * Math.min(1, RIM + 0.5 - d[k]));
+  }
+  await save(name, cut);
 }
