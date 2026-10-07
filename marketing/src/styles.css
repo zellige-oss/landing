@@ -103,7 +103,6 @@
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --animate-arrive: arrive 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-rise: rise 1.1s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  --animate-float: float 6s ease-in-out infinite;
   --animate-twinkle: twinkle 2.6s ease-in-out infinite;
   --animate-pop: pop 0.6s 0.9s cubic-bezier(0.3, 1.5, 0.5, 1) both;
 }
@@ -113,9 +112,6 @@
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(40px) scale(0.97); }
-}
-@keyframes float {
-  50% { translate: 0 -10px; }
 }
 @keyframes wiggle {
   20% { rotate: -7deg; }
@@ -198,11 +194,6 @@
   .fragment {
     translate: 0 calc(var(--drift, 0) * 1px);
   }
-  /* Panorama: loose pieces converge into one continuous mosaic as it scrolls in. */
-  .mosaic-panorama {
-    --tile: 140px;
-    --period: 560px;
-  }
   /* Mosaic band: brass-edged, fading out at both ends so the page can breathe. */
   .mosaic-band {
     background-size: auto 280%;
@@ -210,28 +201,6 @@
     border-block: 2px solid var(--brand-gold);
     mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
     box-shadow: inset 0 6px 10px -6px rgb(0 0 0 / 0.35), inset 0 -6px 10px -6px rgb(0 0 0 / 0.35);
-  }
-  .mosaic-surface {
-    background-size: var(--period) var(--period);
-  }
-  .mosaic-surface.is-assembling {
-    @apply overflow-visible bg-surface;
-    background-image: url("./assets/lattice.svg");
-    background-size: 70px 70px;
-  }
-  .mosaic-piece {
-    --rest: calc(1 - var(--assembly, 0));
-    position: absolute;
-    height: var(--tile);
-    background: var(--ceramic-base) url("./assets/ceramic.webp") var(--bx) var(--by) / var(--period) var(--period);
-    transform: translate(calc(var(--dx) * var(--rest)), calc(var(--dy) * var(--rest))) rotate(calc(var(--r) * var(--rest)));
-    box-shadow: 4px 12px 22px color-mix(in srgb, #142b35 calc(var(--rest) * 40%), transparent);
-    will-change: transform;
-  }
-  .branch-tile {
-    fill: url(#ceramic);
-    stroke: var(--brass);
-    stroke-width: 1.5;
   }
   /* Mascot: leans toward the pointer, wiggles hello on hover. */
   .companion {
@@ -302,7 +271,6 @@
   .zel-shadow-hero { --shadow-y: 26px; --shadow-blur: 17px; --shadow-alpha: 0.3; }
   .zel-shadow-tile { --shadow-y: 22px; --shadow-blur: 14px; --shadow-alpha: 0.3; }
   .zel-shadow-footer { --shadow-y: 18px; --shadow-blur: 11px; --shadow-alpha: 0.35; }
-  .zel-shadow-guide { --shadow-y: 14px; --shadow-blur: 8px; --shadow-alpha: 0.35; }
   /* In the story the shadow belongs to the whole tile, so it waits for Zel. */
   .tile-scroll.zel-hiding .zel-shadow { opacity: 0; transition: opacity 0.3s ease; }
   .tile-scroll .zel-shadow { transition: opacity 0.6s 0.9s ease; }
@@ -340,29 +308,12 @@
     border-top: 1px solid var(--border);
     border-right: 1px solid var(--border);
   }
-  .progress-item::before {
-    content: "";
-    flex: 0 0 12px;
-    height: 12px;
-    rotate: 45deg;
-    border: 1px solid var(--night-gold);
-  }
-  .progress-item[data-done]::before {
-    background: var(--night-gold);
-  }
   [data-reveal] {
     transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
   [data-reveal].reveal-ready {
     opacity: 0;
     transform: translateY(22px);
-  }
-}
-
-@media (max-width: 700px) {
-  .mosaic-panorama {
-    --tile: 96px;
-    --period: 384px;
   }
 }
 

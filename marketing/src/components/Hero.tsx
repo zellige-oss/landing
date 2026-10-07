@@ -114,7 +114,7 @@ export function Hero({ reduced }: { reduced: boolean }) {
         <a className={cn(buttonVariants({ variant: "cta", size: "cta" }))} href="#piezas">
           <Sparkles aria-hidden="true" /> {t.hero.primary}
         </a>
-        <a className="inline-flex items-center gap-2 text-sm text-muted-foreground decoration-brass underline-offset-[6px] hover:text-foreground hover:underline" href="#proyecto">
+        <a className="inline-flex items-center gap-2 text-sm text-muted-foreground decoration-brass underline-offset-[6px] hover:text-foreground hover:underline" href="#funciones">
           {t.hero.secondary} <ArrowDown aria-hidden="true" className="size-4" />
         </a>
       </div>
