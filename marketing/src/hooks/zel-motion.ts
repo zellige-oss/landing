@@ -9,10 +9,16 @@ const hold = (t: number, a: number, b: number, c: number, d: number) => ramp(t, 
 
 // The greeting, t seconds after it starts. The eyes' part (widen, then turn into the
 // happy ∩ and back) is drawn by greetingEye in zel-eye-shapes.ts.
+// Overshoots to about 1.1 before settling at 1.
+const backOut = (n: number) => { const t = clamp(n) - 1; return 1 + t * t * (2.7 * t + 1.7); };
+
 function reaction(t: number) {
   return {
     anticipation: bump(t, 0, .2, .4),
     hop: bump(t, .22, .54, 1.06),
+    // How much of the spin is still to come: all of it as the greeting starts (the
+    // layer jumps back by its symmetry angle, which looks identical), none after.
+    unspun: t < 0 ? 0 : 1 - backOut((t - .16) / .55),
     spread: t > .26 && t < 1.66 ? Math.sin(Math.PI * (t - .26) / 1.4) : 0,
   };
 }
@@ -41,11 +47,14 @@ function wake(t: number) {
   };
 }
 
+// spin: Zel's signature, in the greeting each layer turns by its own symmetry (the
+// crown is eight-fold, the blue and the points four-fold) and clicks back into
+// place, alternating directions like a combination lock; the face stays upright.
 const pieces = [
-  { name: "points", delay: .1, spread: .03 },
-  { name: "cobalt", delay: .065, spread: .022 },
-  { name: "crown", delay: .035, spread: .013 },
-  { name: "centre", delay: 0, spread: 0 },
+  { name: "points", delay: .1, spread: .03, spin: 90 },
+  { name: "cobalt", delay: .065, spread: .022, spin: -90 },
+  { name: "crown", delay: .035, spread: .013, spin: 45 },
+  { name: "centre", delay: 0, spread: 0, spin: 0 },
 ];
 
 /** The approved motion study, with a quiet idle and a greeting on hover or tap.
@@ -150,7 +159,7 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           const pose = reaction(age - part.delay);
           // Eyes lead, then the centre, then the outer pieces. Tiles stay rigid.
           part.tilt += (gazeX * 3.2 - part.tilt) * (1 - Math.exp(-dt / (.13 + part.delay)));
-          const turn = part.tilt - pose.anticipation * 2.4 + pose.hop * 2;
+          const turn = part.tilt - pose.anticipation * 2.4 + pose.hop * 2 - part.spin * pose.unspun;
           // While waking, each layer follows the centre a little later than when awake.
           const w = awake ? null : wake(elapsed - part.delay * 2.5);
           const wakeTurn = w ? 6 * w.shake - 4 * w.nod : 0;

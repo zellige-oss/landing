@@ -297,7 +297,7 @@
   /* The pose belongs to an inner wrapper, posed by the hero's motion (zel-motion.ts).
      Assembly, hover and scroll keep their own outer transforms, and the face always
      shares the centre tile's pose. */
-  .zel-piece { transform-origin: center; }
+  .zel-piece { transform-origin: 49.8% 51.4%; } /* the emblem's centre */
   .zel-lively[data-zel-awake] .zel-whole { opacity: 0; }
   .zel-lively .companion-look { transition: none; }
   /* Hero: asleep until the motion opens the lids (it sets each lid's translate). */
@@ -419,6 +419,81 @@
 @keyframes zel-ripple {
   35% { scale: 1.045; }
   70% { scale: 0.99; }
+}
+/*
+ * Body language: each mood moves Zel's tiles, which no other mascot can do. Only
+ * the tiles' images move (Zel's own pose, the assembly and the scroll story use
+ * the wrappers around them), around the emblem's centre. While they move, the
+ * assembled emblem that covers resting layers steps aside.
+ *   thinking   the crown clicks round an eighth of a turn at a time, like a dial
+ *   curious    the outer layers lean, one after another, as if peering
+ *   excited    the layers bounce outward in a ripple
+ *   focused    the layers draw in tight
+ *   hello      the points give a quick wave
+ *   wink       the points flick a quarter turn now and then
+ *   content    the layers breathe, slowly
+ * Turns use each layer's symmetry (the crown has eight-fold, the blue and the points
+ * four-fold), so a layer always lands looking whole.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .zel-layer .zel-piece > img { transform-origin: 49.8% 51.4%; transition: scale 0.6s cubic-bezier(0.3, 1.4, 0.5, 1); }
+  :is(.zel-mood-thinking, .zel-mood-curious, .zel-mood-excited, .zel-mood-focused, .zel-mood-hello, .zel-mood-wink, .zel-mood-content):not(.zel-lively) .zel-whole { opacity: 0; }
+  .zel-mood-thinking .layer-crown .zel-piece > img { animation: zel-dial 9.6s cubic-bezier(0.5, 0, 0.3, 1.4) infinite; }
+  .zel-mood-curious .layer-points .zel-piece > img { animation: zel-peer 4.4s ease-in-out infinite; --lean: -6deg; }
+  .zel-mood-curious .layer-cobalt .zel-piece > img { animation: zel-peer 4.4s 0.12s ease-in-out infinite; --lean: -3.5deg; }
+  .zel-mood-curious .layer-crown .zel-piece > img { animation: zel-peer 4.4s 0.24s ease-in-out infinite; --lean: -1.5deg; }
+  .zel-mood-excited .layer-crown .zel-piece > img { animation: zel-bounce 1.5s ease-out infinite; --pop: 1.045; }
+  .zel-mood-excited .layer-cobalt .zel-piece > img { animation: zel-bounce 1.5s 0.09s ease-out infinite; --pop: 1.065; }
+  .zel-mood-excited .layer-points .zel-piece > img { animation: zel-bounce 1.5s 0.18s ease-out infinite; --pop: 1.085; }
+  .zel-mood-focused .layer-points .zel-piece > img { scale: 0.95; }
+  .zel-mood-focused .layer-cobalt .zel-piece > img { scale: 0.97; }
+  .zel-mood-focused .layer-crown .zel-piece > img { scale: 0.985; }
+  .zel-mood-hello .layer-points .zel-piece > img { animation: zel-wave 3.6s ease-in-out infinite; }
+  .zel-mood-wink .layer-points .zel-piece > img { animation: zel-flick 20s cubic-bezier(0.5, 0, 0.3, 1.5) infinite; }
+  .zel-mood-content .zel-layer:not(.layer-centre) .zel-piece > img { animation: zel-breathe 5.2s ease-in-out infinite; }
+  .zel-mood-content .layer-cobalt .zel-piece > img { animation-delay: 0.2s; }
+  .zel-mood-content .layer-points .zel-piece > img { animation-delay: 0.4s; }
+}
+/* Eight clicks of 45 degrees make a whole turn, so the loop has no jump. */
+@keyframes zel-dial {
+  0%, 8% { rotate: 0deg; }
+  12.5%, 20.5% { rotate: 45deg; }
+  25%, 33% { rotate: 90deg; }
+  37.5%, 45.5% { rotate: 135deg; }
+  50%, 58% { rotate: 180deg; }
+  62.5%, 70.5% { rotate: 225deg; }
+  75%, 83% { rotate: 270deg; }
+  87.5%, 95.5% { rotate: 315deg; }
+  100% { rotate: 360deg; }
+}
+@keyframes zel-peer {
+  0%, 15%, 100% { rotate: 0deg; }
+  35%, 65% { rotate: var(--lean); }
+  80% { rotate: calc(var(--lean) * -0.35); }
+}
+@keyframes zel-bounce {
+  0%, 55%, 100% { scale: 1; }
+  18% { scale: var(--pop); }
+  36% { scale: 0.99; }
+}
+@keyframes zel-wave {
+  0%, 52%, 100% { rotate: 0deg; }
+  60% { rotate: 7deg; }
+  70% { rotate: -6deg; }
+  80% { rotate: 4deg; }
+  90% { rotate: -1.5deg; }
+}
+/* Four quarter turns, one every five seconds: a whole turn, so the loop has no jump. */
+@keyframes zel-flick {
+  0%, 21% { rotate: 0deg; }
+  25%, 46% { rotate: 90deg; }
+  50%, 71% { rotate: 180deg; }
+  75%, 96% { rotate: 270deg; }
+  100% { rotate: 360deg; }
+}
+@keyframes zel-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.018; }
 }
 @keyframes zel-ring {
   from { opacity: 0.9; scale: 0.4; }

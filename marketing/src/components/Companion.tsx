@@ -17,7 +17,8 @@ export type { Mood };
  * so they can also be shown one by one; each is a whole tile with its own rim, and
  * the assembled emblem, with its drawn rims, covers them while they rest in place
  * (.zel-whole in styles.css). The face is SVG, so Zel can change
- * expression, blink and look around (ZelFace.tsx).
+ * expression, blink and look around (ZelFace.tsx); each mood also moves the tiles
+ * in its own way (.zel-mood-* in styles.css), so Zel speaks with its body too.
  * Positions are set from JS through the CSS object model, never inline style
  * attributes in the markup, to stay within the landing's CSP.
  */
@@ -64,7 +65,7 @@ export function Companion({
     return () => removeEventListener("pointermove", look);
   }, [follow, lively]);
   return (
-    <div ref={root} className={cn("relative", lively && "zel-lively", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
+    <div ref={root} className={cn("relative", `zel-mood-${mood}`, lively && "zel-lively", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
       {/* Square box holding the stacked emblem layers. */}
       <div className="relative aspect-square w-full">
         {layers.map(({ name, src }) => (
