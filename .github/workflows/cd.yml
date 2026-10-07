@@ -15,6 +15,7 @@ permissions:
 # older commit skips itself at the tip check below.
 concurrency:
   group: production
+  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -61,7 +62,7 @@ jobs:
           # The CLI output can include private project details, so it is not published.
           deployment_log="$(mktemp "${RUNNER_TEMP}/zellige-deploy.XXXXXX")"
           trap 'rm -f "$deployment_log"' EXIT
-          if ! npm exec --yes --package=vercel@62.2.0 -- vercel deploy --prebuilt --prod --yes --meta sourceSha="$APPROVED_SHA" --token="$VERCEL_TOKEN" >"$deployment_log" 2>&1; then
+          if ! npm exec --ignore-scripts --yes --package=vercel@62.2.0 -- vercel deploy --prebuilt --prod --yes --meta sourceSha="$APPROVED_SHA" --token="$VERCEL_TOKEN" >"$deployment_log" 2>&1; then
             echo "::error::Deployment failed. Check the Vercel dashboard; raw CLI output is not published."
             exit 1
           fi

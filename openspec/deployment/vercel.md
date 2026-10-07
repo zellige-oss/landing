@@ -19,8 +19,9 @@ Two workflows:
 - **`CD`** (`.github/workflows/cd.yml`) runs when `CI` succeeds on a push to
   `main`. It confirms that the commit is still the tip of `main` (a newer commit
   deploys itself), downloads the package that CI built and deploys it to
-  production. Deployments to `marketing-production` are queued without
-  interrupting a running publication.
+  production. Deployments to `marketing-production` are queued with `queue: max`
+  without interrupting a running publication or replacing a pending one when an
+  older CI completes later.
 
 ## Vercel and GitHub configuration
 
@@ -65,7 +66,7 @@ package without rebuilding.
 From the repository root, using Node.js 24:
 
 ```sh
-(cd marketing && npm ci && npm run build)
+(cd marketing && npm ci --ignore-scripts && npm run build)
 node --test tests/marketing.test.mjs tests/marketing-build.test.mjs
 node deploy/build-marketing.mjs
 ```
@@ -93,13 +94,14 @@ The deployment command runs from `.output/marketing` with the three settings
 already available in its environment:
 
 ```sh
-npm exec --yes --package=vercel@62.2.0 -- vercel deploy --prebuilt --prod --yes
+npm exec --ignore-scripts --yes --package=vercel@62.2.0 -- vercel deploy --prebuilt --prod --yes
 ```
 
 The CLI version is pinned, runs without a global installation, and waits for
-deployment completion. The workflow captures CLI output in a temporary runner
-file, deletes it on exit, and reports only success or failure. It does not
-publish raw logs or deployment URLs as Actions artifacts or step output.
+deployment completion. Both CI's `npm ci` and CD's `npm exec` use `--ignore-scripts`
+to disable dependency installation hooks. The workflow captures CLI output in a
+temporary runner file, deletes it on exit, and reports only success or failure.
+It does not publish raw logs or deployment URLs as Actions artifacts or step output.
 For failures, inspect the private provider dashboard and Actions settings.
 This avoids publishing deployment metadata, not discovery of the hosting
 provider through the public site's DNS or HTTP behavior. No

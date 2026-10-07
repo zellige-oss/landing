@@ -144,7 +144,15 @@ test('CI validates PRs and main; CD deploys the package of a passing main push',
   assert.match(ci, /run: node deploy\/sonar-quality-gate\.mjs/);
   assert.match(cd, /on:\n\s+workflow_run:\n\s+workflows: \[CI\]\n\s+types: \[completed\]\n\s+branches: \[main\]/);
   assert.match(cd, /if: github\.event\.workflow_run\.conclusion == 'success' && github\.event\.workflow_run\.event == 'push'/);
-  assert.match(cd, /cancel-in-progress: false/);
+  // Keep all pending publications: a late older CI must not cancel the newer CD.
+  assert.match(cd, /concurrency:\n\s+group: production\n\s+queue: max\n\s+cancel-in-progress: false/);
+  for (const workflow of [ci, cd]) {
+    const installations = [...workflow.matchAll(/\bnpm\s+(?:ci|exec)\b[^\n]*/g)];
+    assert.ok(installations.length > 0);
+    for (const [command] of installations) {
+      assert.match(command, /\s--ignore-scripts(?:\s|$)/, 'Dependency installation must not run lifecycle scripts');
+    }
+  }
   assert.match(cd, /if \[ "\$tip" = "\$APPROVED_SHA" \]/);
   assert.match(cd, /run-id: \$\{\{ github\.event\.workflow_run\.id \}\}/);
   assert.match(cd, /^\s+VERCEL_ORG_ID: \$\{\{ vars\.VERCEL_ORG_ID \}\}$/m);
