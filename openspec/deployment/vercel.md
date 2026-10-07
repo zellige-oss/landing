@@ -122,3 +122,11 @@ the configured credentials and end-to-end publication.
 - [Vercel CLI project and token environment variables](https://vercel.com/docs/cli/global-options)
 - [GitHub concurrency queue behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#concurrency)
 - [GitHub variables are not masked in logs](https://docs.github.com/en/actions/concepts/workflows-and-actions/variables)
+
+## Only CD deploys
+
+`vercel.json` at the repository root sets `git.deploymentEnabled: false`, so the
+Vercel GitHub integration creates no deployment on pushes or pull requests. Those
+deployments, even the ones Vercel marks as ignored, count towards the Hobby plan's
+100 deployments a day. Production is deployed only by CD (`cd.yml`), with the CLI,
+from the package CI built; the CLI does not read `vercel.json`.
