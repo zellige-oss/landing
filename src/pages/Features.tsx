@@ -56,7 +56,9 @@ export function Features() {
         <h3 className="font-serif text-[28px] leading-tight text-gold italic sm:text-[32px]">{t.features.api.title}</h3>
         <div className="grid gap-4 text-[15px] leading-[1.75] text-muted-foreground sm:text-base">
           {t.features.api.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-          <ProviderLogos label={t.features.api.providers} />
+          <h4 className="mt-4 font-serif text-[22px] text-gold italic sm:text-[24px]">{t.features.api.sub.title}</h4>
+          <p>{t.features.api.sub.body}</p>
+          <ProviderLogos label={t.features.api.providers} google={t.features.api.sub.google} />
           <p className="text-xs text-muted-foreground/80">{t.features.api.trademarks}</p>
         </div>
       </div>
