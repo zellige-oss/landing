@@ -3,21 +3,24 @@ import { ChevronDown } from "lucide-react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
 import type { Mood } from "@/components/Companion";
-import { LayerGlyph, Trio, type Piece } from "@/components/Trio";
+import { Trio, ZelGlyph, type Piece } from "@/components/Trio";
 import { Workings } from "@/components/Workings";
-import { zelMark } from "@/components/brand";
 import { useT } from "@/i18n";
 
+/** The stages of the story: one per layer, then the whole tile. */
 const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
   { layer: "crown", key: "crown", mood: "curious" },
   { layer: "cobalt", key: "cobalt", mood: "thinking" },
   { layer: "points", key: "points", mood: "excited" },
   { key: "tile", mood: "hello" },
 ];
+const parts = steps.filter((step): step is { layer: Piece; key: Piece; mood: Mood } => !!step.layer);
+const last = steps.length - 1;
 
-/** Each step takes a quarter of the story's scroll. */
-const SHARE = 1 / steps.length;
-const stepAt = (t: number) => Math.min(steps.length - 1, Math.floor(t / SHARE));
+/** Where each stage begins, as a share of the story's scroll. The whole tile comes
+ *  last and briefly, so "Por dentro" follows soon after it. */
+const STARTS = [0, 0.3, 0.6, 0.9];
+const stepAt = (t: number) => Math.max(0, STARTS.filter((start) => t >= start).length - 1);
 
 /*
  * Scroll story: Zel stays in the centre of the tile and each step shows one layer
@@ -36,7 +39,8 @@ export function Story({ reduced }: { reduced: boolean }) {
   // past it, it settles into a still summary (every step, the whole tile, every
   // label), so coming back up never replays it.
   const [settled, setSettled] = useState(false);
-  // The layer under the mouse on the tile: its step lights up and the rest step back.
+  // The layer under the mouse, on the tile or on its part in the text: the part
+  // lights up, the rest step back and the tile lifts that layer.
   const [pointed, setPointed] = useState<Piece>();
   const seenEnd = useRef(false);
   // What the reader is looking at when the story settles (the next section) and
@@ -46,7 +50,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   useScrollProgress(track, "through", (t) => {
     const step = stepAt(t);
     setActive(step);
-    if (step === steps.length - 1) seenEnd.current = true;
+    if (step === last) seenEnd.current = true;
     setAtStart(t < 0.06);
   }, !reduced && !settled);
   useEffect(() => {
@@ -84,15 +88,16 @@ export function Story({ reduced }: { reduced: boolean }) {
   const live = !reduced && !settled;
   const stage = live ? active ?? 0 : null;
   const show = live && active !== undefined ? steps[active].layer : undefined;
-  // The tile answers the mouse only when whole: at the last step, or once settled.
-  const lit = show ? undefined : pointed;
+  // The tile and its parts answer the mouse only when whole: at the end, or once settled.
+  const whole = !live || stage === last;
+  const lit = whole ? pointed : undefined;
   /** Scrolls to where a step has just begun. */
   function goTo(index: number) {
     const node = track.current;
     if (!node) return;
     const top = node.getBoundingClientRect().top + scrollY;
     const span = node.offsetHeight - innerHeight;
-    scrollTo({ top: top + (index ? index * SHARE + 0.02 : 0) * span, behavior: "smooth" });
+    scrollTo({ top: top + (index ? STARTS[index] + 0.02 : 0) * span, behavior: "smooth" });
   }
 
   const gutter = "px-6 sm:px-[clamp(24px,4.5vw,80px)] min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]";
@@ -113,13 +118,23 @@ export function Story({ reduced }: { reduced: boolean }) {
           <h2 id="piezas-title" className="text-[clamp(32px,8vw,44px)] leading-[1.02] lg:col-start-1 lg:row-start-1 lg:self-end lg:text-[clamp(44px,4.2vw,68px)]">
             {t.story.title}
           </h2>
-          <Trio
-            mood={steps[stage ?? steps.length - 1].mood}
-            show={show}
-            onPick={(piece) => { if (live) goTo(steps.findIndex((step) => step.layer === piece)); }}
-            onHover={setPointed}
-            className="mx-auto w-[min(62vw,32svh,300px)] sm:w-[min(62vw,38svh,380px)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:w-[min(84%,460px,60svh)]"
-          />
+          <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <Trio
+              mood={steps[stage ?? last].mood}
+              show={show}
+              lift={lit}
+              onPick={(piece) => { if (live) goTo(steps.findIndex((step) => step.layer === piece)); }}
+              onHover={setPointed}
+              className="mx-auto w-[min(62vw,32svh,300px)] sm:w-[min(62vw,38svh,380px)] lg:w-[min(84%,460px,60svh)]"
+            />
+            {/* The end of the story, under the whole tile rather than among its parts. */}
+            {whole && (
+              <p className="story-end mx-auto mt-4 max-w-[40ch] text-center text-[15px] leading-[1.6] text-muted-foreground sm:text-base">
+                <strong className="block text-lg font-semibold text-foreground sm:text-xl">{t.story.steps.tile.title}</strong>
+                {t.story.steps.tile.body}
+              </p>
+            )}
+          </div>
           <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
             {live && (
               <ol aria-label={t.story.progress} className="mb-4 flex items-center gap-2 max-lg:justify-center">
@@ -140,24 +155,27 @@ export function Story({ reduced }: { reduced: boolean }) {
               </ol>
             )}
             <ol className="grid gap-1">
-              {steps.map((step, index) => {
+              {parts.map((step, index) => {
                 const current = lit ? step.layer === lit : stage === index;
-                const quiet = lit ? !current : live && !current;
+                const quiet = lit ? !current : live && !current && !whole;
                 const copy = t.story.steps[step.key];
                 return (
                   <li
                     key={step.key}
                     aria-current={stage === index ? "step" : undefined}
-                    onClick={live && !current ? () => goTo(index) : undefined}
+                    onClick={live && !current && !whole ? () => goTo(index) : undefined}
+                    onPointerEnter={(event) => { if (event.pointerType === "mouse") setPointed(step.layer); }}
+                    onPointerLeave={() => setPointed(undefined)}
                     className={cn(
                       "story-step rounded-2xl border border-transparent p-4 transition-[opacity,background-color,border-color] duration-300 sm:p-5",
                       quiet && "opacity-40",
-                      live && !current && "cursor-pointer hover:opacity-80 max-lg:hidden",
+                      live && !current && !whole && "cursor-pointer hover:opacity-80",
+                      live && !current && "max-lg:hidden",
                       current && "border-brass/60 bg-popover/80 shadow-[0_14px_34px_-22px_rgb(20_43_53/0.45)]",
                     )}
                   >
                     <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-base sm:text-lg">
-                      {step.layer ? <LayerGlyph layer={step.layer} className="size-7" /> : <img src={zelMark} width="530" height="512" alt="" className="h-7 w-auto" />}
+                      <ZelGlyph layer={step.layer} className="size-8" />
                       <strong className="font-semibold">{copy.title}</strong>
                     </p>
                     <p className="mt-2 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base">{copy.body}</p>
@@ -165,8 +183,8 @@ export function Story({ reduced }: { reduced: boolean }) {
                 );
               })}
             </ol>
-            {/* With a mouse, the whole tile explains each layer on hover (Trio.tsx). */}
-            {(!live || stage === steps.length - 1) && (
+            {/* With a mouse, the whole tile and its parts point at each other. */}
+            {whole && (
               <p aria-hidden="true" className="mt-4 hidden text-sm text-muted-foreground lg:pointer-fine:block">{t.story.hover}</p>
             )}
             {live && (

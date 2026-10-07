@@ -6,6 +6,7 @@
 //   public/favicon.png           landing favicon, 64 px
 //   public/brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png   Zel + wordmark
 //   src/assets/zel-mark.webp     Zel for the header's logo, 512 px tall (it also flies there from the hero)
+//   src/assets/glyph-{crown,cobalt,points}.webp   each layer with Zel at its centre, 128 px
 // (The emblem layers come from build-layers.mjs, which `npm run brand` runs first.)
 import { mkdir, rm } from 'node:fs/promises';
 import sharp from 'sharp';
@@ -29,6 +30,18 @@ const zel = await sharp(path('../public/brand/zel/zel-look.png')).trim().toBuffe
 const zelRatio = zel.info.width / zel.info.height;
 // The header's logo is this same Zel next to the wordmark (Header.tsx).
 await sharp(zel.data).resize({ height: 512 }).webp({ quality: 88 }).toFile(path('../src/assets/zel-mark.webp'));
+// Each layer's glyph with Zel at its centre, for the story's steps and the server
+// diagram: Zel (look) cut to the centre layer's shape, over the layer.
+const centre = await sharp(path('../src/assets/layer-centre.webp')).resize(960, 960).ensureAlpha().png().toBuffer();
+const zelCentre = await sharp(path('../public/brand/zel/zel-look.png')).resize(960, 960)
+  .composite([{ input: centre, blend: 'dest-in' }]).png().toBuffer();
+for (const piece of ['crown', 'cobalt', 'points']) {
+  const glyph = await sharp(path(`../src/assets/layer-${piece}.webp`)).resize(960, 960)
+    .composite([{ input: zelCentre }]).png().toBuffer();
+  await sharp(glyph).trim().resize(128, 128, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .webp({ quality: 90 }).toFile(path(`../src/assets/glyph-${piece}.webp`));
+}
+console.log('glyph-crown.webp, glyph-cobalt.webp, glyph-points.webp');
 const WORD = { x: 0, y: 40, width: 1480, height: 730 };
 const lockups = {
   // Zel taller than the ascenders, centred a little above the x-height's middle.

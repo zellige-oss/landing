@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 import { Database, Globe, KeyRound, Lock, Monitor, Plug, Server, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
-import { zelMark } from "@/components/brand";
-import { LayerGlyph, pieces } from "@/components/Trio";
+import { ZelGlyph, pieces } from "@/components/Trio";
 
 const box = "rounded-2xl border border-border bg-popover/80 p-4 shadow-[0_14px_34px_-26px_rgb(20_43_53/0.45)]";
 /** A small square: an icon over its name. */
@@ -45,14 +44,11 @@ export function Workings({ className }: { className?: string }) {
         </Link>
         <div className={cn(box, "border-brass/60")}>
           <p className="flex items-center gap-2 text-sm font-semibold"><Server aria-hidden="true" strokeWidth={1.5} className="size-4 text-gold" />{w.server.title}</p>
-          <div className="mt-3 grid items-center gap-3 sm:grid-cols-[auto_1fr]">
-            <img src={zelMark} width="530" height="512" alt="" className="mx-auto h-11 w-auto sm:h-12" />
-            <ul className="grid grid-cols-3 gap-2">
-              {pieces.map((piece) => (
-                <li key={piece} className={tile}><LayerGlyph layer={piece} className="size-5" />{t.layers[piece].use}</li>
-              ))}
-            </ul>
-          </div>
+          <ul className="mt-3 grid grid-cols-3 gap-2">
+            {pieces.map((piece) => (
+              <li key={piece} className={tile}><ZelGlyph layer={piece} className="size-8" />{t.layers[piece].use}</li>
+            ))}
+          </ul>
           <p className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-3 py-2 text-[13px]"><Database aria-hidden="true" strokeWidth={1.5} className="size-4 text-gold" />{w.server.memory}</p>
         </div>
         <Link />
