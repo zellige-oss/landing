@@ -1,7 +1,11 @@
-// One-off correction of the standard emblem: its top point was glazed cobalt while
-// the other three points are teal, which breaks the emblem's four-fold symmetry.
-// Recolours that piece's glaze to match the teal points (per-channel colour
-// transfer, so its own shading and texture are kept); gold rims are untouched.
+// Corrections of the standard emblem, re-applied from the untouched original:
+// 1. Its top point was glazed cobalt while the other three points are teal, which
+//    breaks the emblem's four-fold symmetry. Recolours that piece's glaze to match
+//    the teal points (per-channel colour transfer, so its own shading and texture
+//    are kept); gold rims are untouched.
+// 2. The four cobalt corner squares had no gold rim on their outer sides, unlike
+//    every other piece. Frames those sides with a rim copied from the emblem's own
+//    rims (one cross-section per lighting direction, blended by the edge's facing).
 // The original is kept at docs/design/proposals/zellige-emblem-original.png.
 import { copyFile, access } from 'node:fs/promises';
 import sharp from 'sharp';
@@ -70,5 +74,152 @@ for (let k = 0; k < N; k += 1) {
     fixed[k * 4 + c] = Math.max(0, Math.min(255, Math.round(v)));
   }
 }
+
+// 2. Gold rims for the cobalt squares. Mask each square (cobalt connected to its
+// middle, bridging crackle lines), then fill crackle notches and holes.
+const fill = (seed, accept) => {
+  const mask = new Uint8Array(N);
+  const stack = [seed];
+  if (!accept(seed)) throw new Error(`Seed ${seed % W},${Math.floor(seed / W)} is not on its piece`);
+  while (stack.length) {
+    const k = stack.pop();
+    if (mask[k]) continue;
+    mask[k] = 1;
+    const x = k % W, y = (k - x) / W;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (let step = 1; step <= 5; step += 1) {
+        const nx = x + dx * step, ny = y + dy * step;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) break;
+        const n = ny * W + nx;
+        if (accept(n)) { if (!mask[n]) stack.push(n); break; }
+      }
+    }
+  }
+  return mask;
+};
+function grow(mask, radius) {
+  const reach = Uint8Array.from(mask);
+  let frontier = [];
+  for (let k = 0; k < N; k += 1) if (mask[k]) frontier.push(k);
+  for (let step = 0; step < radius; step += 1) {
+    const next = [];
+    for (const k of frontier) {
+      const x = k % W, y = (k - x) / W;
+      for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const n = ny * W + nx;
+        if (!reach[n]) { reach[n] = 1; next.push(n); }
+      }
+    }
+    frontier = next;
+  }
+  return reach;
+}
+const squares = new Uint8Array(N);
+for (const [fx, fy] of [[0.28, 0.31], [0.72, 0.31], [0.28, 0.72], [0.72, 0.72]]) {
+  const square = fill(Math.round(H * fy) * W + Math.round(W * fx), cobalt);
+  const closed = grow(grow(square, 4).map((v) => 1 - v), 4).map((v) => 1 - v);
+  for (let k = 0; k < N; k += 1) if (closed[k] || square[k]) squares[k] = 1;
+}
+{
+  const outside = new Uint8Array(N);
+  const stack = [0];
+  while (stack.length) {
+    const k = stack.pop();
+    if (outside[k] || squares[k]) continue;
+    outside[k] = 1;
+    const x = k % W, y = (k - x) / W;
+    if (x > 0) stack.push(k - 1);
+    if (x < W - 1) stack.push(k + 1);
+    if (y > 0) stack.push(k - W);
+    if (y < H - 1) stack.push(k + W);
+  }
+  for (let k = 0; k < N; k += 1) if (!outside[k]) squares[k] = 1;
+}
+
+// Euclidean distance to the transparent background (Felzenszwalb–Huttenlocher), so
+// only the outer sides get a rim; the inner sides already meet their neighbours' rims.
+const INF = 1e12;
+const dist = new Float64Array(N);
+for (let k = 0; k < N; k += 1) dist[k] = data[k * 4 + 3] < 40 ? 0 : INF;
+const edt1d = (get, set, n) => {
+  const f = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
+  for (let q = 0; q < n; q += 1) f[q] = get(q);
+  let j = 0;
+  v[0] = 0; z[0] = -Infinity; z[1] = Infinity;
+  for (let q = 1; q < n; q += 1) {
+    let s;
+    do {
+      const p = v[j];
+      s = ((f[q] + q * q) - (f[p] + p * p)) / (2 * q - 2 * p);
+    } while (s <= z[j] && --j >= 0);
+    j += 1; v[j] = q; z[j] = s; z[j + 1] = Infinity;
+  }
+  j = 0;
+  for (let q = 0; q < n; q += 1) {
+    while (z[j + 1] < q) j += 1;
+    set(q, (q - v[j]) ** 2 + f[v[j]]);
+  }
+};
+for (let x = 0; x < W; x += 1) edt1d((y) => dist[y * W + x], (y, d) => { dist[y * W + x] = d; }, H);
+for (let y = 0; y < H; y += 1) edt1d((x) => dist[y * W + x], (x, d) => { dist[y * W + x] = d; }, W);
+for (let k = 0; k < N; k += 1) dist[k] = Math.sqrt(dist[k]);
+
+// Rim cross-sections from the emblem's own rims, outer edge first, one per facing.
+const RIM = 16;
+const section = (x, y, dx, dy) => Array.from({ length: RIM }, (_, i) => {
+  const k = ((y + dy * i) * W + x + dx * i) * 4;
+  return [data[k], data[k + 1], data[k + 2]];
+});
+const profiles = {
+  left: section(454, 400, 1, 0), // the top point's left side
+  right: section(797, 400, -1, 0), // the top point's right side
+  top: section(330, 481, 0, 1), // the upper-left kite's top side
+  bottom: section(330, 803, 0, -1), // the lower-left kite's bottom side
+};
+const at = (profile, t, c) => {
+  const i = Math.min(RIM - 1, Math.floor(t)), f = Math.min(1, t - i);
+  return profile[i][c] * (1 - f) + profile[Math.min(RIM - 1, i + 1)][c] * f;
+};
+// Steps from (x, y) to the background along (dx, dy), capped past the rim's width.
+const run = (x, y, dx, dy) => {
+  let s = 1;
+  for (; s <= RIM + 1; s += 1) {
+    const px = x + dx * s, py = y + dy * s;
+    if (px < 0 || py < 0 || px >= W || py >= H || data[(py * W + px) * 4 + 3] < 40) break;
+  }
+  return s;
+};
+let rimmed = 0;
+for (let k = 0; k < N; k += 1) {
+  if (!squares[k] || data[k * 4 + 3] < 40) continue;
+  const x = k % W, y = (k - x) / W;
+  // Each square's outer sides face away from the centre. Measuring straight out to
+  // those sides only keeps the rim from wrapping into the gaps to its neighbours.
+  const sideX = x < W / 2 ? 'left' : 'right', sideY = y < H / 2 ? 'top' : 'bottom';
+  const tx = run(x, y, sideX === 'left' ? -1 : 1, 0) - 1, ty = run(x, y, 0, sideY === 'top' ? -1 : 1) - 1;
+  if (tx >= RIM && ty >= RIM) continue;
+  let t, weights;
+  if (tx < RIM && ty < RIM) {
+    // Outer corner: follow its rounded outline, down the distance field's gradient.
+    t = Math.min(RIM - 1, dist[k] - 1);
+    const nx = -(dist[y * W + Math.min(W - 1, x + 2)] - dist[y * W + Math.max(0, x - 2)]);
+    const ny = -(dist[Math.min(H - 1, y + 2) * W + x] - dist[Math.max(0, y - 2) * W + x]);
+    weights = { [sideX]: Math.abs(nx) ** 2, [sideY]: Math.abs(ny) ** 2 };
+    if (!nx && !ny) weights = { [sideY]: 1 };
+  } else {
+    t = Math.min(tx, ty);
+    weights = { [tx < ty ? sideX : sideY]: 1 };
+  }
+  const total = Object.values(weights).reduce((a, b) => a + b, 0);
+  for (let c = 0; c < 3; c += 1) {
+    let v = 0;
+    for (const [side, w] of Object.entries(weights)) v += at(profiles[side], Math.max(0, t), c) * w;
+    fixed[k * 4 + c] = Math.round(v / total);
+  }
+  rimmed += 1;
+}
+console.log(`Gilded ${rimmed} px of rim on the four cobalt squares`);
+
 await sharp(fixed, { raw: { width: W, height: H, channels: 4 } }).png().toFile(emblem);
 console.log(`Recoloured ${from.n} px of the top point to the teal of ${to.n} px; wrote ${emblem}`);
