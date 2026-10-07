@@ -43,7 +43,7 @@ test('content is prerendered, so it reads without JavaScript', () => {
   assert.match(html, /<h1[^>]*id="hero-title"[^>]*>\s*<img[^>]*alt="zellige"/);
   for (const id of ['inicio', 'piezas', 'funciones', 'contacto']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /pequeña piedra pulida/, 'The name is explained under the title');
-  assert.match(html, /Tu IA está repartida en mil apps\./);
+  assert.match(html, /Chat, desarrollo con agentes y agente personal,/);
 });
 
 test('landing links GitHub only for the project repository, never the pilot or development domain', () => {
@@ -192,6 +192,6 @@ test('each language has its own prerendered page, linked with hreflang', () => {
     titles.add(page.match(/<title>([^<]+)<\/title>/)?.[1]);
   }
   assert.equal(titles.size, 2, 'Titles are translated');
-  assert.match(pages.en, /Your AI is scattered across a dozen apps\./);
-  assert.doesNotMatch(pages.en, /Varias piedras|Mira cómo encaja|repartida/, 'No Spanish copy left on the English page');
+  assert.match(pages.en, /Chat, software development with agents and a personal agent,/);
+  assert.doesNotMatch(pages.en, /Cada capa|desarrollo con agentes|Del árabe/, 'No Spanish copy left on the English page');
 });
