@@ -17,14 +17,17 @@ const es = {
     links: { idea: "La idea", features: "Funciones", contact: "Contacto" },
     theme: "Cambiar entre modo claro y oscuro",
     themeTitle: "Modo claro / oscuro",
+    menu: "Menú",
+    repository: "Repositorio en GitHub",
   },
   hero: {
-    etymology: { from: "del árabe", source: "az-zellīj", meaning: "«pequeña piedra pulida»" },
+    origin: {
+      from: "Del árabe",
+      meaning: "«pequeña piedra pulida»",
+      body: "Un mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
+    },
     title: { lead: "Tu IA está repartida en mil apps.", turn: "Zellige la junta." },
-    body: "El chat de siempre, un meta-harness para desarrollar software con agentes y tu agente personal, encajados en un espacio abierto que guarda una sola historia: la tuya.",
     next: "Ir a la siguiente sección",
-    primary: "Mira cómo encaja",
-    secondary: "Lo que podrás hacer",
   },
   zel: {
     alt: "Zel, la mascota de Zellige",
@@ -106,14 +109,17 @@ const en = {
     links: { idea: "The idea", features: "Features", contact: "Contact" },
     theme: "Switch between light and dark mode",
     themeTitle: "Light / dark mode",
+    menu: "Menu",
+    repository: "Repository on GitHub",
   },
   hero: {
-    etymology: { from: "from Arabic", source: "az-zellīj", meaning: "“small polished stone”" },
+    origin: {
+      from: "From Arabic",
+      meaning: "“small polished stone”",
+      body: "A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
+    },
     title: { lead: "Your AI is scattered across a dozen apps.", turn: "Zellige brings it together." },
-    body: "The chat you know, a meta-harness for building software with agents and your personal agent, fitted into one open space that keeps a single story: yours.",
     next: "Go to the next section",
-    primary: "See how it fits",
-    secondary: "What you'll be able to do",
   },
   zel: {
     alt: "Zel, Zellige's mascot",
