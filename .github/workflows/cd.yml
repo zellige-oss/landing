@@ -11,8 +11,10 @@ permissions:
   contents: read
   actions: read
 
-# One deployment at a time; a running one is never interrupted. A queued one for an
-# older commit skips itself at the tip check below.
+# One deployment at a time; a running one is never interrupted. Each waits a minute
+# before its tip check below, so a burst of pushes to main (several PRs merged in a
+# row) deploys once, for the last of them: the older ones find a newer commit on
+# main and skip themselves.
 concurrency:
   group: production
   queue: max
@@ -28,6 +30,8 @@ jobs:
     env:
       APPROVED_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
+      - name: Wait a minute for newer commits on main
+        run: sleep 60
       - name: Skip commits that are no longer the tip of main
         id: tip
         env:

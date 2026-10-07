@@ -17,8 +17,9 @@ Two workflows:
   pushed revision. A failed gate, missing analysis, or unavailable Sonar service
   blocks deployment. Pull requests get SonarCloud's own check instead.
 - **`CD`** (`.github/workflows/cd.yml`) runs when `CI` succeeds on a push to
-  `main`. It confirms that the commit is still the tip of `main` (a newer commit
-  deploys itself), downloads the package that CI built and deploys it to
+  `main`. It waits a minute, then confirms that the commit is still the tip of
+  `main` (a newer commit deploys itself), so several PRs merged in a row deploy
+  once, for the last of them. It then downloads the package that CI built and deploys it to
   production. Deployments to `marketing-production` are queued with `queue: max`
   without interrupting a running publication or replacing a pending one when an
   older CI completes later.
