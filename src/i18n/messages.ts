@@ -6,9 +6,9 @@ export type FeatureIcon = "chat" | "harness" | "agent";
 
 const es = {
   meta: {
-    title: "Zellige — Cada idea encuentra su lugar",
+    title: "Zellige — Chat, harness y agente personal en tu servidor",
     description:
-      "Zellige. Un proyecto abierto para reunir conversaciones, herramientas y agentes en un espacio propio. Distintas piezas, una misma historia.",
+      "Zellige. Un proyecto abierto y autoalojado que junta el chat, el desarrollo con agentes y tu agente personal en tu propio servidor.",
   },
   skip: "Ir al contenido",
   header: {
@@ -41,7 +41,7 @@ const es = {
   },
   story: {
     hint: "Desliza para ver cada capa",
-    progress: "Pasos de la historia",
+    progress: "Pasos",
     goTo: "Ir al paso",
     title: "Cómo funciona",
     hover: "Pasa el ratón por el azulejo para ver cada capa.",
@@ -50,7 +50,7 @@ const es = {
       nodes: [
         ["Tus dispositivos", "Las apps de escritorio y de móvil, para todas las plataformas, y la web."],
         ["Tailscale", "Una red privada entre tus dispositivos y tu servidor, estés donde estés."],
-        ["Tu servidor", "Zellige: el chat, el gestor de harness y tu agente personal, con una sola historia que es tuya."],
+        ["Tu servidor", "Zellige: el chat, el gestor de harness y tu agente personal, compartiendo la misma memoria."],
         ["Los modelos", "Por API, con tus propias claves; o con tu suscripción, iniciando sesión con OAuth."],
       ] as [string, string][],
     },
@@ -84,9 +84,9 @@ const es = {
     together: {
       title: "Y las tres, juntas",
       items: [
-        ["Una sola historia", "El chat, el gestor de harness y tu agente parten de la misma historia, en lugar de empezar cada uno desde cero."],
-        ["En tu servidor", "Un proyecto abierto y autoalojado: tu historia se guarda en tu propio servidor, no en el de un proveedor."],
-        ["Cambia de modelo, no de historia", "Los modelos y las herramientas pueden cambiar sin llevarse por delante lo que has construido."],
+        ["Una sola memoria", "El chat, el gestor de harness y tu agente comparten lo que saben, en lugar de empezar cada uno desde cero."],
+        ["En tu servidor", "Un proyecto abierto y autoalojado: tus datos se guardan en tu propio servidor, no en el de un proveedor."],
+        ["Cambia de modelo sin perder nada", "Los modelos y las herramientas pueden cambiar sin llevarse por delante lo que has construido."],
       ] as [string, string][],
     },
     api: {
@@ -111,7 +111,7 @@ const es = {
     email: "Escríbenos",
   },
   footer: {
-    tagline: "Distintas piezas. Una misma historia.",
+    tagline: "Chat, harness y agente personal, en tu servidor.",
     top: "Volver arriba",
     home: "Zellige, volver al inicio",
     nav: "Enlaces del proyecto",
@@ -122,9 +122,9 @@ export type Messages = typeof es;
 
 const en = {
   meta: {
-    title: "Zellige — Every idea finds its place",
+    title: "Zellige — Chat, harness and personal agent on your server",
     description:
-      "Zellige. An open project that brings conversations, tools and agents together in a space of your own. Different pieces, one story.",
+      "Zellige. An open, self-hosted project that brings chat, software development with agents and your personal agent together on your own server.",
   },
   skip: "Skip to content",
   header: {
@@ -157,7 +157,7 @@ const en = {
   },
   story: {
     hint: "Scroll to see each layer",
-    progress: "Story steps",
+    progress: "Steps",
     goTo: "Go to step",
     title: "How it works",
     hover: "Point at the tile to see each layer.",
@@ -166,7 +166,7 @@ const en = {
       nodes: [
         ["Your devices", "The desktop and mobile apps, on every platform, and the web."],
         ["Tailscale", "A private network between your devices and your server, wherever you are."],
-        ["Your server", "Zellige: the chat, the harness manager and your personal agent, with one story that is yours."],
+        ["Your server", "Zellige: the chat, the harness manager and your personal agent, sharing one memory."],
         ["The models", "Through their APIs, with your own keys; or with your subscription, signing in with OAuth."],
       ] as [string, string][],
     },
@@ -199,9 +199,9 @@ const en = {
     together: {
       title: "And all three, together",
       items: [
-        ["One story", "The chat, the harness manager and your agent start from the same story, instead of each starting from scratch."],
-        ["On your server", "An open, self-hosted project: your story is kept on your own server, not a provider's."],
-        ["Change models, not your story", "Models and tools can change without taking what you've built with them."],
+        ["One memory", "The chat, the harness manager and your agent share what they know, instead of each starting from scratch."],
+        ["On your server", "An open, self-hosted project: your data is kept on your own server, not a provider's."],
+        ["Change models without losing anything", "Models and tools can change without taking what you've built with them."],
       ] as [string, string][],
     },
     api: {
@@ -226,7 +226,7 @@ const en = {
     email: "Write to us",
   },
   footer: {
-    tagline: "Different pieces. One story.",
+    tagline: "Chat, harness and personal agent, on your server.",
     top: "Back to top",
     home: "Zellige, back to top",
     nav: "Project links",
