@@ -18,7 +18,7 @@ import { Wordmark } from "./Wordmark";
 /** Which layer the pointer is over, from its position relative to the emblem centre. */
 function layerAt(x: number, y: number): Piece | undefined {
   const r = Math.hypot(x, y);
-  if (r < 0.2 || r > 0.98) return undefined; // Zel's face, or outside the emblem
+  if (r < 0.26 || r > 0.98) return undefined; // Zel's face (the centre star), or outside the emblem
   if (Math.abs(x) > 0.2 && Math.abs(y) > 0.2 && Math.abs(Math.abs(x) - Math.abs(y)) < 0.28) {
     return r < 0.4 ? "crown" : "cobalt"; // the diagonals: kites near the centre, corner squares beyond
   }
