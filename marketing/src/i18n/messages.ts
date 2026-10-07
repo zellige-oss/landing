@@ -30,7 +30,6 @@ const es = {
     alt: "Zel, la mascota de Zellige",
     hello: "¡Hola! Soy Zel.",
     helloLine: "Junto las piezas de tu IA en un solo sitio.",
-    bye: "¡Hasta pronto!",
   },
   layers: {
     crown: { name: "Corona", use: "Chat" },
@@ -90,6 +89,7 @@ const es = {
     tagline: "Distintas piezas. Una misma historia.",
     top: "Volver arriba",
     home: "Zellige, volver al inicio",
+    nav: "Enlaces del proyecto",
   },
 };
 
@@ -121,7 +121,6 @@ const en = {
     alt: "Zel, Zellige's mascot",
     hello: "Hi! I'm Zel.",
     helloLine: "I put the pieces of your AI in one place.",
-    bye: "See you soon!",
   },
   layers: {
     crown: { name: "Crown", use: "Chat" },
@@ -180,6 +179,7 @@ const en = {
     tagline: "Different pieces. One story.",
     top: "Back to top",
     home: "Zellige, back to top",
+    nav: "Project links",
   },
 } satisfies Messages;
 

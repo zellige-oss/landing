@@ -1,27 +1,29 @@
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, CodeXml, Mail } from "lucide-react";
+import { zelMark } from "./brand";
 import { Wordmark } from "./Wordmark";
-import { Companion } from "./Companion";
 import { useT } from "@/i18n";
+import { site } from "@/site";
 
+/** A quiet close: the logo, the tagline and the ways to reach the project, in one line. */
 export function Footer() {
   const t = useT();
+  const link = "inline-flex items-center gap-1.5 decoration-brass underline-offset-[6px] hover:text-foreground hover:underline";
   return (
-    <footer className="overflow-hidden px-6 pt-[46px] pb-6 sm:px-[clamp(24px,4.5vw,80px)] sm:pt-20 sm:pb-5">
-      <div className="mb-8 flex items-start justify-between gap-5 border-b border-border pb-6 sm:mb-[38px] sm:items-center">
-        <p className="max-w-[170px] text-xs leading-[1.6] text-muted-foreground sm:max-w-none sm:text-[13px]">{t.footer.tagline}</p>
-        <a className="inline-flex items-center gap-2.5 text-xs text-muted-foreground decoration-brass underline-offset-[6px] hover:underline sm:gap-5 sm:py-3 sm:text-[13px]" href="#inicio">
-          {t.footer.top} <ArrowUp aria-hidden="true" strokeWidth={1.3} className="size-[18px]" />
-        </a>
+    <footer className="px-6 pt-10 pb-8 sm:px-[clamp(24px,4.5vw,80px)] min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]">
+      <div className="flex flex-col gap-5 border-t border-border pt-6 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <a href="#inicio" aria-label={t.footer.home} className="inline-flex items-center gap-1">
+            <img src={zelMark} width="530" height="512" alt="" loading="lazy" className="h-6 w-auto" />
+            <Wordmark lazy className="h-8 w-auto" />
+          </a>
+          <span>{t.footer.tagline}</span>
+        </div>
+        <nav aria-label={t.footer.nav} className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <a className={link} href={site.repository} target="_blank" rel="noopener noreferrer"><CodeXml aria-hidden="true" strokeWidth={1.5} className="size-4" /> GitHub</a>
+          {site.email && <a className={link} href={`mailto:${site.email}`}><Mail aria-hidden="true" strokeWidth={1.5} className="size-4" /> {site.email}</a>}
+          <a className={link} href="#inicio">{t.footer.top} <ArrowUp aria-hidden="true" strokeWidth={1.5} className="size-4" /></a>
+        </nav>
       </div>
-      <a className="flex items-center justify-between gap-[4vw]" href="#inicio" aria-label={t.footer.home}>
-        <span className="w-[78%] max-w-[1200px]"><Wordmark lazy className="w-full drop-shadow-[0_18px_24px_#0f3b6e2e]" /></span>
-        <span className="relative w-[18vw] max-w-[220px] shrink-0 sm:w-[clamp(84px,15vw,220px)]">
-          <span className="absolute -top-[18%] right-[78%] hidden rounded-2xl rounded-br-sm border border-border bg-popover px-3.5 py-2 text-sm whitespace-nowrap text-foreground shadow-[0_12px_30px_-14px_rgb(20_43_53/0.4)] sm:block">
-            {t.zel.bye} <span className="text-muted-foreground">— Zel</span>
-          </span>
-          <Companion mood="wink" follow shadow="footer" className="w-full" />
-        </span>
-      </a>
     </footer>
   );
 }

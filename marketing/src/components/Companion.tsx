@@ -52,7 +52,7 @@ export function Companion({
   lively?: boolean;
   motionDelay?: number;
   /** A soft shadow under Zel, sized for where it sits (.zel-shadow-* in styles.css). */
-  shadow?: "hero" | "tile" | "footer";
+  shadow?: "hero" | "tile";
 }) {
   const root = useRef<HTMLDivElement>(null);
   useZelMotion(root, lively, motionDelay);
