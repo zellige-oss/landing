@@ -15,6 +15,20 @@ function reaction(t: number) {
   };
 }
 
+// Waking up, over the first WAKE seconds: the eyes crack open drowsily (looking down),
+// sag shut, try again, blink and open wide with a little overshoot, while the tiles
+// stretch apart as if Zel were waking from a nap. [seconds, eye openness]
+const WAKE = 2.3;
+const eyelids: [number, number][] = [[0, .09], [.25, .09], [.75, .4], [1.05, .2], [1.4, .62], [1.52, .1], [1.66, .1], [1.92, 1.08], [2.1, 1]];
+function wake(t: number) {
+  let open = 1;
+  for (let i = 1; i < eyelids.length; i += 1) {
+    const [a, from] = eyelids[i - 1], [b, to] = eyelids[i];
+    if (t < b) { open = from + (to - from) * ramp(t, a, b); break; }
+  }
+  return { open, drowsy: 1 - ramp(t, 1.1, 1.8), stretch: bump(t, .7, 1.3, 2.1) };
+}
+
 const pieces = [
   { name: "points", delay: .1, spread: .03 },
   { name: "cobalt", delay: .065, spread: .022 },
@@ -60,21 +74,23 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       if (elapsed >= 0) {
         node!.dataset.zelAwake = "";
         // One welcome after waking; later greetings respond to the reader.
-        if (!greeted && elapsed >= 4.06) { greeted = true; greetingAt = elapsed; }
-        const phase = elapsed % 14;
-        const idleGaze = -hold(phase, 1.4, 1.7, 2.05, 2.4) + .8 * hold(phase, 2.25, 2.55, 2.85, 3.2);
-        const attention = 1 - ramp(elapsed - pointerAt, 1.6, 2.4);
+        if (!greeted && elapsed >= WAKE + .5) { greeted = true; greetingAt = elapsed; }
+        const waking = wake(elapsed);
+        const awake = elapsed >= WAKE;
+        const phase = awake ? (elapsed - WAKE) % 14 : 0;
+        const idleGaze = awake ? -hold(phase, 1.4, 1.7, 2.05, 2.4) + .8 * hold(phase, 2.25, 2.55, 2.85, 3.2) : 0;
+        const attention = awake ? 1 - ramp(elapsed - pointerAt, 1.6, 2.4) : 0;
         const targetX = idleGaze * (1 - attention) + pointerX * attention;
-        const targetY = pointerY * attention;
+        const targetY = pointerY * attention + .55 * waking.drowsy;
         const eyeEase = 1 - Math.exp(-dt / .07);
         gazeX += (targetX - gazeX) * eyeEase;
         gazeY += (targetY - gazeY) * eyeEase;
-        const blink = Math.max(bump(phase, .96, 1.035, 1.17), bump(phase, 3.28, 3.355, 3.48),
-          bump(phase, 3.52, 3.59, 3.72), bump(phase, 8.02, 8.1, 8.25), bump(phase, 11.35, 11.43, 11.58));
+        const blink = awake ? Math.max(bump(phase, 3.28, 3.355, 3.48),
+          bump(phase, 3.52, 3.59, 3.72), bump(phase, 8.02, 8.1, 8.25), bump(phase, 11.35, 11.43, 11.58)) : 0;
         const age = elapsed - greetingAt;
         node!.style.setProperty("--look-x", `${(gazeX * 22).toFixed(2)}px`);
         node!.style.setProperty("--look-y", `${(gazeY * 14 - Math.abs(gazeX) * 4).toFixed(2)}px`);
-        node!.style.setProperty("--zel-eye-open", Math.max(.09, 1 - blink).toFixed(3));
+        node!.style.setProperty("--zel-eye-open", Math.max(.09, (awake ? 1 : waking.open) - blink).toFixed(3));
         node!.style.setProperty("--zel-happy", reaction(age).happy.toFixed(3));
         const breath = Math.sin(elapsed / 6.4 * Math.PI * 4);
         for (const part of parts) {
@@ -82,11 +98,12 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           // Eyes lead, then the centre, then the outer pieces. Tiles stay rigid.
           part.tilt += (gazeX * 3.2 - part.tilt) * (1 - Math.exp(-dt / (.13 + part.delay)));
           const turn = part.tilt - pose.anticipation * 2.4 + pose.hop * 2;
-          const rise = (-1.7 * breath + 3.5 * pose.anticipation - 16 * pose.hop) / 470 * 100;
+          const stretch = waking.stretch * (part.spread ? 1 : 0);
+          const rise = (-1.7 * breath + 3.5 * pose.anticipation - 16 * pose.hop - 5 * stretch) / 470 * 100;
           for (const element of part.nodes) {
             element.style.setProperty("--zel-turn", `${turn.toFixed(3)}deg`);
             element.style.setProperty("--zel-rise", `${rise.toFixed(3)}%`);
-            element.style.setProperty("--zel-spread", (1 + pose.spread * part.spread).toFixed(4));
+            element.style.setProperty("--zel-spread", (1 + (pose.spread + .7 * stretch) * part.spread).toFixed(4));
           }
         }
       }
