@@ -34,7 +34,7 @@ and Zel, the mascot, is the centre that holds them together.
    BYOS: your API keys, priced per token in the open, or a subscription you already
    pay for, signed in with OAuth (each tool's sign-in listed). BYOH: the
    open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness), as
-   large tiles. A bar below: on your server, one memory, change models without
+   large tiles, or the one that comes with your subscription (Claude Code, Codex CLI). A bar below: on your server, one memory, change models without
    losing anything. Tool marks, in their official colours, live in
    `src/components/providers.tsx` and `src/assets/marks/`.
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,
