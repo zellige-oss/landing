@@ -6,7 +6,7 @@ import { Companion, layers, type Layer, type Mood } from "./Companion";
  * Zel is the standard emblem: Zel in the centre, and around it the colour layers,
  * each a way of using Zel:
  *   crown  (ivory kites, closest to Zel)  → chat
- *   cobalt (blue corner squares)          → the meta-harness for building software
+ *   cobalt (blue corner squares)          → the harness manager, for building software
  *   points (outer green points)           → the personal agent
  * The scroll story shows one layer around Zel at a time, then all of them. Motion is
  * CSS only; without JS or with reduced motion, the emblem is simply whole.
@@ -49,7 +49,7 @@ export function Trio({
           )}
         >
           <LayerGlyph layer={piece} className="size-4" />
-          <span><strong className="hidden font-semibold sm:inline">{t.layers[piece].name} · </strong>{t.layers[piece].use}</span>
+          {t.layers[piece].use}
         </span>
       ))}
     </div>

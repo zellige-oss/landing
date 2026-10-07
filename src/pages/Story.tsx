@@ -95,7 +95,7 @@ export function Story({ reduced }: { reduced: boolean }) {
       <div className={cn(gutter, "pt-20 pb-4 lg:pb-8")}>
         <p className="eyebrow">{t.header.links.idea}</p>
         <h2 id="piezas-title" className="mt-4 text-[clamp(38px,9vw,52px)] leading-[1.02] sm:text-[clamp(44px,4.6vw,76px)]">
-          {t.story.headline.lead}<br /><em className="text-accent">{t.story.headline.turn}</em>
+          {t.story.title}
         </h2>
       </div>
       <div ref={track} className={cn(live && "h-[300vh]")}>
@@ -104,7 +104,7 @@ export function Story({ reduced }: { reduced: boolean }) {
             gutter,
             "grid items-center gap-5 lg:grid-cols-[1fr_1fr] lg:gap-[6vw]",
             // Below the fixed header, which is 68 px tall (76 px from sm).
-            live ? "sticky top-[68px] h-[calc(100svh-68px)] content-center py-4 sm:top-[76px] sm:h-[calc(100svh-76px)]" : "pt-6 pb-20",
+            live ? "sticky top-[68px] h-[calc(100svh-68px)] content-start py-4 lg:content-center sm:top-[76px] sm:h-[calc(100svh-76px)]" : "pt-6 pb-20",
           )}
         >
           <div>
@@ -144,7 +144,6 @@ export function Story({ reduced }: { reduced: boolean }) {
                     <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-base sm:text-lg">
                       {step.layer ? <LayerGlyph layer={step.layer} className="size-7" /> : <span aria-hidden="true" className="size-2.5 rotate-45 bg-brass" />}
                       <strong className="font-semibold">{copy.title}</strong>
-                      {step.layer && <span className="rounded-full bg-surface px-2.5 py-0.5 text-[13px] text-muted-foreground">{t.layers[step.layer].use}</span>}
                     </p>
                     <p className="mt-2 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base">{copy.body}</p>
                   </li>
