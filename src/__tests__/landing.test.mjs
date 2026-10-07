@@ -192,6 +192,6 @@ test('each language has its own prerendered page, linked with hreflang', () => {
     titles.add(page.match(/<title>([^<]+)<\/title>/)?.[1]);
   }
   assert.equal(titles.size, 2, 'Titles are translated');
-  assert.match(pages.en, /Chat, software development with agents and a personal agent,/);
+  assert.match(pages.en, /AI chat, coding agents and your own personal agent,/);
   assert.doesNotMatch(pages.en, /Cada capa|desarrollo con agentes|Del árabe/, 'No Spanish copy left on the English page');
 });
