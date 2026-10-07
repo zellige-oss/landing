@@ -287,6 +287,20 @@
     transform-origin: center;
     animation: blink 5s infinite;
   }
+  /* The pose belongs to an inner wrapper. Assembly, hover and scroll keep their
+     own outer transforms, and the face always shares the centre tile's pose. */
+  .zel-piece {
+    transform: translateY(var(--zel-rise, 0%)) rotate(var(--zel-turn, 0deg)) scale(var(--zel-spread, 1));
+    transform-origin: center;
+  }
+  .zel-lively[data-zel-awake] .zel-whole { opacity: 0; }
+  .zel-lively .companion-look { transition: none; }
+  .zel-lively .companion-eye {
+    animation: none;
+    scale: 1 var(--zel-eye-open, 0.09);
+  }
+  .zel-attentive-eyes { opacity: calc(1 - var(--zel-happy, 0)); }
+  .zel-happy-eyes { opacity: var(--zel-happy, 0); }
   .speech-bubble::after {
     content: "";
     position: absolute;
@@ -339,6 +353,10 @@
     opacity: 1;
     transform: none;
   }
+  .zel-piece { transform: none; }
+  .zel-lively .companion-eye { scale: 1; }
+  .zel-attentive-eyes { opacity: 1; }
+  .zel-happy-eyes { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

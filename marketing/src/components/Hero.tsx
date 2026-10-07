@@ -4,15 +4,15 @@ import { ArrowDown, ChevronDown, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
-import { Companion, type Mood } from "./Companion";
+import { Companion } from "./Companion";
 import { LayerGlyph, pieces, type Piece } from "./Trio";
 import { Wordmark } from "./Wordmark";
 
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
  * The emblem's layers fly in from beyond the screen and lock around Zel (CSS);
- * pointing at a layer lifts it and names it; scrolling away lets the layers fall
- * toward the story below, where they assemble again step by step.
+ * pointing at a layer lifts it and names it; scrolling away lets the layers drift
+ * apart toward the story below, where they assemble again step by step.
  */
 
 /** Which layer the pointer is over, from its position relative to the emblem centre. */
@@ -25,35 +25,7 @@ function layerAt(x: number, y: number): Piece | undefined {
   return r < 0.46 ? "crown" : "points";
 }
 
-/*
- * Zel wakes up once the centre lands: eyes closed, open, a look left and right
- * at the new page, a blink, then the usual smile. [delay ms, mood, gaze x in face units]
- */
-const wake: [number, Mood, number][] = [
-  [1700, "look", 0],
-  [2150, "look", -70],
-  [2650, "look", 70],
-  [3100, "look", 0],
-  [3350, "content", 0],
-  [3500, "look", 0],
-  [3900, "hello", 0],
-];
-
 function Emblem({ reduced }: { reduced: boolean }) {
-  const root = useRef<HTMLDivElement>(null);
-  const [intro, setIntro] = useState<Mood>();
-  useEffect(() => {
-    if (reduced) return;
-    const node = root.current;
-    const timers = [window.setTimeout(() => setIntro("content"), 0)];
-    for (const [delay, mood, gaze] of wake) {
-      timers.push(window.setTimeout(() => {
-        setIntro(mood === "hello" ? undefined : mood);
-        node?.style.setProperty("--look-x", `${gaze}px`);
-      }, delay));
-    }
-    return () => timers.forEach(clearTimeout);
-  }, [reduced]);
   const t = useT();
   const [hover, setHover] = useState<Piece>();
   const shown = hover;
@@ -63,13 +35,12 @@ function Emblem({ reduced }: { reduced: boolean }) {
   }
   return (
     <div
-      ref={root}
       className={cn("hero-zel tile relative mx-auto aspect-square w-[min(78vw,clamp(200px,30vh,380px))]", !reduced && "hero-intro", shown && `lift-${shown}`)}
       onPointerMove={track}
       onPointerDown={track}
       onPointerLeave={() => setHover(undefined)}
     >
-      <Companion mood={shown ? "look" : intro ?? "hello"} follow alt={t.zel.alt} className="size-full drop-shadow-[0_26px_34px_rgb(11_29_41/0.3)]" />
+      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={2400} alt={t.zel.alt} className="size-full drop-shadow-[0_26px_34px_rgb(11_29_41/0.3)]" />
       {/* The layer under the pointer names itself; screen readers get all three below. */}
       {pieces.map((piece) => (
         <span
@@ -98,6 +69,10 @@ export function Hero({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end start"] });
+  useEffect(() => {
+    if (reduced) section.current?.style.removeProperty("--out");
+    else section.current?.style.setProperty("--out", Math.min(1, scrollYProgress.get() * 1.6).toFixed(3));
+  }, [reduced, scrollYProgress]);
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     if (!reduced) section.current?.style.setProperty("--out", Math.min(1, progress * 1.6).toFixed(3));
   });

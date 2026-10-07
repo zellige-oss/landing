@@ -71,7 +71,7 @@ export function Eyes({ mood }: { mood: Mood }) {
 }
 
 /** The face group, in emblem coordinates (viewBox 0 0 1254 1254). */
-export function ZelFace({ mood }: { mood: Mood }) {
+export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean }) {
   const gradient = `zel-face-${useId().replaceAll(":", "")}`;
   return (
     <>
@@ -85,7 +85,12 @@ export function ZelFace({ mood }: { mood: Mood }) {
       <polygon points={STAR} fill={`url(#${gradient})`} />
       <polyline points={GLINT} fill="none" stroke="#fff" strokeOpacity=".12" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
       <g className="zel-face" transform="translate(625 644) scale(0.88) translate(-622 -622)">
-        <Eyes mood={mood} />
+        {lively ? (
+          <>
+            <g className="zel-attentive-eyes"><Eyes mood={mood} /></g>
+            <g className="zel-happy-eyes companion-look"><Eyes mood="hello" /></g>
+          </>
+        ) : <Eyes mood={mood} />}
       </g>
     </>
   );
