@@ -166,7 +166,7 @@ test('brand art: approved ceramic mosaic, emblem layers, emblem and moodboard wo
     file.startsWith(`assets/${prefix}`) && file.endsWith(extension));
   for (const [prefix, extension] of [
     ['ceramic-', '.webp'], ['emblem-', '.webp'], ['layer-centre-', '.webp'], ['layer-crown-', '.webp'],
-    ['layer-cobalt-', '.webp'], ['layer-points-', '.webp'], ['zellige-wordmark-', '.svg'],
+    ['layer-cobalt-', '.webp'], ['layer-points-', '.webp'], ['layer-whole-', '.webp'], ['zellige-wordmark-', '.svg'],
   ]) assert.ok(asset(prefix, extension), `${prefix}*${extension} is published`);
   // Superseded artwork never reaches the public build.
   assert.ok(!builtFiles.some((file) => /zellige-mosaic|rosette-v2|ceramic-grain|interlocked/.test(file)));
