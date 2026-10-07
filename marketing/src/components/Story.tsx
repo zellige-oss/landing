@@ -21,6 +21,11 @@ export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
   const [active, setActive] = useState<number>();
+  // Zel hides in the centre tile until the personal-agents step finds it, and is
+  // startled for a moment; scrolling back hides it again, so the surprise replays.
+  const [startled, setStartled] = useState(false);
+  const wasFound = useRef(false);
+  const calm = useRef<number>(undefined);
   const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end end"] });
   useMotionValueEvent(scrollYProgress, "change", (t) => {
     const node = section.current;
@@ -31,22 +36,22 @@ export function Story({ reduced }: { reduced: boolean }) {
     node.style.setProperty("--p2", clamp((t - 0.19) / 0.09).toFixed(3));
     node.style.setProperty("--p3", clamp((t - 0.45) / 0.09).toFixed(3));
     // No step until the first layer has landed.
-    setActive(t < 0.1 ? undefined : t < 0.28 ? 0 : t < 0.54 ? 1 : t < 0.8 ? 2 : 3);
+    const step = t < 0.1 ? undefined : t < 0.28 ? 0 : t < 0.54 ? 1 : t < 0.8 ? 2 : 3;
+    setActive(step);
+    const isFound = (step ?? 0) >= FOUND;
+    if (isFound !== wasFound.current) {
+      wasFound.current = isFound;
+      window.clearTimeout(calm.current);
+      setStartled(isFound);
+      if (isFound) calm.current = window.setTimeout(() => setStartled(false), 1300);
+    }
   });
+  useEffect(() => () => window.clearTimeout(calm.current), []);
   // The story only runs with motion allowed; otherwise (and before hydration) it is a plain list.
   const live = !reduced;
   const stage = live ? active ?? 0 : null;
   const focus = live && active !== undefined ? steps[active].layer : undefined;
-  // Zel hides in the centre tile until the personal-agents step finds it, and is
-  // startled for a moment; scrolling back hides it again.
   const found = !live || (stage ?? 0) >= FOUND;
-  const [startled, setStartled] = useState(false);
-  useEffect(() => {
-    if (!live || !found) return;
-    setStartled(true);
-    const timer = window.setTimeout(() => setStartled(false), 1300);
-    return () => window.clearTimeout(timer);
-  }, [live, found]);
   useEffect(() => {
     const node = section.current;
     if (!node) return;
@@ -97,7 +102,7 @@ export function Story({ reduced }: { reduced: boolean }) {
             })}
           </ol>
         </div>
-        <Trio mood={startled ? "surprised" : steps[stage ?? 3].mood} focus={focus} found={found} mode="scroll" className="mx-auto w-[min(64vw,300px)] max-lg:order-first sm:w-[min(84%,460px)]" />
+        <Trio mood={live && startled ? "surprised" : steps[stage ?? 3].mood} focus={focus} found={found} mode="scroll" className="mx-auto w-[min(64vw,300px)] max-lg:order-first sm:w-[min(84%,460px)]" />
       </div>
     </section>
   );
