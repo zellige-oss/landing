@@ -26,7 +26,7 @@ const es = {
       meaning: "«pequeña piedra pulida»",
       body: "Un mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
     },
-    title: { lead: "Tu IA está repartida en mil apps.", turn: "Zellige la junta." },
+    title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "en un solo sitio abierto." },
     next: "Ir a la siguiente sección",
   },
   zel: {
@@ -118,7 +118,7 @@ const en = {
       meaning: "“small polished stone”",
       body: "A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
     },
-    title: { lead: "Your AI is scattered across a dozen apps.", turn: "Zellige brings it together." },
+    title: { lead: "Chat, software development with agents and a personal agent,", turn: "in one open place." },
     next: "Go to the next section",
   },
   zel: {
