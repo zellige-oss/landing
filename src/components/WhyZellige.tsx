@@ -2,23 +2,22 @@ import { useT } from "@/i18n";
 import { useDisclosure } from "@/hooks/use-disclosure";
 
 /*
- * A gold spark beside the hero's wordmark, like the sparks over its letters. It opens
- * where the name comes from, as a dictionary would put it, without taking room from
- * the hero. Place it inside a relative box around the wordmark.
+ * "Why Zellige?" with a gold spark, beside the hero's wordmark like the sparks over its
+ * letters (below it on phones). It opens where the name comes from, as a dictionary
+ * would put it, without taking room from the hero. Place it inside a relative box
+ * around the wordmark.
  */
 export function WhyZellige() {
   const t = useT();
   const { props } = useDisclosure();
   return (
     <details {...props} className="group">
-      <summary
-        aria-label={t.hero.why.title}
-        title={t.hero.why.title}
-        className="absolute top-[4%] -right-8 grid size-8 cursor-pointer list-none place-items-center rounded-full text-gold transition-transform hover:scale-110 sm:-right-8 sm:size-9 [&::-webkit-details-marker]:hidden"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-[18px] fill-current drop-shadow-[0_2px_4px_rgb(176_138_74/0.45)] motion-safe:animate-[twinkle_3.2s_ease-in-out_infinite] group-open:animate-none sm:size-5">
+      {/* Below the wordmark on phones; beside it, like its sparks, from sm. */}
+      <summary className="group/why relative mx-auto mt-2 flex w-max cursor-pointer list-none items-center gap-1.5 rounded-full px-2 py-1 text-gold sm:absolute sm:top-[6%] sm:left-full sm:mt-0 sm:ml-1 [&::-webkit-details-marker]:hidden">
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 shrink-0 fill-current drop-shadow-[0_2px_4px_rgb(176_138_74/0.45)] motion-safe:animate-[twinkle_3.2s_ease-in-out_infinite] group-open:animate-none sm:size-[18px]">
           <path d="M12 0c.6 7 5 11.4 12 12-7 .6-11.4 5-12 12-.6-7-5-11.4-12-12 7-.6 11.4-5 12-12Z" />
         </svg>
+        <span className="font-serif text-[16px] whitespace-nowrap italic underline decoration-brass/60 decoration-dotted underline-offset-4 group-hover/why:decoration-solid sm:text-[17px]">{t.hero.why.title}</span>
       </summary>
       <div className="absolute top-full left-1/2 z-20 mt-3 w-[min(88vw,360px)] -translate-x-1/2 rounded-2xl border border-border bg-popover p-5 text-left shadow-[0_18px_40px_-20px_rgb(20_43_53/0.5)]">
         <p className="font-serif text-[22px] leading-tight text-gold italic">{t.hero.why.title}</p>
