@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,7 @@ import { zelMark } from "@/components/brand";
 import { Wordmark } from "@/components/Wordmark";
 import { GitHubMark } from "@/components/GitHubMark";
 import { site } from "@/site";
+import { useDisclosure } from "@/hooks/use-disclosure";
 
 export function Header() {
   const t = useT();
@@ -35,22 +36,8 @@ export function Header() {
     }
     return () => observer.disconnect();
   }, []);
-  // On phones the links live in a menu: a <details>, so it opens without JavaScript
-  // too. With it, choosing a link, pressing Escape or tapping outside closes it.
-  const menu = useRef<HTMLDetailsElement>(null);
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const close = () => { if (menu.current) menu.current.open = false; };
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
-    const onPointer = (event: PointerEvent) => { if (!menu.current?.contains(event.target as Node)) close(); };
-    addEventListener("keydown", onKey);
-    addEventListener("pointerdown", onPointer);
-    return () => {
-      removeEventListener("keydown", onKey);
-      removeEventListener("pointerdown", onPointer);
-    };
-  }, [open]);
+  // On phones the links live in a menu that also opens without JavaScript.
+  const { open, close, props: menu } = useDisclosure();
   const links = [
     ["#piezas", t.header.links.idea],
     ["#funciones", t.header.links.features],
@@ -91,7 +78,7 @@ export function Header() {
         <Moon aria-hidden="true" className="dark:hidden" />
         <Sun aria-hidden="true" className="hidden dark:block" />
       </button>
-      <details ref={menu} className="group sm:hidden" onToggle={(event) => setOpen(event.currentTarget.open)}>
+      <details {...menu} className="group sm:hidden">
         <summary
           aria-label={t.header.menu}
           className={cn(buttonVariants({ variant: "cta-secondary", size: "lg" }), "size-10 cursor-pointer list-none p-0 [&::-webkit-details-marker]:hidden")}
@@ -107,7 +94,7 @@ export function Header() {
                   <a
                     href={href}
                     aria-current={current === href ? "location" : undefined}
-                    onClick={() => { if (menu.current) menu.current.open = false; }}
+                    onClick={close}
                     className="flex items-center gap-3 py-4 text-lg text-foreground/80 aria-[current]:text-foreground"
                   >
                     <span aria-hidden="true" className={cn("size-1.5 rotate-45", current === href ? "bg-brass" : "bg-foreground/25")} />

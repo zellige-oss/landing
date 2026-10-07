@@ -21,7 +21,8 @@ const es = {
     repository: "Repositorio en GitHub",
   },
   hero: {
-    origin: {
+    why: {
+      title: "¿Por qué Zellige?",
       from: "Del árabe",
       meaning: "«pequeña piedra pulida»",
       body: "Un mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
@@ -125,7 +126,8 @@ const en = {
     repository: "Repository on GitHub",
   },
   hero: {
-    origin: {
+    why: {
+      title: "Why Zellige?",
       from: "From Arabic",
       meaning: "“small polished stone”",
       body: "A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
