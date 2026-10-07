@@ -40,9 +40,7 @@ const es = {
     hint: "Desliza para montar el azulejo",
     progress: "Pasos de la historia",
     goTo: "Ir al paso",
-    definition:
-      "Del árabe az-zellīj, «pequeña piedra pulida». Mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
-    headline: { lead: "Varias piedras,", turn: "un mismo azulejo." },
+    headline: { lead: "Cada capa del azulejo", turn: "es una forma de usar la\u00a0IA." },
     steps: {
       crown: {
         title: "La corona",
@@ -131,9 +129,7 @@ const en = {
     hint: "Scroll to build the tile",
     progress: "Story steps",
     goTo: "Go to step",
-    definition:
-      "From Arabic az-zellīj, “small polished stone”. A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
-    headline: { lead: "Many stones,", turn: "one tile." },
+    headline: { lead: "Each layer of the tile", turn: "is a way to use\u00a0AI." },
     steps: {
       crown: {
         title: "The crown",
