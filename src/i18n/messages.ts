@@ -82,8 +82,8 @@ const es = {
     },
     harness: {
       tag: "BYOH",
-      title: "Tu harness open source",
-      body: "El chat, el gestor de harness y tu agente funcionan con el harness open source que elijas.",
+      title: "Tu harness open source… o el de tu suscripción",
+      body: "El chat, el gestor de harness y tu agente funcionan con el harness open source que elijas, o con el que va acoplado a tu suscripción, como Claude Code o Codex CLI.",
       more: "Y otros harness open source.",
     },
     points: ["En tu servidor", "Una sola memoria", "Cambia de modelo sin perder nada"],
@@ -186,8 +186,8 @@ const en = {
     },
     harness: {
       tag: "BYOH",
-      title: "Your open-source harness",
-      body: "The chat, the harness manager and your agent run on the open-source harness you choose.",
+      title: "Your open-source harness… or your subscription's",
+      body: "The chat, the harness manager and your agent run on the open-source harness you choose, or on the one that comes with your subscription, like Claude Code or Codex CLI.",
       more: "And other open-source harnesses.",
     },
     points: ["On your server", "One memory", "Change models without losing anything"],
