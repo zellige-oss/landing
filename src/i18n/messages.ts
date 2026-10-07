@@ -13,7 +13,7 @@ const es = {
   header: {
     home: "Zellige, inicio",
     nav: "Principal",
-    links: { idea: "¿Qué es Zellige?", features: "Bring your own", contact: "Contacto" },
+    links: { idea: "¿Qué es Zellige?", features: "Trae lo tuyo", contact: "Contacto" },
     theme: "Cambiar entre modo claro y oscuro",
     themeTitle: "Modo claro / oscuro",
     menu: "Menú",
@@ -28,7 +28,7 @@ const es = {
       history: "Barro esmaltado, cortado a mano pieza a pieza, que viste Fez y la Alhambra desde hace siglos.",
     },
     title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "self\u2011hosted y open source." },
-    bring: { lead: "Bring your own", items: ["harness", "sub", "API key"] },
+    bring: { lead: "Trae lo tuyo", items: ["harness", "suscripción", "clave de API"] },
     next: "Ir a la siguiente sección",
   },
   zel: {
@@ -51,7 +51,7 @@ const es = {
       devices: { title: "Tus dispositivos", items: ["Escritorio", "Móvil", "Web"] },
       tunnel: { title: "Tailscale", body: "Red privada" },
       server: { title: "Tu servidor", memory: "Memoria compartida" },
-      models: { title: "Tus modelos", api: ["API", "Tus API keys"], oauth: ["OAuth", "Tu suscripción"] },
+      models: { title: "Tus modelos", api: ["API", "Tus claves de API"], oauth: ["OAuth", "Tu suscripción"] },
     },
     steps: {
       crown: {
@@ -73,10 +73,10 @@ const es = {
     },
   },
   features: {
-    title: "Bring your own",
+    title: "Trae lo tuyo",
     access: {
       tag: "BYOK · BYOS",
-      title: "Tu API key… o tu suscripción",
+      title: "Tu clave de API… o tu suscripción",
       body: "Con una API pagas por token y el precio está a la vista. Una suscripción es una caja negra: no ves sus límites y cambian sin avisar. Aun así, si ya pagas una, inicia sesión con OAuth.",
       google: "con Google",
     },
