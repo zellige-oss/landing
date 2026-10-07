@@ -13,6 +13,8 @@ const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
 ];
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
+/** The step where Zel is found: the personal agents, reaching out. */
+const FOUND = steps.findIndex((step) => step.key === "points");
 
 /** Scroll story: each kind of AI use arrives as a layer of the emblem until the tile is complete. */
 export function Story({ reduced }: { reduced: boolean }) {
@@ -35,6 +37,16 @@ export function Story({ reduced }: { reduced: boolean }) {
   const live = !reduced;
   const stage = live ? active ?? 0 : null;
   const focus = live && active !== undefined ? steps[active].layer : undefined;
+  // Zel hides in the centre tile until the personal-agents step finds it, and is
+  // startled for a moment; scrolling back hides it again.
+  const found = !live || (stage ?? 0) >= FOUND;
+  const [startled, setStartled] = useState(false);
+  useEffect(() => {
+    if (!live || !found) return;
+    setStartled(true);
+    const timer = window.setTimeout(() => setStartled(false), 1300);
+    return () => window.clearTimeout(timer);
+  }, [live, found]);
   useEffect(() => {
     const node = section.current;
     if (!node) return;
@@ -85,7 +97,7 @@ export function Story({ reduced }: { reduced: boolean }) {
             })}
           </ol>
         </div>
-        <Trio mood={steps[stage ?? 3].mood} focus={focus} mode="scroll" className="mx-auto w-[min(64vw,300px)] max-lg:order-first sm:w-[min(84%,460px)]" />
+        <Trio mood={startled ? "surprised" : steps[stage ?? 3].mood} focus={focus} found={found} mode="scroll" className="mx-auto w-[min(64vw,300px)] max-lg:order-first sm:w-[min(84%,460px)]" />
       </div>
     </section>
   );
