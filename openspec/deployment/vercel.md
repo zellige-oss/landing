@@ -57,40 +57,41 @@ production domains; it does not modify DNS or attach domains.
 
 ## Artifact and local verification
 
-The landing is a Vite + React + Tailwind/shadcn app in `marketing/`. Its build
+The landing is a Vite + React + Tailwind/shadcn app at the repository root. Its build
 prerenders the page to static HTML (content, anchors and disclosures work without
 JavaScript) and hydrates it on the client. CI builds it, checks the
-prerendered page, then packages `marketing/dist/` unchanged; CD deploys that
+prerendered page, then packages `dist/` unchanged; CD deploys that
 package without rebuilding.
 
 From the repository root, using Node.js 24:
 
 ```sh
-(cd marketing && npm ci --ignore-scripts && npm run build)
-node --test tests/marketing.test.mjs tests/marketing-build.test.mjs
-node deploy/build-marketing.mjs
+npm ci --ignore-scripts && npm run build
+npm test
+node scripts/package-vercel.mjs
 ```
 
-The output is `.output/marketing/.vercel/output/`, using Vercel Build Output API
-version 3. Its `static/` directory is exactly `marketing/dist/`: `index.html`,
-hashed `assets/` (script, stylesheet, images, wordmark) and `fonts/` with their
-licenses. Packaging refuses symlinks, unexpected file types (including source
+The output is `.output/.vercel/output/`, using Vercel Build Output API
+version 3. Its `static/` directory is exactly `dist/`: `index.html`,
+hashed `assets/` (script, stylesheet, images, wordmark), `fonts/` with their
+licenses and the brand kit in `brand/`. Packaging refuses symlinks, unexpected file types (including source
 maps), inline `data:` URIs or inline scripts that the CSP would block, and any
 reference to the pilot, its API or the development domain.
 
 The builder copies these files unchanged and copies
-`deploy/vercel-marketing.json` to `.vercel/output/config.json`. That configuration
+`scripts/vercel-output-config.json` to `.vercel/output/config.json`. That configuration
 applies the landing's CSP, `nosniff`, frame denial, and referrer policy to every
-path (`tests/marketing-build.test.mjs` pins the exact values). There is no catch-all page fallback: unknown paths
-remain 404s. The pilot screenshot, mascot, application, backend, databases,
-documentation, and secrets are excluded by the explicit file allowlist.
+path (`scripts/__tests__/package-vercel.test.mjs` pins the exact values). There is no catch-all page fallback: unknown paths
+remain 404s. The application, backend, databases, documentation, and secrets are
+excluded: only `dist/` is packaged.
 
-Rebuilding replaces only `.output/marketing/.vercel/output`, clearing stale
+Rebuilding replaces only `.output/.vercel/output`, clearing stale
 generated files while preserving siblings and project metadata. All source files
 must exist before replacement starts. Symlinked inputs and output ancestors are
 rejected. Do not store manual files in the generated output directory.
 
-The deployment command runs from `.output/marketing` with the three settings
+The deployment command runs from the directory holding `.vercel/output` (in CD,
+the downloaded package in `landing/`) with the three settings
 already available in its environment:
 
 ```sh

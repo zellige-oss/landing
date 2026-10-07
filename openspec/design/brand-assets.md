@@ -3,29 +3,32 @@
 Source: the mascot identity board supplied by the user on 2026-10-02. Generated
 with the built-in image tool using that board as the reference, not copied from
 an unrelated stock library. AI extraction may reinterpret small details; these
-are not vector originals. The source moodboard is not shipped in the website.
+are not vector originals. The source moodboard is not shipped in the website; everything in
+`public/brand/` is, so the brand kit is downloadable from the site.
 
-- `brand/zellige-emblem.png`: 1254 × 1254 RGBA PNG. **The single source**
+- `public/brand/zellige-emblem.png`: 1254 × 1254 RGBA PNG. **The single source**
   for every derived asset. Corrected on 2026-10-03: its top point is teal like the
   other three (it was cobalt, breaking the four-fold symmetry); the uncorrected
   original is kept at `openspec/design/proposals/zellige-emblem-original.png`.
-- `brand/zel/zel-<mood>.png`: Zel, the mascot, for each mood (`hello`,
+- `public/brand/zel/zel-<mood>.png`: Zel, the mascot, for each mood (`hello`,
   `look`, `thinking`, `excited`, `curious`, `focused`, `wink`, `content`). Zel is
   the emblem with an obsidian face on the centre star. The pilot uses `zel-hello`.
-- `brand/zellige-wordmark{,-night}.svg`: moodboard wordmark, day (navy)
-  and night (porcelain); gold stars in both, from `marketing/scripts/build-wordmark.mjs`.
-- `brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png`: the
+- `public/brand/zellige-wordmark{,-night}.svg`: moodboard wordmark, day (navy)
+  and night (porcelain); gold stars in both, from `scripts/build-wordmark.mjs`.
+- `public/brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png`: the
   logo, Zel (`zel-look`, eyes open, no expression) with the wordmark beside it,
   under it (`zel-top`) or over it (`wordmark-top`). Every version has a transparent
   ground; `-night` uses the night wordmark, for dark grounds. Built
-  by `marketing/scripts/build-brand.mjs` from the images above, so it follows any
+  by `scripts/build-brand.mjs` from the images above, so it follows any
   change to the emblem, Zel's face or the wordmark.
-- Landing: `marketing/src/assets/layer-{centre,crown,cobalt,points}.webp` (the
+- Landing: `src/assets/layer-{centre,crown,cobalt,points}.webp` (the
   emblem's colour layers), `emblem.webp`, `zel-mark.webp` (Zel for the header's
-  logo, beside the wordmark) and `marketing/public/favicon.png`.
+  logo, beside the wordmark) and `public/favicon.png`.
+- `public/brand/zellige-ceramic-source.png`: the approved ceramic mosaic the
+  landing's texture (`src/assets/ceramic.webp`) is cut from.
 
-Regenerate everything derived with `npm run brand` in `marketing/` after changing
-the emblem or Zel's face (`marketing/src/components/ZelFace.tsx`, the same
+Regenerate everything derived with `npm run brand` after changing
+the emblem or Zel's face (`src/components/ZelFace.tsx`, the same
 component the landing renders). Never edit the outputs by hand, and do not
 generate a second, slightly different mascot for any surface.
 

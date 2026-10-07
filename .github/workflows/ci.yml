@@ -29,21 +29,18 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-          cache-dependency-path: marketing/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci --ignore-scripts
-        working-directory: marketing
       - run: npm run lint
-        working-directory: marketing
       - run: npm run build
-        working-directory: marketing
-      - run: node --test tests/*.test.mjs
-      - run: node deploy/build-marketing.mjs
+      - run: npm test
+      - run: node scripts/package-vercel.mjs
       - name: Keep the package for CD
         if: github.event_name == 'push'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: landing
-          path: .output/marketing/.vercel/output
+          path: .output/.vercel/output
           include-hidden-files: true
           retention-days: 3
 
@@ -65,4 +62,4 @@ jobs:
         env:
           SONAR_PROJECT_KEY: zellige-oss_landing
           APPROVED_SHA: ${{ github.sha }}
-        run: node deploy/sonar-quality-gate.mjs
+        run: node scripts/sonar-quality-gate.mjs

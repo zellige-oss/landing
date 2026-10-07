@@ -10,23 +10,36 @@ The application and API live in `zellige-oss/Zellige`.
 Use Node.js 24:
 
 ```sh
-npm --prefix marketing ci
-npm --prefix marketing run dev
+npm ci
+npm run dev
 ```
+
+## Layout
+
+- `src/`: the React app. `pages/` holds the landing's four pages (hero, story,
+  features, contact), `layout/` the header and footer, `components/` the pieces
+  they share (Zel, the tile, the wordmark, the band), plus `hooks/`, `i18n/`
+  and `assets/`. Tests sit beside the code: `src/__tests__/`.
+- `public/`: served as is, including `public/brand/` (emblem, Zel's moods,
+  logos and wordmarks).
+- `scripts/`: brand generation, prerendering and packaging for Vercel, with
+  their tests in `scripts/__tests__/`.
+- `openspec/`: design notes, brand and deployment docs.
 
 ## Validation and packaging
 
 ```sh
-npm --prefix marketing run lint
-npm --prefix marketing run build
-node --test tests/*.test.mjs
-node deploy/build-marketing.mjs
+npm run lint
+npm run build
+npm test
+node scripts/package-vercel.mjs
 ```
 
-The build prerenders Spanish and English pages. Only validated static output
-is packaged into `.output/marketing/.vercel/output/`.
+The build prerenders Spanish and English pages; the tests check that output, so
+build first. Only validated static output is packaged into
+`.output/.vercel/output/`.
 
-`npm --prefix marketing run brand` rebuilds brand derivatives from `brand/` and
+`npm run brand` rebuilds brand derivatives from `public/brand/` and
 `openspec/design/proposals/`; it does not need a checkout of the application.
 The application retains its own copies of the brand assets it uses.
 
@@ -37,8 +50,8 @@ to `main`; CD (`cd.yml`) deploys the package CI built once CI passes on `main`.
 GitHub Actions variables and secrets must be configured in this repository;
 they are not transferred with Git history.
 
-To check a production build locally, run `npm --prefix marketing run preview`
-after `npm --prefix marketing run build`.
+To check a production build locally, run `npm run preview` after
+`npm run build`.
 
 ## Provenance
 
