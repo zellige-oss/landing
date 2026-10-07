@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { ChevronRight, Menu, Moon, Sun, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
 import { zelMark } from "@/components/brand";
 import { Wordmark } from "@/components/Wordmark";
 import { GitHubMark } from "@/components/GitHubMark";
+import { LayerGlyph, type Piece } from "@/components/Trio";
 import { site } from "@/site";
 import { useDisclosure } from "@/hooks/use-disclosure";
 
@@ -43,6 +44,8 @@ export function Header() {
     ["#funciones", t.header.links.features],
     ["#contacto", t.header.links.contact],
   ];
+  // In the phone menu each link carries a piece of the tile.
+  const glyphs: Piece[] = ["crown", "cobalt", "points"];
   return (
     <header className={cn("fixed inset-x-0 top-0 z-10 flex items-center gap-4 px-[22px] py-3 transition-[background-color,border-color] duration-300 sm:gap-8 sm:px-[30px] sm:py-4", heroMark && !open ? "border-b border-transparent" : "border-b border-border/70 bg-background/85 backdrop-blur-md")}>
       {/* The logo: Zel beside the wordmark, as in public/brand/logo/zellige-logo-horizontal.png.
@@ -88,17 +91,18 @@ export function Header() {
         </summary>
         <div className="absolute inset-x-0 top-full border-b border-border/70 bg-background px-[22px] pb-5 shadow-[0_18px_30px_-24px_rgb(20_43_53/0.5)]">
           <nav aria-label={t.header.nav}>
-            <ul className="divide-y divide-border/70">
-              {links.map(([href, label]) => (
+            <ul className="grid gap-1 pt-2">
+              {links.map(([href, label], index) => (
                 <li key={href}>
                   <a
                     href={href}
                     aria-current={current === href ? "location" : undefined}
                     onClick={close}
-                    className="flex items-center gap-3 py-4 text-lg text-foreground/80 aria-[current]:text-foreground"
+                    className="group/link flex items-center gap-3.5 rounded-xl px-3 py-3.5 text-lg text-foreground/80 transition-colors hover:bg-surface hover:text-foreground aria-[current]:bg-surface aria-[current]:text-foreground"
                   >
-                    <span aria-hidden="true" className={cn("size-1.5 rotate-45", current === href ? "bg-brass" : "bg-foreground/25")} />
+                    <LayerGlyph layer={glyphs[index]} className="size-6 transition-transform duration-300 group-hover/link:rotate-45 group-aria-[current]/link:rotate-45" />
                     {label}
+                    <ChevronRight aria-hidden="true" className="ml-auto size-5 text-gold opacity-0 transition-[opacity,translate] group-hover/link:translate-x-0.5 group-hover/link:opacity-100 group-aria-[current]/link:opacity-100" />
                   </a>
                 </li>
               ))}

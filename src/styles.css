@@ -9,13 +9,6 @@
   font-weight: 100 900;
   font-display: swap;
 }
-@font-face {
-  font-family: "Cormorant Garamond";
-  src: url("/fonts/cormorant-garamond-italic-variable.ttf") format("truetype");
-  font-style: italic;
-  font-weight: 300 700;
-  font-display: swap;
-}
 
 /* Brand palette shared with the pilot (web/src/styles.css), plus the landing's surfaces. */
 :root {
@@ -100,7 +93,6 @@
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) * 1.5);
   --font-sans: Onest, ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", Georgia, serif;
   --animate-arrive: arrive 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
@@ -149,10 +141,9 @@
   h2 {
     @apply font-[550] tracking-[-0.055em] text-balance;
   }
-  /* The serif italic is the brand's second voice, used for the turn of each phrase. */
+  /* The turn of each phrase keeps the type and takes the accent colour. */
   em {
-    font: italic 1.08em/1 var(--font-serif);
-    letter-spacing: -0.035em;
+    font-style: normal;
   }
   section {
     scroll-margin-top: 100px;
@@ -171,6 +162,49 @@
   }
   .ceramic {
     background: var(--ceramic-base) url("./assets/ceramic.webp");
+  }
+  /* Contact (TileInProgress.tsx): a mosaic panel being laid, one piece hovering over
+     its gap. Each square shows its own part of the ceramic. */
+  .tile-build {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3px;
+  }
+  .tile-build > span {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: url("./assets/ceramic.webp") 0 0 / 400% 400%;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25);
+  }
+  .tile-build > :nth-child(4n + 2) { background-position-x: 33.333%; }
+  .tile-build > :nth-child(4n + 3) { background-position-x: 66.667%; }
+  .tile-build > :nth-child(4n + 4) { background-position-x: 100%; }
+  .tile-build > :nth-child(n + 5) { background-position-y: 33.333%; }
+  .tile-build > :nth-child(n + 9) { background-position-y: 66.667%; }
+  .tile-build > :nth-child(n + 13) { background-position-y: 100%; }
+  .tile-build > .tile-gap {
+    background-image: none;
+    box-shadow: none;
+    outline: 1.5px dashed rgb(201 169 98 / 0.55);
+    outline-offset: -4px;
+  }
+  .tile-piece {
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    background: url("./assets/ceramic.webp");
+    background-size: inherit;
+    background-position: inherit;
+    box-shadow: 0 14px 18px -8px #000c, inset 0 0 0 1px rgb(201 169 98 / 0.7);
+    translate: -10% -38%;
+    rotate: -8deg;
+    transition: translate 0.5s cubic-bezier(0.3, 1.4, 0.5, 1), rotate 0.5s ease, box-shadow 0.5s ease;
+  }
+  #contacto:is(:hover, :focus-within) .tile-piece {
+    translate: 0 0;
+    rotate: 0deg;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25);
   }
   /* Mosaic band: brass-edged, fading out at both ends so the page can breathe. */
   .mosaic-band {
@@ -199,16 +233,6 @@
   .tile-scroll.show-cobalt .layer-cobalt,
   .tile-scroll.show-points .layer-points,
   .tile-scroll.show-all .zel-layer:not(.layer-centre) { opacity: 1; scale: 1; }
-  /* Only the layer on show is named, next to it; the whole tile names them all. */
-  .tile-scroll .tile-label {
-    opacity: 0;
-    translate: 0 12px;
-    transition: opacity 0.3s ease, translate 0.3s ease;
-  }
-  .show-crown .label-crown,
-  .show-cobalt .label-cobalt,
-  .show-points .label-points,
-  .show-all .tile-label { opacity: 1; translate: 0 0; }
   /* The assembled emblem keeps its drawn rims: it covers the layers once they have
      all landed, and gives way to them as soon as one moves. */
   .zel-whole { transition: opacity 0.3s ease; }
@@ -220,8 +244,9 @@
   .tile-scroll.lift-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
   .tile-scroll.lift-points .zel-layer:not(.layer-centre, .layer-points) { filter: saturate(0.3) brightness(0.92); opacity: 0.45; }
   .tile-scroll:is(.lift-crown, .lift-cobalt, .lift-points) .zel-whole { opacity: 0; transition: none; }
-  /* The hovered layer's card takes the labels' place. */
-  .tile-scroll:is(.lift-crown, .lift-cobalt, .lift-points) .tile-label { opacity: 0; }
+  /* Zel rises with the layer, so the two never come apart. */
+  .tile-scroll :is(.layer-centre, .zel-face-layer) { transition: translate 0.3s ease; }
+  .tile-scroll:is(.lift-crown, .lift-cobalt, .lift-points) :is(.layer-centre, .zel-face-layer) { translate: 0 -6px; }
   .tile-scroll.lift-crown .layer-crown,
   .tile-scroll.lift-cobalt .layer-cobalt,
   .tile-scroll.lift-points .layer-points {
@@ -296,6 +321,9 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Contact: the waiting piece bobs over its gap until it is set. */
+  .tile-piece { animation: piece-bob 2.8s ease-in-out infinite; }
+  #contacto:is(:hover, :focus-within) .tile-piece { animation: none; }
   /* The whole tile: as the last layers land around Zel, the impact rings out
      through the crown, the blue and the green in turn, and a brass ring spreads. */
   .tile-scroll.show-all .layer-crown .zel-piece { animation: zel-ripple 0.5s 0.35s ease-out; }
@@ -325,6 +353,9 @@
 @keyframes twinkle {
   0%, 100% { scale: 1; opacity: 1; }
   50% { scale: 0.82; opacity: 0.7; }
+}
+@keyframes piece-bob {
+  50% { translate: -10% -46%; }
 }
 @keyframes zel-ripple {
   35% { scale: 1.045; }

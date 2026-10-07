@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, KeyRound, Plug, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ease } from "@/lib/easing";
 import { useT } from "@/i18n";
 import { Companion } from "@/components/Companion";
 import { Wordmark } from "@/components/Wordmark";
 import { WhyZellige } from "@/components/WhyZellige";
+
+const bringIcons = [Workflow, Plug, KeyRound];
 
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
@@ -105,14 +107,18 @@ export function Hero({ reduced }: { reduced: boolean }) {
       <p className="hero-copy relative z-[2] max-w-[22ch] text-[clamp(26px,3.4vw,42px)] leading-[1.08] tracking-[-0.045em] text-balance">
         {t.hero.title.lead} <em className="text-accent">{t.hero.title.turn}</em>
       </p>
-      <ul className="hero-copy relative z-[2] mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-muted-foreground sm:text-[15px]">
-        {t.hero.bring.map((item, index) => (
-          <li key={item} className="flex items-center gap-3">
-            {index > 0 && <span aria-hidden="true" className="size-1.5 rotate-45 bg-brass" />}
-            {item}
-          </li>
-        ))}
-      </ul>
+      {/* Bring your own: kept in English, as the jargon is. */}
+      <p className="hero-copy relative z-[2] mt-6 flex flex-wrap items-center justify-center gap-2 text-[15px] sm:text-base">
+        <span className="mr-1 font-semibold">{t.hero.bring.lead}</span>
+        {t.hero.bring.items.map((item, index) => {
+          const Icon = bringIcons[index];
+          return (
+            <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-brass/60 bg-popover/80 py-1 pr-3 pl-2 font-medium shadow-[0_8px_20px_-14px_rgb(20_43_53/0.5)]">
+              <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 text-gold" />{item}
+            </span>
+          );
+        })}
+      </p>
       {/* Next section: a quiet cue at the bottom edge. */}
       <a
         href="#piezas"

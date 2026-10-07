@@ -15,12 +15,6 @@ import { Companion, layers, type Layer, type Mood } from "./Companion";
 export type Piece = Exclude<Layer, "centre">;
 export const pieces: Piece[] = ["crown", "cobalt", "points"];
 
-const labelPlacement: Record<Piece, string> = {
-  crown: "-left-[2%] bottom-[2%] sm:-left-[10%] sm:bottom-[6%]",
-  cobalt: "left-[0%] -top-[4%] sm:-left-[8%] sm:top-[2%]",
-  points: "-right-[2%] top-[66%] sm:-right-[12%]",
-};
-
 /** One layer of the emblem, small, to name it in labels and lists. */
 export function LayerGlyph({ layer, className }: { layer: Piece; className?: string }) {
   const { src } = layers.find(({ name }) => name === layer)!;
@@ -40,6 +34,7 @@ export function Trio({
   mood,
   show,
   onPick,
+  onHover,
   className,
 }: {
   mood: Mood;
@@ -47,11 +42,18 @@ export function Trio({
   show?: Piece;
   /** Called with the layer the reader clicks or taps. */
   onPick?: (piece: Piece) => void;
+  /** Called with the layer under the mouse, or none, so the page can point at it. */
+  onHover?: (piece: Piece | undefined) => void;
   className?: string;
 }) {
   const t = useT();
-  // Pointing at a visible layer lifts it and explains it.
-  const [hover, setHover] = useState<Piece>();
+  // Pointing at a visible layer lifts it, with Zel; the page lights up its step.
+  const [hover, setHoverState] = useState<Piece>();
+  const setHover = (piece: Piece | undefined) => {
+    if (piece === hover) return;
+    setHoverState(piece);
+    onHover?.(piece);
+  };
   const pieceAt = (event: MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const piece = layerAt(((event.clientX - rect.left) / rect.width) * 2 - 1, ((event.clientY - rect.top) / rect.height) * 2 - 1);
@@ -65,32 +67,6 @@ export function Trio({
       onClick={(event) => { const piece = pieceAt(event); if (piece) onPick?.(piece); }}
     >
       <Companion mood={mood} follow alt={t.zel.alt} shadow="tile" className="size-full" />
-      {pieces.map((piece) => (
-        <span
-          key={piece}
-          className={cn(
-            `tile-label label-${piece} absolute flex items-center gap-2 rounded-full border border-border bg-popover/95 py-1.5 pr-3 pl-2 text-xs whitespace-nowrap text-foreground shadow-[0_10px_24px_-14px_rgb(20_43_53/0.45)] transition-[border-color,box-shadow] sm:text-[13px] ${labelPlacement[piece]}`,
-            show === piece && "border-brass shadow-[0_0_0_3px_rgb(176_138_74/0.25)]",
-          )}
-        >
-          <LayerGlyph layer={piece} className="size-4" />
-          {t.layers[piece].use}
-        </span>
-      ))}
-      {/* What the layer under the pointer is, over the bottom of the tile. */}
-      {pieces.map((piece) => (
-        <div
-          key={piece}
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute inset-x-[4%] bottom-[-6%] z-10 rounded-2xl border border-brass/60 bg-popover/95 p-4 text-left shadow-[0_18px_40px_-20px_rgb(20_43_53/0.5)] backdrop-blur-sm transition-[opacity,translate] duration-300",
-            hover === piece ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
-          )}
-        >
-          <p className="flex items-center gap-2 font-semibold"><LayerGlyph layer={piece} className="size-5" /> {t.story.steps[piece].title}</p>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t.story.steps[piece].body}</p>
-        </div>
-      ))}
     </div>
   );
 }
