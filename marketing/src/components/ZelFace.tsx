@@ -1,6 +1,7 @@
 import { useId } from "react";
 
-export type Mood = "hello" | "look" | "thinking" | "excited" | "curious" | "focused" | "wink" | "content";
+export type Mood = "hello" | "look" | "thinking" | "excited" | "curious" | "focused" | "wink" | "content" | "surprised";
+// The moods with a generated image (scripts/build-brand.mjs); "surprised" only plays on the web.
 export const moods: Mood[] = ["hello", "look", "thinking", "excited", "curious", "focused", "wink", "content"];
 
 /*
@@ -25,10 +26,10 @@ function Arc({ x, up = true }: { x: number; up?: boolean }) {
   return <path d={d} fill="none" stroke="#f8f6ef" strokeWidth="24" strokeLinecap="round" />;
 }
 
-function Open({ x, squint = false }: { x: number; squint?: boolean }) {
+function Open({ x, squint = false, wide = false }: { x: number; squint?: boolean; wide?: boolean }) {
   return (
     <g className="companion-eye">
-      <ellipse cx={x} cy={EYE_Y} rx="30" ry={squint ? 13 : 40} fill="#f8f6ef" />
+      <ellipse cx={x} cy={EYE_Y} rx={wide ? 38 : 30} ry={squint ? 13 : wide ? 54 : 40} fill="#f8f6ef" />
       {!squint && <circle cx={x - 9} cy={EYE_Y - 14} r="8" fill="#0b1d29" opacity=".18" />}
     </g>
   );
@@ -49,6 +50,8 @@ export function Eyes({ mood }: { mood: Mood }) {
           <path d={`M${EYE_R + 34} ${EYE_Y - 36}L${EYE_R - 30} ${EYE_Y}L${EYE_R + 34} ${EYE_Y + 36}`} />
         </g>
       );
+    case "surprised":
+      return <g className="companion-look"><Open x={EYE_L} wide /><Open x={EYE_R} wide /></g>;
     case "focused":
       return <g className="companion-look"><Open x={EYE_L} squint /><Open x={EYE_R} squint /></g>;
     case "thinking":

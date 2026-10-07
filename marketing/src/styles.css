@@ -299,6 +299,8 @@
     animation: none;
     scale: 1 var(--zel-eye-open, 0.09);
   }
+  /* Story: until Zel is found, the centre is just the emblem's teal star. */
+  .zel-hiding .zel-face-layer { opacity: 0; scale: 0.7; transition: opacity 0.3s ease, scale 0.3s ease; }
   .zel-attentive-eyes { opacity: calc(1 - var(--zel-happy, 0)); }
   .zel-happy-eyes { opacity: var(--zel-happy, 0); }
   .speech-bubble::after {
@@ -371,12 +373,23 @@
   .tile-intro .label-cobalt { animation-delay: 1.4s; }
   .tile-intro .label-points { animation-delay: 1.6s; }
   .tile-intro .tile-greeting { animation: pop 0.6s 1.9s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: bottom left; }
+  /* Found: the face jumps out of the centre tile and the pieces startle. */
+  .tile-scroll.zel-found .zel-face-layer { animation: found-face 0.75s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+  .tile-scroll.zel-found .zel-layer:not(.layer-centre) .zel-piece { animation: found-startle 0.6s 0.05s ease-out; }
 }
 @keyframes layer-in {
   from { scale: var(--from); opacity: 0; }
 }
 @keyframes centre-in {
   from { opacity: 0; scale: 0.6; }
+}
+@keyframes found-face {
+  from { opacity: 0; scale: 0.6; }
+  45% { opacity: 1; scale: 1.14; translate: 0 -3%; }
+}
+@keyframes found-startle {
+  30% { translate: 0 -2.5%; }
+  60% { translate: 0 0.8%; }
 }
 @keyframes whole-in {
   from { opacity: 0; }

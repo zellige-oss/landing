@@ -31,6 +31,7 @@ export function Trio({
   mode,
   focus,
   greeting,
+  found = true,
   className,
 }: {
   mood: Mood;
@@ -40,11 +41,13 @@ export function Trio({
   focus?: Piece;
   /** Zel introduces itself in a bubble once the tile is complete. */
   greeting?: boolean;
+  /** Whether Zel's face shows; when it appears, Zel startles at being found. */
+  found?: boolean;
   className?: string;
 }) {
   const t = useT();
   return (
-    <div className={cn("tile relative aspect-square", mode === "intro" ? "tile-intro" : "tile-scroll", focus && `focus-${focus}`, className)}>
+    <div className={cn("tile relative aspect-square", mode === "intro" ? "tile-intro" : "tile-scroll", focus && `focus-${focus}`, found ? "zel-found" : "zel-hiding", className)}>
       <Companion mood={mood} follow alt={t.zel.alt} className="size-full drop-shadow-[0_22px_28px_rgb(11_29_41/0.3)]" />
       {pieces.map((piece) => (
         <span
