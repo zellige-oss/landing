@@ -2,6 +2,8 @@
 // its shape exactly (the `satisfies` check fails the build if a key is missing).
 // Headlines are { lead, turn }: the plain line, then the serif-italic turn.
 
+export type FeatureIcon = "chat" | "harness" | "agent";
+
 const es = {
   meta: {
     title: "Zellige — Cada idea encuentra su lugar",
@@ -12,17 +14,17 @@ const es = {
   header: {
     home: "Zellige, inicio",
     nav: "Principal",
-    links: { idea: "La idea", branches: "Las ramas", project: "El proyecto" },
+    links: { idea: "La idea", features: "Funciones", contact: "Contacto" },
     theme: "Cambiar entre modo claro y oscuro",
     themeTitle: "Modo claro / oscuro",
   },
   hero: {
     etymology: { from: "del árabe", source: "az-zellīj", meaning: "«pequeña piedra pulida»" },
     title: { lead: "Tu IA está repartida en mil apps.", turn: "Zellige la junta." },
-    body: "Tus agentes personales, los gestores que orquestan modelos y el chat de siempre, encajados en un espacio abierto que guarda una sola historia: la tuya.",
+    body: "El chat de siempre, un meta-harness para desarrollar software con agentes y tu agente personal, encajados en un espacio abierto que guarda una sola historia: la tuya.",
     next: "Ir a la siguiente sección",
     primary: "Mira cómo encaja",
-    secondary: "Cómo va el proyecto",
+    secondary: "Lo que podrás hacer",
   },
   zel: {
     alt: "Zel, la mascota de Zellige",
@@ -32,11 +34,13 @@ const es = {
   },
   layers: {
     crown: { name: "Corona", use: "Chat" },
-    cobalt: { name: "Azul", use: "Gestores y meta-harness" },
+    cobalt: { name: "Azul", use: "Meta-harness" },
     points: { name: "Puntas", use: "Agentes personales" },
   },
   story: {
-    eyebrow: "El arte de unir",
+    hint: "Desliza para montar el azulejo",
+    progress: "Pasos de la historia",
+    goTo: "Ir al paso",
     definition:
       "Del árabe az-zellīj, «pequeña piedra pulida». Mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
     headline: { lead: "Varias piedras,", turn: "un mismo azulejo." },
@@ -47,7 +51,7 @@ const es = {
       },
       cobalt: {
         title: "El azul",
-        body: "Las esquinas que sujetan el conjunto. Son los gestores y meta-harness: orquestan modelos, herramientas y flujos para que todo encaje.",
+        body: "Las esquinas que sujetan el conjunto. Es el meta-harness para desarrollar software con agentes: orquesta modelos, herramientas y flujos para que todo encaje.",
       },
       points: {
         title: "Las puntas",
@@ -59,37 +63,28 @@ const es = {
       },
     },
   },
-  panorama: {
-    label: "Mosaico zellige formado por piezas cerámicas que encajan entre sí",
-    caption: { lead: "Cada pieza es distinta.", turn: "Juntas cuentan una sola historia." },
+  features: {
+    headline: { lead: "Tres maneras de usar la IA,", turn: "un solo sitio." },
+    // [icon, layer of the tile it belongs to, use, title, body]
+    pillars: [
+      ["chat", "crown", "Chat", "El chat de siempre", "Piensa en voz alta con el modelo que elijas, como en cualquier chat de IA, pero sin que la conversación se quede encerrada en una app."],
+      ["harness", "cobalt", "Meta-harness", "Desarrollo de software con agentes", "Orquesta modelos, herramientas y agentes de código en un mismo flujo para construir software."],
+      ["agent", "points", "Agente personal", "Tu agente personal", "Sale, recuerda, avisa y hace recados por ti."],
+    ] as [FeatureIcon, "crown" | "cobalt" | "points", string, string, string][],
+    together: {
+      title: "Y las tres, juntas",
+      items: [
+        ["Una sola historia", "El chat, el meta-harness y tu agente parten de la misma historia, en lugar de empezar cada uno desde cero."],
+        ["En tu servidor", "Un proyecto abierto y autoalojado: tu historia se guarda en tu propio servidor, no en el de un proveedor."],
+        ["Cambia de modelo, no de historia", "Los modelos y las herramientas pueden cambiar sin llevarse por delante lo que has construido."],
+      ] as [string, string][],
+    },
   },
-  branches: {
-    label: "Diagrama: una historia de mensajes de la que nace una rama sin perder el original",
-    original: "Historia original",
-    branch: "Una rama nueva",
-    caption: { lead: "La pieza de la que parte", turn: "se queda donde estaba." },
-    eyebrow: "Pensado para permanecer",
-    headline: { lead: "Cambia de rumbo.", turn: "No de historia." },
-    principles: [
-      ["Tu conversación, no la de un proveedor.", "La conversación es el centro. Los modelos y herramientas pueden cambiar sin llevarse por delante lo que has construido."],
-      ["Explorar sin borrar el camino.", "Las ramas permiten seguir una idea en otra dirección y conservar el hilo del que partiste. Cambiar de opinión también forma parte del proceso."],
-      ["Un espacio que puedes hacer tuyo.", "Un proyecto abierto y autoalojado. El servidor guarda tu historia; las interfaces son distintas maneras de entrar en ella."],
-    ] as [string, string][],
-  },
-  project: {
-    eyebrow: "Estamos poniendo las primeras piezas",
-    headline: { lead: "Lo estamos", turn: "construyendo." },
-    progress: [
-      ["Guardar conversaciones en tu propio servidor", true],
-      ["Explorar ideas en ramas sin perder el original", true],
-      ["Conectar agentes y modelos a tu historia", false],
-    ] as [string, boolean][],
-    signature: "Pieza a pieza.",
-  },
-  guide: {
-    panorama: "¡Mira cómo encajan!",
-    ramas: "Una rama nueva no borra el camino.",
-    proyecto: "Seguimos poniendo piezas.",
+  contact: {
+    headline: { lead: "¿Quieres poner", turn: "tu pieza?" },
+    body: "Zellige es un proyecto abierto. Sigue cómo avanza en GitHub, abre un issue con tus ideas o escríbenos.",
+    repo: "Código en GitHub",
+    email: "Escríbenos",
   },
   footer: {
     tagline: "Distintas piezas. Una misma historia.",
@@ -110,17 +105,17 @@ const en = {
   header: {
     home: "Zellige, home",
     nav: "Main",
-    links: { idea: "The idea", branches: "Branches", project: "The project" },
+    links: { idea: "The idea", features: "Features", contact: "Contact" },
     theme: "Switch between light and dark mode",
     themeTitle: "Light / dark mode",
   },
   hero: {
     etymology: { from: "from Arabic", source: "az-zellīj", meaning: "“small polished stone”" },
     title: { lead: "Your AI is scattered across a dozen apps.", turn: "Zellige brings it together." },
-    body: "Your personal agents, the managers that orchestrate models and the chat you already use, fitted into one open space that keeps a single story: yours.",
+    body: "The chat you know, a meta-harness for building software with agents and your personal agent, fitted into one open space that keeps a single story: yours.",
     next: "Go to the next section",
     primary: "See how it fits",
-    secondary: "How the project is going",
+    secondary: "What you'll be able to do",
   },
   zel: {
     alt: "Zel, Zellige's mascot",
@@ -130,11 +125,13 @@ const en = {
   },
   layers: {
     crown: { name: "Crown", use: "Chat" },
-    cobalt: { name: "Blue", use: "Managers & meta-harnesses" },
+    cobalt: { name: "Blue", use: "Meta-harness" },
     points: { name: "Points", use: "Personal agents" },
   },
   story: {
-    eyebrow: "The art of joining",
+    hint: "Scroll to build the tile",
+    progress: "Story steps",
+    goTo: "Go to step",
     definition:
       "From Arabic az-zellīj, “small polished stone”. A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
     headline: { lead: "Many stones,", turn: "one tile." },
@@ -145,7 +142,7 @@ const en = {
       },
       cobalt: {
         title: "The blue",
-        body: "The corners that hold it all together. Managers and meta-harnesses: they orchestrate models, tools and flows so everything fits.",
+        body: "The corners that hold it all together. The meta-harness for building software with agents: it orchestrates models, tools and flows so everything fits.",
       },
       points: {
         title: "The points",
@@ -157,37 +154,27 @@ const en = {
       },
     },
   },
-  panorama: {
-    label: "Zellige mosaic made of ceramic pieces fitting together",
-    caption: { lead: "Every piece is different.", turn: "Together they tell one story." },
+  features: {
+    headline: { lead: "Three ways to use AI,", turn: "one place." },
+    pillars: [
+      ["chat", "crown", "Chat", "The chat you know", "Think out loud with the model you choose, like any AI chat, but without the conversation being locked inside one app."],
+      ["harness", "cobalt", "Meta-harness", "Software development with agents", "Orchestrate models, tools and coding agents in one flow to build software."],
+      ["agent", "points", "Personal agent", "Your personal agent", "It goes out, remembers, reminds and runs errands for you."],
+    ] as [FeatureIcon, "crown" | "cobalt" | "points", string, string, string][],
+    together: {
+      title: "And all three, together",
+      items: [
+        ["One story", "The chat, the meta-harness and your agent start from the same story, instead of each starting from scratch."],
+        ["On your server", "An open, self-hosted project: your story is kept on your own server, not a provider's."],
+        ["Change models, not your story", "Models and tools can change without taking what you've built with them."],
+      ] as [string, string][],
+    },
   },
-  branches: {
-    label: "Diagram: a message history that branches off without losing the original",
-    original: "Original history",
-    branch: "A new branch",
-    caption: { lead: "The piece it starts from", turn: "stays where it was." },
-    eyebrow: "Built to last",
-    headline: { lead: "Change course.", turn: "Not your story." },
-    principles: [
-      ["Your conversation, not a provider's.", "The conversation is the centre. Models and tools can change without taking what you've built with them."],
-      ["Explore without erasing the path.", "Branches let you take an idea in another direction and keep the thread you started from. Changing your mind is part of the process."],
-      ["A space you can make your own.", "An open, self-hosted project. The server keeps your story; the interfaces are different ways into it."],
-    ],
-  },
-  project: {
-    eyebrow: "Laying the first pieces",
-    headline: { lead: "We're", turn: "building it." },
-    progress: [
-      ["Keep conversations on your own server", true],
-      ["Explore ideas in branches without losing the original", true],
-      ["Connect agents and models to your story", false],
-    ],
-    signature: "Piece by piece.",
-  },
-  guide: {
-    panorama: "Look how they fit!",
-    ramas: "A new branch doesn't erase the path.",
-    proyecto: "Still laying pieces.",
+  contact: {
+    headline: { lead: "Want to add", turn: "your piece?" },
+    body: "Zellige is an open project. Follow how it's going on GitHub, open an issue with your ideas, or write to us.",
+    repo: "Code on GitHub",
+    email: "Write to us",
   },
   footer: {
     tagline: "Different pieces. One story.",
