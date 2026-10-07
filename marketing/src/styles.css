@@ -369,9 +369,9 @@
 
 /* Hero: the emblem's layers fly in from beyond the screen and lock around Zel. */
 @media (prefers-reduced-motion: no-preference) {
-  .hero-intro .layer-points { animation: fly-in 1.1s 0.25s cubic-bezier(0.16, 0.9, 0.24, 1.04) both; --fly: 2.8; --spin: 24deg; }
-  .hero-intro .layer-cobalt { animation: fly-in 1.1s 0.55s cubic-bezier(0.16, 0.9, 0.24, 1.04) both; --fly: 2.1; --spin: -18deg; }
-  .hero-intro .layer-crown { animation: fly-in 1s 0.85s cubic-bezier(0.16, 0.9, 0.24, 1.04) both; --fly: 1.5; --spin: 12deg; }
+  .hero-intro .layer-points { animation: fly-in 1.1s 0.25s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 2.8; --spin: 24deg; }
+  .hero-intro .layer-cobalt { animation: fly-in 1.1s 0.55s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 2.1; --spin: -18deg; }
+  .hero-intro .layer-crown { animation: fly-in 1s 0.85s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 1.5; --spin: 12deg; }
   .hero-intro .layer-centre, .hero-intro .zel-face-layer { animation: centre-in 0.7s 1.35s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: center; }
   .hero-intro .zel-whole { animation: whole-in 0.3s 2.05s backwards; }
   .hero-intro .hero-greeting { animation: pop 0.6s 2.1s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: bottom left; }
@@ -382,17 +382,19 @@
   60% { opacity: 1; }
 }
 @layer components {
-  /* Scrolling away: the layers fall toward the story below, outer ones first. */
-  .hero-zel .layer-points { translate: 0 calc(var(--out, 0) * 150px); }
-  .hero-zel .layer-cobalt { translate: 0 calc(var(--out, 0) * 105px); }
-  .hero-zel .layer-crown { translate: 0 calc(var(--out, 0) * 65px); }
+  /* Scrolling away: the layers drift apart and fade, outer ones first, the reverse
+     of how the story below assembles them. Tied to the scroll, with no transition
+     on scale or opacity, so they never lag behind and snap back together. */
+  .hero-zel .layer-points { scale: calc(1 + var(--out, 0) * 0.6); opacity: calc(1 - var(--out, 0) * 1.1); }
+  .hero-zel .layer-cobalt { scale: calc(1 + var(--out, 0) * 0.42); opacity: calc(1 - var(--out, 0) * 0.9); }
+  .hero-zel .layer-crown { scale: calc(1 + var(--out, 0) * 0.26); opacity: calc(1 - var(--out, 0) * 0.7); }
   .hero-zel { opacity: max(0, calc(1 - var(--out, 0) * 1.6)); }
   /* Pointing at a layer lifts it and dims the rest. */
   .hero-zel .zel-layer { transition: translate 0.35s ease, filter 0.35s ease; }
   .lift-crown .zel-layer:not(.layer-centre, .layer-crown),
   .lift-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
   .lift-points .zel-layer:not(.layer-centre, .layer-points) { filter: saturate(0.3) brightness(0.92); opacity: 0.45; }
-  .hero-zel .zel-whole { opacity: calc(1 - var(--out, 0) * 100); }
+  .hero-zel .zel-whole { opacity: calc(1 - var(--out, 0) * 100); transition: none; }
   .lift-crown .zel-whole, .lift-cobalt .zel-whole, .lift-points .zel-whole { opacity: 0; }
   .lift-crown .layer-crown, .lift-cobalt .layer-cobalt, .lift-points .layer-points {
     translate: 0 -6px;
