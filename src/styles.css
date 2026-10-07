@@ -364,6 +364,10 @@
 @media (prefers-reduced-motion: no-preference) and (max-width: 1023px) {
   .story-step[aria-current="step"] { animation: step-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
 }
+/* The end of the story rises under the whole tile, a beat after it completes. */
+@media (prefers-reduced-motion: no-preference) {
+  .story-end { animation: step-in 0.6s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+}
 @keyframes step-in {
   from { opacity: 0; translate: 0 10px; }
 }

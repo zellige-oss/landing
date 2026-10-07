@@ -2,6 +2,9 @@ import { useState, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
 import { Companion, layers, type Layer, type Mood } from "./Companion";
+import glyphCrown from "@/assets/glyph-crown.webp";
+import glyphCobalt from "@/assets/glyph-cobalt.webp";
+import glyphPoints from "@/assets/glyph-points.webp";
 
 /*
  * Zel is the standard emblem: Zel in the centre, and around it the colour layers,
@@ -21,6 +24,13 @@ export function LayerGlyph({ layer, className }: { layer: Piece; className?: str
   return <img src={src} alt="" width="960" height="960" className={cn("size-5 shrink-0", className)} draggable={false} />;
 }
 
+const glyphs: Record<Piece, string> = { crown: glyphCrown, cobalt: glyphCobalt, points: glyphPoints };
+
+/** One layer with Zel at its centre: one way of using Zel (scripts/build-brand.mjs). */
+export function ZelGlyph({ layer, className }: { layer: Piece; className?: string }) {
+  return <img src={glyphs[layer]} alt="" width="128" height="128" className={cn("size-5 shrink-0", className)} draggable={false} />;
+}
+
 /** The layer under a point of the tile, in -1..1 from its centre; none on Zel or outside. */
 function layerAt(x: number, y: number): Piece | undefined {
   const r = Math.hypot(x, y);
@@ -35,6 +45,7 @@ export function Trio({
   show,
   onPick,
   onHover,
+  lift,
   className,
 }: {
   mood: Mood;
@@ -44,6 +55,8 @@ export function Trio({
   onPick?: (piece: Piece) => void;
   /** Called with the layer under the mouse, or none, so the page can point at it. */
   onHover?: (piece: Piece | undefined) => void;
+  /** A layer to lift from outside, such as the step the reader points at. */
+  lift?: Piece;
   className?: string;
 }) {
   const t = useT();
@@ -61,7 +74,7 @@ export function Trio({
     return show ? undefined : piece;
   };
   // A layer stays lifted only while the whole tile shows (scrolling back can hide it).
-  const lifted = show ? undefined : hover;
+  const lifted = show ? undefined : hover ?? lift;
   return (
     <div
       className={cn("tile tile-scroll relative aspect-square", `show-${show ?? "all"}`, lifted && `lift-${lifted}`, lifted && onPick && "cursor-pointer", className)}

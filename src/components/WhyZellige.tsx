@@ -28,9 +28,11 @@ export function WhyZellige() {
           <span className="text-muted-foreground">/zɛˈliːʒ/</span>
           <span lang="ar" dir="rtl" className="text-muted-foreground">الزليج</span>
         </p>
-        <p className="mt-2 text-[15px] leading-[1.65] text-muted-foreground">
-          {t.hero.why.from} <span className="font-medium text-foreground">az-zellīj</span>, {t.hero.why.meaning}. {t.hero.why.body}
-        </p>
+        <div className="mt-2 grid gap-2 text-[15px] leading-[1.65] text-muted-foreground">
+          <p>{t.hero.why.from} <span className="font-medium text-foreground">az-zellīj</span>, {t.hero.why.meaning}</p>
+          <p>{t.hero.why.history}</p>
+          <p><strong className="font-semibold text-foreground">{t.hero.why.fact.label}</strong> {t.hero.why.fact.body}</p>
+        </div>
       </div>
     </details>
   );

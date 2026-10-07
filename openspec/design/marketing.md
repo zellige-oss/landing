@@ -13,15 +13,19 @@ and Zel, the mascot, is the centre that holds them together.
 1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel, one line
    (self-hosted and open source) and "Bring your own: harness · sub · API key",
    kept in English as the jargon is. "Why Zellige?" beside the wordmark opens
-   where the name comes from (`src/components/WhyZellige.tsx`), beside the
+   where the name comes from (`src/components/WhyZellige.tsx`): the literal
+   meaning ("tile"), a line of history and a fun fact. It sits beside the
    wordmark on wide screens and in the flow on smaller ones, never over Zel. As
    the hero scrolls away, Zel flies, shrinking, into the header's logo.
-2. **How it works** (`src/pages/Story.tsx`): the title stays in the sticky panel
-   with the story. Zel stays in the centre of the tile and each scroll step shows
-   one layer around it: chat (crown), the harness manager (blue), the personal
-   agent (green); the last puts the whole tile together. With a mouse, pointing at
-   a layer lifts it, with Zel, and lights up its step while the rest step back;
-   clicking or tapping one jumps to its step. Below, "Under the hood" explains the
+2. **How does it work?** (`src/pages/Story.tsx`): the title stays in the sticky
+   panel with the story. Zel stays in the centre of the tile and each scroll step
+   shows one layer around it: chat (crown), the harness manager (blue), the
+   personal agent (green). Each part is named with its layer and Zel at its centre.
+   The whole tile comes last and briefly, with "Zellige is all of this" rising under
+   it, so "Under the hood" follows soon after. Once the tile is whole, the tile and
+   the parts point at each other: hovering a layer lifts it, with Zel, and lights
+   up its part; hovering a part lifts its layer. Clicking or tapping a layer jumps
+   to its step. Below, "Under the hood" explains the
    setup and draws it: your devices reach your server over Tailscale; the server
    runs Zellige (its three layers on one shared memory) and reaches the models by
    API or OAuth. The story plays once, then settles; without JavaScript or with
@@ -29,9 +33,10 @@ and Zel, the mascot, is the centre that holds them together.
 3. **Features** (`src/pages/Features.tsx`): "Bring your own", two cards. BYOK ·
    BYOS: your API keys, priced per token in the open, or a subscription you already
    pay for, signed in with OAuth (each tool's sign-in listed). BYOH: the
-   open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness). A bar
-   below: on your server, one memory, change models without losing anything. Tool
-   marks live in `src/components/providers.tsx`.
+   open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness), as
+   large tiles. A bar below: on your server, one memory, change models without
+   losing anything. Tool marks, in their official colours, live in
+   `src/components/providers.tsx` and `src/assets/marks/`.
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,
    both set in `src/site.ts`, beside a mosaic panel still being laid
    (`src/components/TileInProgress.tsx`): as it comes into view the pieces slot in
@@ -51,7 +56,9 @@ A mosaic band (`src/components/Band.tsx`) separates the pages.
 - `src/hooks/zel-motion.ts`: the hero's living Zel (wake-up, gaze, blinks, the
   greeting with its widening eyes and the layer spin). It writes each value
   straight onto the element that uses it, so phones never restyle all of Zel.
-- `src/components/Trio.tsx`: the tile with its layer labels, used by the story.
+- `src/components/Trio.tsx`: the tile used by the story, and the glyphs that name
+  its layers: `LayerGlyph` (the layer alone, in the phone menu) and `ZelGlyph`
+  (the layer with Zel at its centre, `src/assets/glyph-*.webp`).
 
 ## Brand and ornament
 

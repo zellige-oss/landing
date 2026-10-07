@@ -31,9 +31,9 @@ export function Features() {
       <ul className="mt-8 grid gap-4 lg:grid-cols-2">
         <Card icon={KeyRound} {...f.access}>
           <ul aria-label={f.providers} className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
-            {providers.map(({ name, command, paths }) => (
+            {providers.map(({ name, command, mark }) => (
               <li key={name} className="flex min-w-0 items-center gap-2">
-                <ProviderMark paths={paths} className="size-4 shrink-0" />
+                <ProviderMark mark={mark} className="size-4" />
                 <span className="shrink-0">{name}</span>
                 {command ? <code className="truncate font-mono text-[12px] text-muted-foreground">{command}</code> : <span className="text-muted-foreground">{f.access.google}</span>}
               </li>
@@ -41,14 +41,15 @@ export function Features() {
           </ul>
         </Card>
         <Card icon={Workflow} {...f.harness}>
-          <ul aria-label={f.harnesses} className="flex flex-wrap gap-2">
-            {openHarnesses.map(({ name, paths, viewBox }) => (
-              <li key={name} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 py-1.5 pr-3.5 pl-2.5">
-                <ProviderMark paths={paths} viewBox={viewBox} className="size-4" />{name}
+          {/* The marks large, in one row, so the card shows what it is about at a glance. */}
+          <ul aria-label={f.harnesses} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {openHarnesses.map(({ name, mark }) => (
+              <li key={name} className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface/70 px-2 py-4 text-center leading-tight">
+                <ProviderMark mark={mark} className="size-7" />{name}
               </li>
             ))}
-            <li className="self-center pl-1 text-muted-foreground">{f.harness.more}</li>
           </ul>
+          <p className="mt-3 text-muted-foreground">{f.harness.more}</p>
         </Card>
       </ul>
       {/* What every part shares, as one bar under the cards. */}
