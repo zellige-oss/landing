@@ -38,7 +38,7 @@ export function Features() {
       </ul>
       <div data-reveal className="mt-14 border-t border-border pt-10 sm:mt-20">
         <h3 className="font-serif text-[28px] text-gold italic sm:text-[32px]">{t.features.together.title}</h3>
-        <ul className="mt-6 grid gap-6 sm:grid-cols-3 sm:gap-10">
+        <ul className="mt-6 grid gap-6 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4">
           {t.features.together.items.map(([title, body]) => (
             <li key={title} className="flex gap-3.5">
               <span aria-hidden="true" className="mt-2 size-2.5 shrink-0 rotate-45 bg-brass" />
