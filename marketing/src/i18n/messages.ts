@@ -37,6 +37,9 @@ const es = {
   },
   story: {
     eyebrow: "El arte de unir",
+    hint: "Desliza para montar el azulejo",
+    progress: "Pasos de la historia",
+    goTo: "Ir al paso",
     definition:
       "Del árabe az-zellīj, «pequeña piedra pulida». Mosaico de piezas de cerámica cortadas a mano que, por separado, no dicen nada; juntas forman un dibujo.",
     headline: { lead: "Varias piedras,", turn: "un mismo azulejo." },
@@ -135,6 +138,9 @@ const en = {
   },
   story: {
     eyebrow: "The art of joining",
+    hint: "Scroll to build the tile",
+    progress: "Story steps",
+    goTo: "Go to step",
     definition:
       "From Arabic az-zellīj, “small polished stone”. A mosaic of hand-cut ceramic pieces that say nothing on their own; together they make a pattern.",
     headline: { lead: "Many stones,", turn: "one tile." },
