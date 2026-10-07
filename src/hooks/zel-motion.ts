@@ -1,11 +1,6 @@
 import { useEffect, type RefObject } from "react";
 import { GREETING_EYES, greetingEye } from "@/components/zel-eye-shapes";
-
-const clamp = (n: number) => Math.max(0, Math.min(1, n));
-const ease = (n: number) => { const t = clamp(n); return t * t * (3 - 2 * t); };
-const ramp = (t: number, a: number, b: number) => ease((t - a) / (b - a));
-const bump = (t: number, a: number, m: number, b: number) => t < m ? ramp(t, a, m) : 1 - ramp(t, m, b);
-const hold = (t: number, a: number, b: number, c: number, d: number) => ramp(t, a, b) * (1 - ramp(t, c, d));
+import { clamp, ramp, bump, hold } from "@/lib/easing";
 
 // The greeting, t seconds after it starts. The eyes' part (widen, then turn into the
 // happy ∩ and back) is drawn by greetingEye in zel-eye-shapes.ts.

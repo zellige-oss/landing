@@ -21,6 +21,24 @@ const GLINT = "455,644 514,594 504,530 573,542 624,488";
 const LID_CLEAR_UP = .45;
 const LID_CLEAR_DOWN = .2;
 
+// The face's obsidian, also on each eye's lids so a shut lid blends into the face.
+const ObsidianStops = () => (
+  <>
+    <stop offset="0" stopColor="#1a2433" />
+    <stop offset=".55" stopColor="#05080d" />
+    <stop offset="1" stopColor="#000" />
+  </>
+);
+
+// The eyes' glaze: lit from the top left, warmer towards the edge.
+const GlazeStops = () => (
+  <>
+    <stop offset="0" stopColor="#fffdf8" />
+    <stop offset=".62" stopColor="#f3ecdd" />
+    <stop offset="1" stopColor="#d8ccb4" />
+  </>
+);
+
 function Arc({ x, up = true }: { x: number; up?: boolean }) {
   // ∩ for a smile-squint, ∪ for closed, relaxed eyes.
   const w = HAPPY_HALF_WIDTH;
@@ -49,14 +67,10 @@ function Open({ x, rx = EYE_RX, ry = EYE_RY, squint = false }: { x: number; rx?:
         {/* The face's own obsidian gradient, placed where the face draws it, so a
             shut lid blends into the face and only its crease shows. */}
         <radialGradient id={`${id}-lid`} gradientUnits="userSpaceOnUse" cx="574" cy="538" r="336">
-          <stop offset="0" stopColor="#1a2433" />
-          <stop offset=".55" stopColor="#05080d" />
-          <stop offset="1" stopColor="#000" />
+          <ObsidianStops />
         </radialGradient>
         <radialGradient id={`${id}-glaze`} cx="42%" cy="34%" r="70%">
-          <stop offset="0" stopColor="#fffdf8" />
-          <stop offset=".62" stopColor="#f3ecdd" />
-          <stop offset="1" stopColor="#d8ccb4" />
+          <GlazeStops />
         </radialGradient>
         <filter id={`${id}-shade`} x="-20%" y="-20%" width="140%" height="160%">
           <feDropShadow dx="0" dy={h * .08} stdDeviation={h * .07} floodColor="#000" floodOpacity=".55" />
@@ -127,15 +141,11 @@ export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean
     <>
       <defs>
         <radialGradient id={gradient} cx="40%" cy="30%" r="75%">
-          <stop offset="0" stopColor="#1a2433" />
-          <stop offset=".55" stopColor="#05080d" />
-          <stop offset="1" stopColor="#000" />
+          <ObsidianStops />
         </radialGradient>
         {lively && (
           <radialGradient id={`${gradient}-glaze`} cx="42%" cy="34%" r="70%">
-            <stop offset="0" stopColor="#fffdf8" />
-            <stop offset=".62" stopColor="#f3ecdd" />
-            <stop offset="1" stopColor="#d8ccb4" />
+            <GlazeStops />
           </radialGradient>
         )}
       </defs>

@@ -1,6 +1,29 @@
 // Pixel-mask helpers shared by the emblem scripts. A mask is a Uint8Array of
 // width × height entries, 1 inside and 0 outside.
 
+// The piece around `seed`: pixels that pass `accept`, reached across gaps of up to
+// 4 px (crackle lines) as long as each pixel crossed passes `bridge`.
+export function flood(seed, accept, width, height, bridge = () => true) {
+  const mask = new Uint8Array(width * height);
+  const stack = [seed];
+  while (stack.length) {
+    const k = stack.pop();
+    if (mask[k]) continue;
+    mask[k] = 1;
+    const x = k % width, y = (k - x) / width;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (let step = 1; step <= 5; step += 1) {
+        const nx = x + dx * step, ny = y + dy * step;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) break;
+        const n = ny * width + nx;
+        if (accept(n)) { if (!mask[n]) stack.push(n); break; }
+        if (!bridge(n)) break;
+      }
+    }
+  }
+  return mask;
+}
+
 // Dilates the mask by `radius` px (4-connected). Eroding is growing the inverse.
 export function grow(mask, width, height, radius) {
   const reach = Uint8Array.from(mask);

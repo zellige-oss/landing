@@ -8,7 +8,7 @@ import { test } from 'vitest';
 // and browsers without JavaScript) receive. Build it first: `npm run build`.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const dist = resolve(root, 'dist');
-assert.ok(existsSync(join(dist, 'index.html')), 'Run `npm run build` before these tests');
+if (!existsSync(join(dist, 'index.html'))) throw new Error('Run `npm run build` before these tests');
 const pageUrl = new URL('https://zellige.invalid/');
 const html = readFileSync(join(dist, 'index.html'), 'utf8');
 const sourceCss = readFileSync(resolve(root, 'src/styles.css'), 'utf8');
