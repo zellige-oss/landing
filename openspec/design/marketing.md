@@ -17,7 +17,7 @@ and Zel, the mascot, is the centre that holds them together.
    into the header's logo; scrolling back flies it home.
 2. **The idea** (`src/pages/Story.tsx`): what Zellige is. Zel stays in the centre
    of the tile and each scroll step shows one layer around it, one way of using
-   Zel: the ivory crown is chat, the blue is the meta-harness for building
+   Zel: the ivory crown is chat, the blue is the harness manager for building
    software with agents, the green points are the personal agent. The last step
    puts the whole tile together: set up your own server and reach all of it
    through Tailscale, from the desktop and mobile apps and the web. The story

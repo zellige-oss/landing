@@ -16,15 +16,9 @@ import { Wordmark } from "@/components/Wordmark";
 
 function Emblem({ reduced }: { reduced: boolean }) {
   const t = useT();
-  // The layers are explained in the story below, so the hero's Zel only says hello.
   return (
     <div className={cn("hero-zel tile relative mx-auto aspect-square w-[min(78vw,clamp(200px,30vh,380px))]", !reduced && "hero-intro")}>
       <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} alt={t.zel.alt} shadow="hero" className="size-full" />
-      <p className="hero-greeting absolute top-[2%] left-[60%] w-max max-w-[150px] rounded-2xl rounded-bl-sm border border-border bg-popover px-3 py-2 text-left text-[11px] leading-snug text-foreground shadow-[0_12px_30px_-14px_rgb(20_43_53/0.4)] sm:top-[6%] sm:left-[64%] sm:max-w-[220px] sm:px-3.5 sm:py-2.5 sm:text-sm">
-        <strong className="font-semibold">{t.zel.hello}</strong>
-        <br />
-        {t.zel.helloLine}
-      </p>
     </div>
   );
 }
