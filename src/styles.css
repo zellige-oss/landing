@@ -273,7 +273,7 @@
   /* The pose belongs to an inner wrapper, posed by the hero's motion (zel-motion.ts).
      Assembly, hover and scroll keep their own outer transforms, and the face always
      shares the centre tile's pose. */
-  .zel-piece { transform-origin: 49.8% 51.4%; } /* the emblem's centre */
+  .zel-piece { transform-origin: 49.86% 51.21%; } /* the emblem's centre (scripts/build-layers.mjs) */
   .zel-lively[data-zel-awake] .zel-whole { opacity: 0; }
   .zel-lively .companion-look { transition: none; }
   /* Hero: asleep until the motion opens the lids (it sets each lid's translate). */
@@ -377,7 +377,7 @@
  * four-fold), so a layer always lands looking whole.
  */
 @media (prefers-reduced-motion: no-preference) {
-  .zel-layer .zel-piece > img { transform-origin: 49.8% 51.4%; transition: scale 0.6s cubic-bezier(0.3, 1.4, 0.5, 1); }
+  .zel-layer .zel-piece > img { transform-origin: 49.86% 51.21%; transition: scale 0.6s cubic-bezier(0.3, 1.4, 0.5, 1); }
   :is(.zel-mood-thinking, .zel-mood-curious, .zel-mood-excited, .zel-mood-focused, .zel-mood-hello, .zel-mood-wink, .zel-mood-content):not(.zel-lively) .zel-whole { opacity: 0; }
   .zel-mood-thinking .layer-crown .zel-piece > img { animation: zel-dial 9.6s cubic-bezier(0.5, 0, 0.3, 1.4) infinite; }
   .zel-mood-curious .layer-points .zel-piece > img { animation: zel-peer-far 4.4s ease-in-out infinite; }
@@ -496,5 +496,18 @@
 @layer components {
   /* The living Zel swaps in for the still one at once (zel-motion.ts), never fading. */
   .hero-zel .zel-whole { transition: none; }
+  /* The logo (ZelMark.tsx): the emblem's square, sized so that Zel itself is --zel
+     tall (it spans x 68–1187 and y 94–1174 of 1254), with negative margins so only
+     Zel takes room in the layout. */
+  .zel-mark {
+    width: calc(var(--zel) * 1254 / 1080);
+    height: calc(var(--zel) * 1254 / 1080);
+    margin: calc(var(--zel) * -94 / 1080) calc(var(--zel) * -67 / 1080) calc(var(--zel) * -80 / 1080) calc(var(--zel) * -68 / 1080);
+  }
+  /* Each of its layers as far round as the hero's greetings have turned it (zel-motion.ts). */
+  .zel-turn { transform-origin: 49.86% 51.21%; }
+  .zel-turn-points { rotate: var(--zel-turn-points, 0deg); }
+  .zel-turn-cobalt { rotate: var(--zel-turn-cobalt, 0deg); }
+  .zel-turn-crown { rotate: var(--zel-turn-crown, 0deg); }
   .hero { background-image: radial-gradient(60% 50% at 50% 46%, rgb(201 169 98 / 0.12), transparent 70%); }
 }

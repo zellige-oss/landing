@@ -1,12 +1,11 @@
-// Regenerates every derived brand asset from the standard emblem
-// (public/brand/zellige-emblem.png). Run `npm run brand` after
-// changing the emblem or Zel's face; never edit these outputs by hand.
+// Regenerates every derived brand asset from the emblem as the landing draws it
+// (build-layers.mjs makes it from public/brand/zellige-emblem.png, with even pieces).
+// Run `npm run brand` after changing the emblem or Zel's face; never edit these
+// outputs by hand.
 //   public/brand/zel/zel-<mood>.png   Zel (emblem + face), one per mood, 1254 px
 //   src/assets/emblem.webp       landing emblem, 320 px
 //   public/favicon.png           landing favicon, 64 px
 //   public/brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png   Zel + wordmark
-//   src/assets/zel-mark.webp     Zel for the header's logo, 512 px tall
-//   src/assets/zel-flight.webp   trimmed Zel at source resolution for the hero-to-header flight
 //   src/assets/glyph-{crown,cobalt,points}.webp   each layer, joined where it has one, with Zel at its centre, 128 px
 // (The emblem layers come from build-layers.mjs, which `npm run brand` runs first.)
 import { existsSync } from 'node:fs';
@@ -15,7 +14,7 @@ import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
 
 const path = (relative) => fileURLToPath(new URL(relative, import.meta.url));
-const emblem = path('../public/brand/zellige-emblem.png');
+const emblem = path('../node_modules/.cache/zellige/emblem.png');
 const { faces } = await import(path('../.brand/brand-entry.js'));
 
 await mkdir(path('../public/brand/zel'), { recursive: true });
@@ -30,14 +29,12 @@ for (const [mood, svg] of Object.entries(faces())) {
 // ascenders from y 200, baseline at 568, descender and stars inside the box).
 const zel = await sharp(path('../public/brand/zel/zel-look.png')).trim().toBuffer({ resolveWithObject: true });
 const zelRatio = zel.info.width / zel.info.height;
-// The header's logo is this same Zel next to the wordmark (Header.tsx).
-await sharp(zel.data).resize({ height: 512 }).webp({ quality: 88 }).toFile(path('../src/assets/zel-mark.webp'));
-await sharp(zel.data).webp({ quality: 90 }).toFile(path('../src/assets/zel-flight.webp'));
 // Each layer's glyph with Zel at its centre, for the story's steps and the server
-// diagram: Zel (look) cut to the centre layer's shape, over the layer.
-const centre = await sharp(path('../src/assets/layer-centre.webp')).resize(960, 960).ensureAlpha().png().toBuffer();
-const zelCentre = await sharp(path('../public/brand/zel/zel-look.png')).resize(960, 960)
-  .composite([{ input: centre, blend: 'dest-in' }]).png().toBuffer();
+// diagram: the centre layer with Zel's face (look) on it, over the layer, as the
+// landing stacks them (the assembled emblem shares its rims, the layers do not).
+const centre = await sharp(path('../src/assets/layer-centre.webp')).resize(1254, 1254).png().toBuffer();
+const zelCentre = await sharp(await sharp(centre).composite([{ input: Buffer.from(faces().look) }]).png().toBuffer())
+  .resize(960, 960).png().toBuffer();
 for (const piece of ['crown', 'cobalt', 'points']) {
   // The joined piece where the emblem splits the layer into four, as the story shows it.
   const joined = path(`../src/assets/layer-${piece}-joined.webp`);

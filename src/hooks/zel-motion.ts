@@ -11,9 +11,10 @@ function reaction(t: number) {
   return {
     anticipation: bump(t, 0, .2, .4),
     hop: bump(t, .22, .54, 1.06),
-    // How much of the spin is still to come: all of it as the greeting starts (the
-    // layer jumps back by its symmetry angle, which looks identical), none after.
-    unspun: t < 0 ? 0 : 1 - backOut((t - .16) / .55),
+    // How much of the spin is still to come: all of it as the greeting starts, none
+    // after. Each greeting turns on from where the last one left the layer.
+    // Before this layer's turn comes up, all of it is still to come.
+    unspun: t < 0 ? 1 : 1 - backOut((t - .16) / .55),
     spread: t > .26 && t < 1.66 ? Math.sin(Math.PI * (t - .26) / 1.4) : 0,
   };
 }
@@ -43,8 +44,10 @@ function wake(t: number) {
 }
 
 // spin: Zel's signature, in the greeting each layer turns by its own symmetry (the
-// crown is eight-fold, the blue and the points four-fold) and clicks back into
-// place, alternating directions like a combination lock; the face stays upright.
+// crown is eight-fold, the blue and the points four-fold) and clicks into place,
+// alternating directions like a combination lock; the face stays upright. The turns
+// add up from one greeting to the next, so a layer never jumps back: a joined piece's
+// glaze is not quite symmetric, and a jump would show.
 const pieces = [
   { name: "points", delay: .1, spread: .03, spin: 90 },
   { name: "cobalt", delay: .065, spread: .022, spin: -90 },
@@ -84,12 +87,24 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       ivory: node.querySelector<SVGPathElement>(`[data-zel-greeting-ivory="${eye.dataset.zelGreetingEye}"]`),
     }));
     let frame = 0, previous = 0, elapsed = -delay / 1000;
-    let visible = false, greeted = false, greetingAt = -Infinity;
+    let visible = false, greeted = false, greetingAt = -Infinity, greetings = 0;
     let pointerAt = -Infinity, pointerX = 0, pointerY = 0, gazeX = 0, gazeY = 0;
     let drawing: boolean | undefined;
     // The face is SVG, which repaints whenever anything in it moves: write the gaze
     // and the lids only when they change (still eyes then cost nothing).
     let lastLook = "", lastShut = "";
+
+    // How far round the greetings have turned each layer, for the logo (ZelMark.tsx)
+    // to show the hero's Zel as it is. Written once per greeting, on the page's root
+    // so the header's logo and the flight to it both follow.
+    const page = document.documentElement;
+    function publishTurns() {
+      for (const part of parts) {
+        if (!part.spin) continue;
+        if (greetings) page.style.setProperty(`--zel-turn-${part.name}`, `${(part.spin * greetings) % 360}deg`);
+        else page.style.removeProperty(`--zel-turn-${part.name}`);
+      }
+    }
 
     function showDrawnEyes(on: boolean) {
       if (on === drawing) return;
@@ -112,6 +127,9 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       }
       gazeX = 0;
       gazeY = 0;
+      // The layers are back at rest, so the turns start over.
+      greetings = 0;
+      publishTurns();
     }
 
     function tick(now: number) {
@@ -121,7 +139,7 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       if (elapsed >= 0) {
         if (!("zelAwake" in node!.dataset)) node!.dataset.zelAwake = "";
         // One welcome after waking; later greetings respond to the reader.
-        if (!greeted && elapsed >= WAKE + .5) { greeted = true; greetingAt = elapsed; }
+        if (!greeted && elapsed >= WAKE + .5) { greeted = true; greetingAt = elapsed; greetings += 1; publishTurns(); }
         const waking = wake(elapsed);
         const awake = elapsed >= WAKE;
         const phase = awake ? (elapsed - WAKE) % 14 : 0;
@@ -164,7 +182,9 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           const pose = reaction(age - part.delay);
           // Eyes lead, then the centre, then the outer pieces. Tiles stay rigid.
           part.tilt += (gazeX * 3.2 - part.tilt) * (1 - Math.exp(-dt / (.13 + part.delay)));
-          const turn = part.tilt - pose.anticipation * 2.4 + pose.hop * 2 - part.spin * pose.unspun;
+          // Every greeting so far, less what is still to come of this one, in one turn.
+          const spun = (part.spin * (greetings - pose.unspun)) % 360;
+          const turn = part.tilt - pose.anticipation * 2.4 + pose.hop * 2 + spun;
           // While waking, each layer follows the centre a little later than when awake.
           const w = awake ? null : wake(elapsed - part.delay * 2.5);
           const wakeTurn = w ? 6 * w.shake - 4 * w.nod : 0;
@@ -197,6 +217,8 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       if (!visible || reduced.matches || elapsed < 0 || elapsed - greetingAt < 2.8) return;
       greeted = true;
       greetingAt = elapsed;
+      greetings += 1;
+      publishTurns();
     }
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); });
     observer.observe(node);
