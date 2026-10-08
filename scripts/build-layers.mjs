@@ -372,6 +372,27 @@ const save = async (name, raw) => {
 // Each layer: its pieces' glaze, then the new rim out to RIM px with an antialiased
 // edge, shaded by the facing of the outward normal (the distance field's gradient).
 const profiles = rimProfiles(data, W);
+// The profiles are sampled where the rims catch the most light, so they run lighter
+// and yellower than the emblem's gold as a whole. Bring them to the drawing's own
+// gold, channel by channel: the same mean and spread as every gold pixel of it.
+{
+  const gold = [], sampled = Object.values(profiles).flat();
+  for (let k = 0; k < N; k += 1) {
+    if (data[k * 4 + 3] < 250) continue;
+    const r = data[k * 4], g = data[k * 4 + 1], b = data[k * 4 + 2], max = Math.max(r, g, b), min = Math.min(r, g, b);
+    if (max < 60 || (max - min) / max < 0.35) continue;
+    const [h] = hsv(k * 4);
+    if (h >= 20 && h <= 55) gold.push([r, g, b]);
+  }
+  const moments = (list, c) => {
+    const mean = list.reduce((sum, p) => sum + p[c], 0) / list.length;
+    return [mean, Math.sqrt(list.reduce((sum, p) => sum + (p[c] - mean) ** 2, 0) / list.length)];
+  };
+  for (let c = 0; c < 3; c += 1) {
+    const [fromMean, fromSpread] = moments(sampled, c), [toMean, toSpread] = moments(gold, c);
+    for (const p of sampled) p[c] = Math.max(0, Math.min(255, toMean + ((p[c] - fromMean) * toSpread) / fromSpread));
+  }
+}
 async function render(name, d, glaze = art) {
   const cut = Buffer.alloc(N * 4);
   for (let k = 0; k < N; k += 1) {
