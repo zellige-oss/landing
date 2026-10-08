@@ -240,7 +240,12 @@
      steps aside so the layer can move. */
   .tile-scroll.lift-crown .zel-layer:not(.layer-centre, .layer-crown),
   .tile-scroll.lift-cobalt .zel-layer:not(.layer-centre, .layer-cobalt),
-  .tile-scroll.lift-points .zel-layer:not(.layer-centre, .layer-points) { filter: saturate(0.3) brightness(0.92); opacity: 0.45; }
+  .tile-scroll.lift-points .zel-layer:not(.layer-centre, .layer-points) { filter: saturate(0.3) brightness(0.92); opacity: 0.12; }
+  /* The lifted layer is its mini Zel: its joined piece, as in the story and its glyph. */
+  .tile-scroll.lift-cobalt .layer-cobalt .zel-joined,
+  .tile-scroll.lift-points .layer-points .zel-joined { opacity: 1; }
+  .tile-scroll.lift-cobalt .layer-cobalt .zel-split,
+  .tile-scroll.lift-points .layer-points .zel-split { opacity: 0; }
   .tile-scroll:is(.lift-crown, .lift-cobalt, .lift-points) .zel-whole { opacity: 0; transition: none; }
   /* Zel rises with the layer, so the two never come apart. */
   .tile-scroll :is(.layer-centre, .zel-face-layer) { transition: translate 0.3s ease; }
