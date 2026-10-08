@@ -202,7 +202,9 @@ export function Story({ reduced }: { reduced: boolean }) {
                         "story-step rounded-2xl border border-transparent p-4 transition-[opacity,background-color,border-color] duration-300 sm:p-5",
                         quiet && "opacity-40",
                         live && !current && !whole && "cursor-pointer hover:opacity-80",
-                        live && !current && "max-lg:hidden",
+                        // On phones the other parts shrink to their names, so the screen
+                        // shows all three, and a tap jumps to one; on short screens they step aside.
+                        live && !current && "max-lg:py-2 [@media(max-height:740px)]:max-lg:hidden",
                         current && "border-brass/60 bg-popover/80 shadow-[0_14px_34px_-22px_rgb(20_43_53/0.45)]",
                       )}
                     >
@@ -210,7 +212,7 @@ export function Story({ reduced }: { reduced: boolean }) {
                         <ZelGlyph layer={step.layer} className="size-8" />
                         <strong className="font-semibold">{copy.title}</strong>
                       </p>
-                      <p className="mt-2 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base">{copy.body}</p>
+                      <p className={cn("mt-2 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base", live && !current && "max-lg:hidden")}>{copy.body}</p>
                     </li>
                   );
                 })}
