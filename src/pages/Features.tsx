@@ -21,7 +21,7 @@ function Card({ icon: Icon, tag, title, body, children }: { icon: LucideIcon; ta
 
 const pointIcons = [Server, Database, RefreshCw];
 
-/** Bring your own: API key or subscription, and an open-source harness. */
+/** Bring your own: subscription or API key, and an open-source harness. */
 export function Features() {
   const t = useT();
   const f = t.features;

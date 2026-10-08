@@ -75,9 +75,9 @@ const es = {
   features: {
     title: "Modelos y herramientas",
     access: {
-      tag: "BYOK · BYOS",
-      title: "Tu clave de API… o tu suscripción",
-      body: "Con una API pagas por token y conoces la tarifa. Con una suscripción ves qué porcentaje de tu cuota has consumido, pero no siempre a cuánto uso real equivale ese 100 %. El proveedor fija la cuota y puede ampliarla o reducirla. Si ya tienes una suscripción, conéctala mediante OAuth.",
+      tag: "BYOS · BYOK",
+      title: "Tu suscripción… o tu clave de API",
+      body: "Si ya pagas una suscripción, conéctala mediante OAuth. Puedes ver qué porcentaje de tu cuota has consumido, aunque no siempre cuánto uso real representa ese 100 %. El proveedor fija la cuota y puede ampliarla o reducirla. Como alternativa, usa una clave de API: pagas por los tokens de entrada y de salida, con un precio fijado de antemano para cada uno.",
       google: "con Google",
     },
     harness: {
@@ -179,9 +179,9 @@ const en = {
   features: {
     title: "Bring your own",
     access: {
-      tag: "BYOK · BYOS",
-      title: "Your API key… or your subscription",
-      body: "With an API, you pay per token at a known rate. With a subscription, you can see the percentage of your quota you've used, but not always how much actual usage that 100% represents. The provider sets the quota and can increase or reduce it. If you already have a subscription, connect it through OAuth.",
+      tag: "BYOS · BYOK",
+      title: "Your subscription… or your API key",
+      body: "Already paying for a subscription? Connect it through OAuth. You can see the percentage of your quota you've used, but not always how much actual usage that 100% represents. The provider sets the quota and can increase or reduce it. Alternatively, use an API key: you pay for input and output tokens, with a price specified up front for each.",
       google: "with Google",
     },
     harness: {
