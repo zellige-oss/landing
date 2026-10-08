@@ -35,7 +35,9 @@ and Zel, the mascot, is the centre that holds them together.
    reduced motion it is a list.
 3. **Bring your own** (`src/pages/Features.tsx`): "Bring your own" ("Modelos y herramientas" in Spanish), two cards. BYOK ·
    BYOS: your API keys, priced per token in the open, or a subscription you already
-   pay for, signed in with OAuth (each tool's sign-in listed). BYOH: the
+   pay for, signed in with OAuth (each tool's sign-in listed). Subscription usage
+   percentages are visible; how much usage the full quota represents may be unclear,
+   and the provider can increase or reduce that quota. BYOH: the
    open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness), as
    large tiles, or the one that comes with your subscription (Claude Code, Codex CLI). A bar below: on your server, one memory, change models without
    losing anything. Tool marks, in their official colours, live in

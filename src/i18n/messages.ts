@@ -77,7 +77,7 @@ const es = {
     access: {
       tag: "BYOK · BYOS",
       title: "Tu clave de API… o tu suscripción",
-      body: "Con una API pagas por token y el precio está a la vista. Una suscripción es una caja negra: no ves sus límites y cambian sin avisar. Aun así, si ya pagas una, inicia sesión con OAuth.",
+      body: "Con una API pagas por token y conoces la tarifa. Con una suscripción ves qué porcentaje de tu cuota has consumido, pero no siempre a cuánto uso real equivale ese 100 %. El proveedor fija la cuota y puede ampliarla o reducirla. Si ya tienes una suscripción, conéctala mediante OAuth.",
       google: "con Google",
     },
     harness: {
@@ -181,7 +181,7 @@ const en = {
     access: {
       tag: "BYOK · BYOS",
       title: "Your API key… or your subscription",
-      body: "With an API, you pay per token and the pricing is out in the open. A subscription is a black box: you can’t see its limits, and they change without warning. Still, if you’re already paying for one, just sign in with OAuth.",
+      body: "With an API, you pay per token at a known rate. With a subscription, you can see the percentage of your quota you've used, but not always how much actual usage that 100% represents. The provider sets the quota and can increase or reduce it. If you already have a subscription, connect it through OAuth.",
       google: "with Google",
     },
     harness: {
