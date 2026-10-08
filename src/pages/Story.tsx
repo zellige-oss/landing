@@ -17,11 +17,8 @@ const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
 const parts = steps.filter((step): step is { layer: Piece; key: Piece; mood: Mood } => !!step.layer);
 const last = steps.length - 1;
 
-/** Where each stage begins, as a share of the story's scroll: the three layers, the
- *  whole tile and, on wide screens, "Por dentro", which takes the tile's place. */
-const STARTS = [0, 0.27, 0.54, 0.8, 0.9];
-/** The stage after the story: "Por dentro" appears in the sticky panel (from lg). */
-const INSIDE = steps.length;
+/** Where each stage begins, as a share of the story's scroll: the three layers, then the whole tile. */
+const STARTS = [0, 0.27, 0.54, 0.8];
 const stepAt = (t: number) => Math.max(0, STARTS.filter((start) => t >= start).length - 1);
 
 /*
@@ -92,11 +89,6 @@ export function Story({ reduced }: { reduced: boolean }) {
   const show = live && active !== undefined ? steps[Math.min(active, last)].layer : undefined;
   // The tile and its parts answer the mouse only when whole: at the end, or once settled.
   const whole = !live || (stage ?? 0) >= last;
-  // On wide screens "Por dentro" then rises where the story was, without scrolling to
-  // it; on phones, where it is taller than the screen, it follows the story.
-  const inside = live && stage === INSIDE;
-  // The dots count the story's stages; "Por dentro" keeps the last one lit.
-  const dot = stage === null ? null : Math.min(stage, last);
   const lit = whole ? pointed : undefined;
   /** Scrolls to where a step has just begun. */
   function goTo(index: number) {
@@ -110,20 +102,16 @@ export function Story({ reduced }: { reduced: boolean }) {
   const gutter = "px-6 sm:px-[clamp(24px,4.5vw,80px)] min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]";
   return (
     <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
-      <div ref={track} className={cn(live && "h-[300vh] lg:h-[330vh]")}>
-        {/* Below the fixed header, which is 68 px tall (76 px from sm). On phones it
-            fills the screen under the header and centres the story, so the room the
-            story leaves frames it rather than gaping below, and what follows comes
-            straight after it. From lg it is as tall as its content, and "Por dentro"
-            shares its one cell with the story, so neither leaves the layout: the
-            story fades out where it is, then "Por dentro" fades in in its place, and
-            back the other way when scrolling up. "Por dentro" is the shorter of the
-            two and sits at the cell's foot, so no gap opens under it before the band. */}
+      <div ref={track} className={cn(live && "h-[300vh]")}>
+        {/* Below the fixed header, which is 68 px tall (76 px from sm). It fills the
+            screen under the header and centres the story, so the room the story
+            leaves frames it rather than gaping below, and "Por dentro" comes straight
+            after it, on every screen. */}
         <div
           className={cn(
             "relative",
             live
-              ? "sticky top-[68px] pt-6 pb-4 max-lg:flex max-lg:min-h-[calc(100svh-68px)] max-lg:flex-col max-lg:justify-center sm:top-[76px] sm:max-lg:min-h-[calc(100svh-76px)] lg:grid"
+              ? "sticky top-[68px] flex min-h-[calc(100svh-68px)] flex-col justify-center pt-6 pb-4 sm:top-[76px] sm:min-h-[calc(100svh-76px)]"
               : "pt-20 pb-10",
           )}
         >
@@ -132,9 +120,7 @@ export function Story({ reduced }: { reduced: boolean }) {
           <div
             className={cn(
               gutter,
-              "grid content-start gap-x-[6vw] gap-y-4 transition-[opacity,visibility] duration-300 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center lg:[grid-area:1/1]",
-              // Stepping aside for "Por dentro", and back once it has gone.
-              inside ? "lg:invisible lg:opacity-0" : "lg:delay-300",
+              "grid content-start gap-x-[6vw] gap-y-4 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center",
             )}
           >
             <h2 id="piezas-title" className="text-[clamp(32px,8vw,44px)] leading-[1.02] lg:col-start-1 lg:row-start-1 lg:self-end lg:text-[clamp(44px,4.2vw,68px)]">
@@ -166,10 +152,10 @@ export function Story({ reduced }: { reduced: boolean }) {
                         type="button"
                         onClick={() => goTo(index)}
                         aria-label={`${t.story.goTo} ${index + 1}: ${t.story.steps[step.key].title}`}
-                        aria-current={dot === index ? "step" : undefined}
+                        aria-current={stage === index ? "step" : undefined}
                         className={cn(
                           "block h-1.5 rounded-full transition-[width,background-color] duration-300",
-                          dot === index ? "w-7 bg-brass" : "w-1.5 bg-foreground/25 hover:bg-foreground/45",
+                          stage === index ? "w-7 bg-brass" : "w-1.5 bg-foreground/25 hover:bg-foreground/45",
                         )}
                       />
                     </li>
@@ -216,15 +202,9 @@ export function Story({ reduced }: { reduced: boolean }) {
               )}
             </div>
           </div>
-          {live && (
-            <Workings
-              reveal={false}
-              className={cn(gutter, "pb-0 transition-[opacity,visibility] duration-500 max-lg:hidden lg:self-end lg:[grid-area:1/1]", inside ? "lg:delay-300" : "invisible opacity-0")}
-            />
-          )}
         </div>
       </div>
-      <Workings className={cn(gutter, live && "lg:hidden")} />
+      <Workings className={gutter} />
     </section>
   );
 }
