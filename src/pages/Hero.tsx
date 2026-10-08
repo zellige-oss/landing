@@ -150,7 +150,7 @@ export function Hero({ reduced }: { reduced: boolean }) {
       <p className="hero-copy relative z-[2] max-w-[22ch] text-[clamp(26px,3.4vw,42px)] leading-[1.08] tracking-[-0.045em] text-balance">
         {t.hero.title.lead} <em className="text-accent">{t.hero.title.turn}</em>
       </p>
-      {/* Bring your own ("Trae lo tuyo" in Spanish): harness, subscription, API key. */}
+      {/* Harness, subscription and API key: connect what the visitor already uses. */}
       <p className="hero-copy relative z-[2] mt-6 flex flex-wrap items-center justify-center gap-2 text-[15px] sm:text-base">
         <span className="mr-1 font-semibold">{t.hero.bring.lead}</span>
         {t.hero.bring.items.map((item, index) => {

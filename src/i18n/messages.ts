@@ -7,13 +7,13 @@ const es = {
   meta: {
     title: "Zellige — Chat, harness y agente personal en tu servidor",
     description:
-      "Zellige es un proyecto open source y autoalojado que reúne tu chat de IA, tus agentes de código y tu agente personal en tu propio servidor.",
+      "Zellige es un proyecto de código abierto y autoalojado que reúne tu chat de IA, tus agentes de programación y tu agente personal en tu propio servidor.",
   },
   skip: "Ir al contenido",
   header: {
     home: "Zellige, inicio",
     nav: "Principal",
-    links: { idea: "¿Qué es Zellige?", features: "Trae lo tuyo", contact: "Contacto" },
+    links: { idea: "¿Qué es Zellige?", features: "Modelos y herramientas", contact: "Contacto" },
     theme: "Cambiar entre modo claro y oscuro",
     themeTitle: "Modo claro / oscuro",
     menu: "Menú",
@@ -27,8 +27,8 @@ const es = {
       meaning: "«azulejo».",
       history: "Barro esmaltado, cortado a mano pieza a pieza, que viste Fez y la Alhambra desde hace siglos.",
     },
-    title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "self\u2011hosted y open source." },
-    bring: { lead: "Trae lo tuyo", items: ["harness", "suscripción", "clave de API"] },
+    title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "en tu servidor y de código abierto." },
+    bring: { lead: "Con lo que ya usas", items: ["harness", "suscripción", "clave de API"] },
     next: "Ir a la siguiente sección",
   },
   zel: {
@@ -56,11 +56,11 @@ const es = {
     steps: {
       crown: {
         title: "Chat",
-        body: "Habla con el modelo que quieras a través del harness que traigas, como en cualquier chat de IA, pero sin que tus conversaciones queden encerradas en una app.",
+        body: "Habla con el modelo que quieras a través del harness que elijas, como en cualquier chat de IA, pero sin que tus conversaciones queden encerradas en una app.",
       },
       cobalt: {
         title: "Gestor de harness",
-        body: "Añade el harness que quieras y orquesta modelos, herramientas y agentes de código en un mismo flujo para desarrollar software.",
+        body: "Añade el harness que quieras y orquesta modelos, herramientas y agentes de programación en un mismo flujo para desarrollar software.",
       },
       points: {
         title: "Agente personal",
@@ -68,12 +68,12 @@ const es = {
       },
       tile: {
         title: "Zellige es todo esto",
-        body: "Chat, gestor de harness y agente personal, juntos alrededor de Zel y con la misma memoria.",
+        body: "Chat, gestor de harness y agente personal, integrados y con una memoria compartida.",
       },
     },
   },
   features: {
-    title: "Trae lo tuyo",
+    title: "Modelos y herramientas",
     access: {
       tag: "BYOK · BYOS",
       title: "Tu clave de API… o tu suscripción",
@@ -82,18 +82,18 @@ const es = {
     },
     harness: {
       tag: "BYOH",
-      title: "Tu harness open source… o el de tu suscripción",
-      body: "El chat, el gestor de harness y tu agente funcionan con el harness open source que elijas, o con el que incluye tu suscripción, como Claude Code o Codex CLI.",
-      more: "Y otros harness open source.",
+      title: "Tu harness de código abierto… o el de tu suscripción",
+      body: "El chat, el gestor de harness y tu agente funcionan con el harness de código abierto que elijas, o con el que incluye tu suscripción, como Claude Code o Codex CLI.",
+      more: "Y otros harness de código abierto.",
     },
-    points: ["En tu servidor", "Una sola memoria", "Cambia de modelo sin perder nada"],
+    points: ["En tu servidor", "Memoria compartida", "Cambia de modelo sin perder nada"],
     providers: "Herramientas con inicio de sesión OAuth",
-    harnesses: "Harness open source",
+    harnesses: "Harness de código abierto",
     trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
   },
   contact: {
-    headline: { lead: "¿Quieres aportar", turn: "tu parte?" },
-    body: "Zellige es un proyecto abierto. Sigue cómo avanza en GitHub, abre un issue con tus ideas o escríbenos.",
+    headline: { lead: "¿Quieres", turn: "colaborar?" },
+    body: "Zellige es un proyecto abierto. Sigue el proyecto en GitHub, abre un issue con tus ideas o escríbenos.",
     repo: "Código en GitHub",
     email: "Escríbenos",
   },

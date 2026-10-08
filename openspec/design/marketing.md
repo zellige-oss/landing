@@ -12,7 +12,7 @@ and Zel, the mascot, is the centre that holds them together.
 
 1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel, one line
    (self-hosted and open source) and "Bring your own: harness · sub · API key"
-   ("Trae lo tuyo: harness · suscripción · clave de API" in Spanish). "Why Zellige?" beside the wordmark opens
+   ("Con lo que ya usas: harness · suscripción · clave de API" in Spanish). "Why Zellige?" beside the wordmark opens
    where the name comes from (`src/components/WhyZellige.tsx`): the literal
    meaning ("tile") and one line of history. It sits beside the wordmark on
    wide screens; smaller ones have no room to spare, so it opens over Zel,
@@ -33,7 +33,7 @@ and Zel, the mascot, is the centre that holds them together.
    runs Zellige (its three layers on one shared memory) and reaches the models by
    API or OAuth. The story plays once, then settles; without JavaScript or with
    reduced motion it is a list.
-3. **Bring your own** (`src/pages/Features.tsx`): "Bring your own" ("Trae lo tuyo"), two cards. BYOK ·
+3. **Bring your own** (`src/pages/Features.tsx`): "Bring your own" ("Modelos y herramientas" in Spanish), two cards. BYOK ·
    BYOS: your API keys, priced per token in the open, or a subscription you already
    pay for, signed in with OAuth (each tool's sign-in listed). BYOH: the
    open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness), as
