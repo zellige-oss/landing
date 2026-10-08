@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { ChevronDown } from "lucide-react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
@@ -57,21 +57,22 @@ function useCentredSticky(panel: RefObject<HTMLElement | null>, active: boolean)
  */
 export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
-  const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number>();
   const [atStart, setAtStart] = useState(true);
-  // The story plays once. After the reader has seen the whole tile and scrolled on
-  // past it, it settles into a still summary (every step, the whole tile, every
-  // label), so coming back up never replays it.
+  // The story plays once. As soon as the reader has seen the whole tile and scrolled
+  // to the end of it, it settles into a still summary (every step, the whole tile,
+  // every label), so scrolling back up never rewinds it.
   const [settled, setSettled] = useState(false);
   // The layer under the mouse, on the tile or on its part in the text: the part
   // lights up, the rest step back and the tile lifts that layer.
   const [pointed, setPointed] = useState<Piece>();
+  // The layer picked with a click or a tap once the tile is whole, which stays lifted.
+  const [picked, setPicked] = useState<Piece>();
   const seenEnd = useRef(false);
-  // What the reader is looking at when the story settles (the next section) and
-  // where it was on screen, to put it back exactly there afterwards.
+  // The story's title and where it was on screen when the story settles, to put it
+  // back exactly there afterwards.
   const anchor = useRef<{ element: Element; top: number } | null>(null);
   // With reduced motion the tile simply stays assembled and the steps read as a list.
   useScrollProgress(track, "through", (t) => {
@@ -79,25 +80,15 @@ export function Story({ reduced }: { reduced: boolean }) {
     setActive(step);
     if (step >= last) seenEnd.current = true;
     setAtStart(t < 0.06);
+    if (t < 1 || !seenEnd.current) return;
+    const title = document.getElementById("piezas-title");
+    if (title) anchor.current = { element: title, top: title.getBoundingClientRect().top };
+    // The browser's own scroll anchoring would also make up for the lost height;
+    // with ours on top, the page jumped twice as far. Only ours runs.
+    document.documentElement.style.setProperty("overflow-anchor", "none");
+    setSettled(true);
   }, !reduced && !settled);
-  useEffect(() => {
-    const node = section.current;
-    if (reduced || settled || !node) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      // Settle only once the whole section is above the screen, so the change in
-      // height happens out of sight.
-      if (entry.isIntersecting || entry.boundingClientRect.bottom > 0 || !seenEnd.current) return;
-      const next = node.nextElementSibling;
-      if (next) anchor.current = { element: next, top: next.getBoundingClientRect().top };
-      // The browser's own scroll anchoring would also make up for the lost height;
-      // with ours on top, the page jumped twice as far. Only ours runs.
-      document.documentElement.style.setProperty("overflow-anchor", "none");
-      setSettled(true);
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [reduced, settled]);
-  // The section got shorter above the screen: scroll by however far the next section
+  // The story's scroll above the screen is gone: scroll by however far the title
   // moved, so what the reader is looking at stays exactly where it was.
   useLayoutEffect(() => {
     if (!settled) return;
@@ -118,7 +109,8 @@ export function Story({ reduced }: { reduced: boolean }) {
   const show = live && active !== undefined ? steps[Math.min(active, last)].layer : undefined;
   // The tile and its parts answer the mouse only when whole: at the end, or once settled.
   const whole = !live || (stage ?? 0) >= last;
-  const lit = whole ? pointed : undefined;
+  const lit = whole ? pointed ?? picked : undefined;
+  const pick = (piece: Piece) => setPicked((value) => (value === piece ? undefined : piece));
   /** Scrolls to where a step has just begun. */
   function goTo(index: number) {
     const node = track.current;
@@ -130,14 +122,14 @@ export function Story({ reduced }: { reduced: boolean }) {
 
   const gutter = "px-6 sm:px-[clamp(24px,4.5vw,80px)] min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]";
   return (
-    <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
+    <section id="piezas" aria-labelledby="piezas-title" className="relative">
       <div ref={track} className={cn(live && "h-[300vh]")}>
         {/* As tall as the story, held in the middle of the screen under the fixed
             header (useCentredSticky), so "Por dentro" comes straight after it. Until
             that is measured, it sits right under the header: 68 px, 76 px from sm. */}
         <div
           ref={panel}
-          className={cn("relative", live ? "sticky top-[68px] pt-6 pb-4 sm:top-[76px]" : "pt-20 pb-10")}
+          className={cn("relative", live ? "sticky top-[68px] pt-6 pb-4 sm:top-[76px]" : "pt-20 pb-4")}
         >
           {/* The title stays with the story: on phones above the tile and the step, on
               wide screens above the steps, with the tile beside them. */}
@@ -155,7 +147,7 @@ export function Story({ reduced }: { reduced: boolean }) {
                 mood={steps[Math.min(stage ?? last, last)].mood}
                 show={show}
                 lift={lit}
-                onPick={(piece) => { if (live) goTo(steps.findIndex((step) => step.layer === piece)); }}
+                onPick={(piece) => { if (whole) pick(piece); else goTo(steps.findIndex((step) => step.layer === piece)); }}
                 onHover={setPointed}
                 className="mx-auto w-[min(62vw,32svh,300px)] sm:w-[min(62vw,38svh,380px)] lg:w-[min(84%,460px,60svh)]"
               />
@@ -195,16 +187,20 @@ export function Story({ reduced }: { reduced: boolean }) {
                     <li
                       key={step.key}
                       aria-current={stage === index ? "step" : undefined}
-                      onClick={live && !current && !whole ? () => goTo(index) : undefined}
+                      onClick={whole ? () => pick(step.layer) : live && !current ? () => goTo(index) : undefined}
                       onPointerEnter={(event) => { if (event.pointerType === "mouse") setPointed(step.layer); }}
                       onPointerLeave={() => setPointed(undefined)}
                       className={cn(
                         "story-step rounded-2xl border border-transparent p-4 transition-[opacity,background-color,border-color] duration-300 sm:p-5",
                         quiet && "opacity-40",
-                        live && !current && !whole && "cursor-pointer hover:opacity-80",
+                        (whole || (live && !current)) && "cursor-pointer",
+                        live && !current && !whole && "hover:opacity-80",
                         // On phones the other parts shrink to their names, so the screen
                         // shows all three, and a tap jumps to one; on short screens they step aside.
-                        live && !current && "max-lg:py-2 [@media(max-height:740px)]:max-lg:hidden",
+                        // Once settled, they stay names until one is picked; with reduced motion
+                        // there is no story, and every part reads in full.
+                        !reduced && !current && "max-lg:py-2",
+                        live && !current && "[@media(max-height:740px)]:max-lg:hidden",
                         current && "border-brass/60 bg-popover/80 shadow-[0_14px_34px_-22px_rgb(20_43_53/0.45)]",
                       )}
                     >
@@ -212,7 +208,7 @@ export function Story({ reduced }: { reduced: boolean }) {
                         <ZelGlyph layer={step.layer} className="size-8" />
                         <strong className="font-semibold">{copy.title}</strong>
                       </p>
-                      <p className={cn("mt-2 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base", live && !current && "max-lg:hidden")}>{copy.body}</p>
+                      <p className={cn("mt-2 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base", !reduced && !current && "max-lg:hidden")}>{copy.body}</p>
                     </li>
                   );
                 })}
