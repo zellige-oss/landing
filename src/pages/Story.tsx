@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { ChevronDown } from "lucide-react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,33 @@ const last = steps.length - 1;
 const STARTS = [0, 0.27, 0.54, 0.8];
 const stepAt = (t: number) => Math.max(0, STARTS.filter((start) => t >= start).length - 1);
 
+/**
+ * Holds a sticky panel in the middle of the screen below the fixed header. Centring
+ * it inside a screen-tall panel would leave that room under it once it scrolls on,
+ * a gap before what follows; a panel as tall as its content, stuck at the right
+ * height, leaves none. Taller than the room, it sticks right under the header.
+ */
+function useCentredSticky(panel: RefObject<HTMLElement | null>, active: boolean) {
+  useLayoutEffect(() => {
+    const node = panel.current;
+    if (!active || !node) return;
+    const place = () => {
+      const header = document.querySelector("header")?.offsetHeight ?? 0;
+      const room = innerHeight - header - node.offsetHeight;
+      node.style.setProperty("top", `${header + Math.max(0, room / 2)}px`);
+    };
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(node);
+    addEventListener("resize", place);
+    return () => {
+      observer.disconnect();
+      removeEventListener("resize", place);
+      node.style.removeProperty("top");
+    };
+  }, [panel, active]);
+}
+
 /*
  * Scroll story: Zel stays in the centre of the tile and each step shows one layer
  * around it, one way of using Zel, then the whole tile and how to reach it. The
@@ -32,6 +59,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number>();
   const [atStart, setAtStart] = useState(true);
   // The story plays once. After the reader has seen the whole tile and scrolled on
@@ -82,6 +110,7 @@ export function Story({ reduced }: { reduced: boolean }) {
     const frame = requestAnimationFrame(() => document.documentElement.style.removeProperty("overflow-anchor"));
     return () => cancelAnimationFrame(frame);
   }, [settled]);
+  useCentredSticky(panel, !reduced && !settled);
   // The story only runs with motion allowed, and only until it has settled; otherwise
   // (and before hydration) it is a plain list next to the whole tile.
   const live = !reduced && !settled;
@@ -103,17 +132,12 @@ export function Story({ reduced }: { reduced: boolean }) {
   return (
     <section ref={section} id="piezas" aria-labelledby="piezas-title" className="relative">
       <div ref={track} className={cn(live && "h-[300vh]")}>
-        {/* Below the fixed header, which is 68 px tall (76 px from sm). It fills the
-            screen under the header and centres the story, so the room the story
-            leaves frames it rather than gaping below, and "Por dentro" comes straight
-            after it, on every screen. */}
+        {/* As tall as the story, held in the middle of the screen under the fixed
+            header (useCentredSticky), so "Por dentro" comes straight after it. Until
+            that is measured, it sits right under the header: 68 px, 76 px from sm. */}
         <div
-          className={cn(
-            "relative",
-            live
-              ? "sticky top-[68px] flex min-h-[calc(100svh-68px)] flex-col justify-center pt-6 pb-4 sm:top-[76px] sm:min-h-[calc(100svh-76px)]"
-              : "pt-20 pb-10",
-          )}
+          ref={panel}
+          className={cn("relative", live ? "sticky top-[68px] pt-6 pb-4 sm:top-[76px]" : "pt-20 pb-10")}
         >
           {/* The title stays with the story: on phones above the tile and the step, on
               wide screens above the steps, with the tile beside them. */}
