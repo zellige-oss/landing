@@ -392,44 +392,13 @@ const names = { 1: 'centre', 2: 'crown', 3: 'cobalt', 4: 'points' };
 // The centre star keeps its glaze as drawn (Zel's face covers it); the others theirs, warped.
 for (const id of STACK) await render(names[id], fields[id], id === 1 ? data : art);
 // The assembled tile, laid as a zellige panel is: each piece's glaze, and between
-// two pieces one gold bead, BEAD px wide along the middle of the gap, with the
-// drawn emblem's own shared-rim cross-section; round the outside, the pieces' own
-// rim. It covers the layers while they rest (styles.css, .zel-whole), so at rest
-// the pieces share their rims as in the drawing; once a layer moves, each piece
-// shows its own. Where a gap is wider than the bead, the glaze reaches the bead.
+// two pieces one gold bead, a whole rim spanning the gap; round the outside, the
+// pieces' own rims. It covers the layers while they rest (styles.css,
+// .zel-whole), so at rest the pieces share their rims as in the drawing; once a
+// layer moves, each piece shows its own. Where a gap is wider than GAP, the glaze
+// reaches the bead.
 {
-  const BEAD = 23, HALF = (BEAD - 1) / 2, GAP = 34;
-  // The shared rims' cross-section, glaze to glaze: every crossing of a gold run
-  // between two layers, left to right and top to bottom, resampled and averaged.
-  const crossings = (horizontal) => {
-    const sum = Array.from({ length: BEAD }, () => [0, 0, 0]);
-    let count = 0;
-    const [outer, inner] = horizontal ? [H, W] : [W, H];
-    for (let o = 0; o < outer; o += 2) {
-      let start = -1, before = 0;
-      for (let i = 1; i < inner; i += 1) {
-        const k = horizontal ? o * W + i : i * W + o, prev = horizontal ? k - 1 : k - W;
-        if (kind[k] === 9 && kind[prev] !== 9) { start = i; before = layer[prev]; }
-        if (kind[k] !== 9 && kind[prev] === 9 && start >= 0) {
-          const length = i - start;
-          if (before && layer[k] && before !== layer[k] && length >= 16 && length <= 30) {
-            for (let j = 0; j < BEAD; j += 1) {
-              const at = start + (j * (length - 1)) / (BEAD - 1), a = Math.floor(at), f = at - a;
-              const ka = horizontal ? o * W + a : a * W + o, kb = horizontal ? ka + 1 : ka + W;
-              for (let c = 0; c < 3; c += 1) sum[j][c] += data[ka * 4 + c] * (1 - f) + data[kb * 4 + c] * f;
-            }
-            count += 1;
-          }
-          start = -1;
-        }
-      }
-    }
-    return sum.map((rgb) => rgb.map((v) => v / count));
-  };
-  // One cross-section, the same whichever way a bead runs and from either side, so
-  // beads meet cleanly where they cross.
-  const [byX, byY] = [crossings(true), crossings(false)];
-  const across = byX.map((_, i) => [0, 1, 2].map((c) => (byX[i][c] + byX[BEAD - 1 - i][c] + byY[i][c] + byY[BEAD - 1 - i][c]) / 4));
+  const GAP = 34;
   // Signed distance to each piece (positive outside, negative inside), and its layer:
   // beads run between any two pieces, of one layer or of two.
   const ids = [1, 2, 3, 4];
@@ -437,12 +406,25 @@ for (const id of STACK) await render(names[id], fields[id], id === 1 ? data : ar
     const inside = distanceTo(Uint8Array.from(outside, (d) => (d ? 1 : 0)), W, H);
     return Float32Array.from(outside, (d, k) => (d ? d : -inside[k]));
   };
-  const pieces = [{ id: 1, signed: signedOf(fields[1]) }];
-  for (const id of [2, 3, 4]) {
-    for (const polygon of outlines[id]) {
-      pieces.push({ id, signed: signedOf(mitred([polygon], distanceTo(fillPolygon(polygon, new Uint8Array(N)), W, H))) });
+  // A convex piece's distance, exact from its sides: the farthest past any side's
+  // line (negative inside), so its edges are smooth, not stepped like a pixel mask.
+  const exact = (polygon) => {
+    const area = polygon.reduce((sum, [ax, ay], i) => { const [bx, by] = polygon[(i + 1) % polygon.length]; return sum + ax * by - bx * ay; }, 0);
+    const sides = polygon.map(([ax, ay], i) => {
+      const [bx, by] = polygon[(i + 1) % polygon.length], length = Math.hypot(bx - ax, by - ay), sign = area > 0 ? 1 : -1;
+      return [ax, ay, (sign * (by - ay)) / length, (sign * (ax - bx)) / length];
+    });
+    const field = new Float32Array(N);
+    for (let k = 0; k < N; k += 1) {
+      const x = k % W, y = (k - x) / W;
+      let d = -Infinity;
+      for (const [ax, ay, nx, ny] of sides) d = Math.max(d, (x - ax) * nx + (y - ay) * ny);
+      field[k] = d;
     }
-  }
+    return field;
+  };
+  const pieces = [{ id: 1, signed: signedOf(fields[1]) }];
+  for (const id of [2, 3, 4]) for (const polygon of outlines[id]) pieces.push({ id, signed: exact(polygon) });
   // Each layer's glaze, and that glaze spread out past its edge for wide gaps.
   const glazeOf = (id) => (id === 1 ? data : art);
   const spreadOf = Object.fromEntries(ids.map((id) => {
@@ -463,30 +445,43 @@ for (const id of STACK) await render(names[id], fields[id], id === 1 ? data : ar
   const whole = Buffer.alloc(N * 4);
   for (let k = 0; k < N; k += 1) {
     const x = k % W, y = (k - x) / W;
-    let sA = Infinity, sB = Infinity, A = 0, nearest = null;
+    let sA = Infinity, sB = Infinity, A = 0, nearest = null, second = null;
     for (const piece of pieces) {
       const d = piece.signed[k];
-      if (d < sA) { sB = sA; sA = d; A = piece.id; nearest = piece; } else if (d < sB) sB = d;
+      if (d < sA) { sB = sA; sA = d; A = piece.id; second = nearest; nearest = piece; } else if (d < sB) { sB = d; second = piece; }
     }
-    const glaze = (c) => (sA <= 0 ? glazeOf(A)[k * 4 + c] : spreadOf[A][k * 4 + c] / Math.max(1e-6, spreadOf[A][k * 4 + 3]));
+    const glaze = (c) => (sA <= 0.5 && !fields[A][k] ? glazeOf(A)[k * 4 + c] : spreadOf[A][k * 4 + c] / Math.max(1e-6, spreadOf[A][k * 4 + 3]));
     let colour = null, alpha = 0;
-    if (between[k] && sA + sB <= GAP) {
-      // Between two pieces: the bead, q px off the gap's middle (negative toward A).
-      const q = (sA - sB) / 2;
-      const t = Math.max(0, Math.min(BEAD - 1, q + HALF)), i = Math.floor(t), f = t - i;
-      const bead = [0, 1, 2].map((c) => across[i][c] * (1 - f) + across[Math.min(BEAD - 1, i + 1)][c] * f);
-      const mix = Math.max(0, Math.min(1, HALF + 0.5 - Math.abs(q)));
-      colour = [0, 1, 2].map((c) => bead[c] * mix + glaze(c) * (1 - mix));
+    // A piece's outward normal here, which way its rim faces.
+    const normal = (piece) => {
+      const d = piece.signed;
+      return [d[y * W + Math.min(W - 1, x + 2)] - d[y * W + Math.max(0, x - 2)], d[Math.min(H - 1, y + 2) * W + x] - d[Math.max(0, y - 2) * W + x]];
+    };
+    const [nx, ny] = normal(nearest);
+    const light = nx || ny ? facing(nx, ny) : { top: 1 };
+    if (sA <= -0.5) {
+      colour = [0, 1, 2].map(glaze);
       alpha = 1;
-    } else if (sA <= 0 || between[k]) {
+    } else if (between[k] && sA + sB <= GAP) {
+      // Between two pieces: one bead, a whole rim as the layers draw it (the same
+      // gold), spanning the gap from glaze to glaze. It is the rim of whichever of
+      // the two pieces faces the light (from the upper left), so the bead is one
+      // rod, lit along one side, as in the drawing.
+      const [mx, my] = second ? normal(second) : [-nx, -ny];
+      const lit = -nx - ny >= -mx - my;
+      const own = lit ? sA : sB, [fx, fy] = lit ? [nx, ny] : [mx, my];
+      const t = RIM * (1 - Math.min(1, Math.max(0, own / (sA + sB))));
+      const rim = rimColour(profiles, t, fx || fy ? facing(fx, fy) : { top: 1 });
+      // Its first px blends into the glaze, so the edge is smooth.
+      const edge = Math.min(1, Math.max(0, sA + 0.5));
+      colour = [0, 1, 2].map((c) => rim[c] * edge + glaze(c) * (1 - edge));
+      alpha = 1;
+    } else if (between[k]) {
       colour = [0, 1, 2].map(glaze);
       alpha = 1;
     } else if (sA < RIM + 0.5) {
       // Round the outside: the piece's own rim, as its layer draws it.
-      const d = nearest.signed;
-      const nx = d[y * W + Math.min(W - 1, x + 2)] - d[y * W + Math.max(0, x - 2)];
-      const ny = d[Math.min(H - 1, y + 2) * W + x] - d[Math.max(0, y - 2) * W + x];
-      colour = rimColour(profiles, Math.max(0, RIM - sA), nx || ny ? facing(nx, ny) : { top: 1 });
+      colour = rimColour(profiles, Math.max(0, RIM - sA), light);
       alpha = Math.min(1, RIM + 0.5 - sA);
     }
     if (!colour) continue;
