@@ -65,6 +65,17 @@ export function Header() {
           </a>
         ))}
       </nav>
+      {/* The code, one click away from the first screen. On phones it is in the menu. */}
+      <a
+        href={site.repository}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={t.header.repository}
+        className={cn(buttonVariants({ variant: "cta-secondary", size: "lg" }), "h-10 gap-2 px-4 text-[13px] max-sm:hidden")}
+      >
+        <GitHubMark className="size-4" />
+        GitHub
+      </a>
       <button
         type="button"
         aria-label={t.header.theme}

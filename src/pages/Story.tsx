@@ -117,7 +117,8 @@ export function Story({ reduced }: { reduced: boolean }) {
             straight after it. From lg it is as tall as its content, and "Por dentro"
             shares its one cell with the story, so neither leaves the layout: the
             story fades out where it is, then "Por dentro" fades in in its place, and
-            back the other way when scrolling up. */}
+            back the other way when scrolling up. "Por dentro" is the shorter of the
+            two and sits at the cell's foot, so no gap opens under it before the band. */}
         <div
           className={cn(
             "relative",
@@ -218,7 +219,7 @@ export function Story({ reduced }: { reduced: boolean }) {
           {live && (
             <Workings
               reveal={false}
-              className={cn(gutter, "pb-0 transition-[opacity,visibility] duration-500 max-lg:hidden lg:[grid-area:1/1]", inside ? "lg:delay-300" : "invisible opacity-0")}
+              className={cn(gutter, "pb-0 transition-[opacity,visibility] duration-500 max-lg:hidden lg:self-end lg:[grid-area:1/1]", inside ? "lg:delay-300" : "invisible opacity-0")}
             />
           )}
         </div>

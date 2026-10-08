@@ -10,7 +10,7 @@ function Card({ icon: Icon, tag, title, body, children }: { icon: LucideIcon; ta
         <span aria-hidden="true" className="grid size-10 place-items-center rounded-xl border border-brass/50 bg-surface text-gold">
           <Icon strokeWidth={1.5} className="size-5" />
         </span>
-        <span className="text-sm font-bold tracking-[0.12em] text-gold">{tag}</span>
+        <span className="text-sm font-bold tracking-[0.12em] text-gold uppercase">{tag}</span>
       </p>
       <h3 className="mt-4 text-xl font-semibold">{title}</h3>
       <p className="mt-2 text-[15px] leading-[1.65] text-muted-foreground">{body}</p>

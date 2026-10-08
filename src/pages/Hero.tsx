@@ -11,6 +11,12 @@ import { WhyZellige } from "@/components/WhyZellige";
 
 const bringIcons = [Workflow, Plug, KeyRound];
 
+/** Keeps hyphenated words on one line. Onest has no non-breaking hyphen (U+2011):
+ *  the browser draws it from a fallback font, over the letter after it. */
+function unbroken(text: string) {
+  return text.split(/(\S+-\S+)/).map((part, index) => (index % 2 ? <span key={index} className="whitespace-nowrap">{part}</span> : part));
+}
+
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
  * The emblem's layers fly in from beyond the screen and lock around Zel (CSS), and
@@ -166,17 +172,18 @@ export function Hero({ reduced }: { reduced: boolean }) {
         <Emblem reduced={reduced} />
       </div>
       <p className="hero-copy relative z-[2] max-w-[22ch] text-[clamp(26px,3.4vw,42px)] leading-[1.08] tracking-[-0.045em] text-balance">
-        {t.hero.title.lead} <em className="text-accent">{t.hero.title.turn}</em>
+        {t.hero.title.lead} <em className="text-accent">{unbroken(t.hero.title.turn)}</em>
       </p>
-      {/* Harness, subscription and API key: connect what the visitor already uses. */}
+      {/* Harness, subscription and API key: connect what the visitor already uses.
+          Each one leads to the section that lists them. */}
       <p className="hero-copy relative z-[2] mt-6 flex flex-wrap items-center justify-center gap-2 text-[15px] sm:text-base">
         <span className="mr-1 font-semibold">{t.hero.bring.lead}</span>
         {t.hero.bring.items.map((item, index) => {
           const Icon = bringIcons[index];
           return (
-            <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-brass/60 bg-popover/80 py-1 pr-3 pl-2 font-medium shadow-[0_8px_20px_-14px_rgb(20_43_53/0.5)]">
+            <a key={item} href="#funciones" className="inline-flex items-center gap-1.5 rounded-full border border-brass/60 bg-popover/80 py-1 pr-3 pl-2 font-medium shadow-[0_8px_20px_-14px_rgb(20_43_53/0.5)] transition-colors hover:border-brass hover:bg-popover">
               <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 text-gold" />{item}
-            </span>
+            </a>
           );
         })}
       </p>

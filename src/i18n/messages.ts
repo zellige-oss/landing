@@ -75,13 +75,13 @@ const es = {
   features: {
     title: "Modelos y herramientas",
     access: {
-      tag: "BYOS · BYOK",
+      tag: "Acceso a modelos",
       title: "Tu suscripción… o tu clave de API",
       body: "Si ya pagas una suscripción, conéctala mediante OAuth. Puedes ver qué porcentaje de tu cuota has consumido, aunque no siempre cuánto uso real representa ese 100 %. El proveedor fija la cuota y puede ampliarla o reducirla. Como alternativa, usa una clave de API: pagas por los tokens de entrada y de salida, con un precio fijado de antemano para cada uno.",
       google: "con Google",
     },
     harness: {
-      tag: "BYOH",
+      tag: "Harness",
       title: "Tu harness de código abierto… o el de tu suscripción",
       body: "El chat, el gestor de harness y tu agente funcionan con el harness de código abierto que elijas, o con el que incluye tu suscripción, como Claude Code o Codex CLI.",
       more: "Y otros harness de código abierto.",
@@ -131,8 +131,8 @@ const en = {
       meaning: "“tile.”",
       history: "Glazed clay, cut by hand piece by piece, that has covered Fez and the Alhambra for centuries.",
     },
-    title: { lead: "AI chat, coding agents and your own personal agent,", turn: "self\u2011hosted and open source." },
-    bring: { lead: "Bring your own", items: ["harness", "sub", "API key"] },
+    title: { lead: "AI chat, coding agents and your own personal agent,", turn: "self-hosted and open source." },
+    bring: { lead: "Bring your own", items: ["harness", "subscription", "API key"] },
     next: "Jump to the next section",
   },
   zel: {
@@ -179,13 +179,13 @@ const en = {
   features: {
     title: "Bring your own",
     access: {
-      tag: "BYOS · BYOK",
+      tag: "Model access",
       title: "Your subscription… or your API key",
       body: "Already paying for a subscription? Connect it through OAuth. You can see the percentage of your quota you've used, but not always how much actual usage that 100% represents. The provider sets the quota and can increase or reduce it. Alternatively, use an API key: you pay for input and output tokens, with a price specified up front for each.",
       google: "with Google",
     },
     harness: {
-      tag: "BYOH",
+      tag: "Harness",
       title: "Your open-source harness… or the one in your subscription",
       body: "Chat, the harness manager and your agent all run on the open-source harness of your choice, or on the one bundled with your subscription, like Claude Code or Codex CLI.",
       more: "Plus other open-source harnesses.",
