@@ -5,7 +5,8 @@
 //   src/assets/emblem.webp       landing emblem, 320 px
 //   public/favicon.png           landing favicon, 64 px
 //   public/brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png   Zel + wordmark
-//   src/assets/zel-mark.webp     Zel for the header's logo, 512 px tall (it also flies there from the hero)
+//   src/assets/zel-mark.webp     Zel for the header's logo, 512 px tall
+//   src/assets/zel-flight.webp   trimmed Zel at source resolution for the hero-to-header flight
 //   src/assets/glyph-{crown,cobalt,points}.webp   each layer, joined where it has one, with Zel at its centre, 128 px
 // (The emblem layers come from build-layers.mjs, which `npm run brand` runs first.)
 import { existsSync } from 'node:fs';
@@ -31,6 +32,7 @@ const zel = await sharp(path('../public/brand/zel/zel-look.png')).trim().toBuffe
 const zelRatio = zel.info.width / zel.info.height;
 // The header's logo is this same Zel next to the wordmark (Header.tsx).
 await sharp(zel.data).resize({ height: 512 }).webp({ quality: 88 }).toFile(path('../src/assets/zel-mark.webp'));
+await sharp(zel.data).webp({ quality: 90 }).toFile(path('../src/assets/zel-flight.webp'));
 // Each layer's glyph with Zel at its centre, for the story's steps and the server
 // diagram: Zel (look) cut to the centre layer's shape, over the layer.
 const centre = await sharp(path('../src/assets/layer-centre.webp')).resize(960, 960).ensureAlpha().png().toBuffer();
