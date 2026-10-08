@@ -10,9 +10,16 @@ are not vector originals. The source moodboard is not shipped in the website; ev
   for every derived asset. Corrected on 2026-10-03: its top point is teal like the
   other three (it was cobalt, breaking the four-fold symmetry); the uncorrected
   original is kept at `openspec/design/proposals/zellige-emblem-original.png`.
+  It is drawn by hand, so its pieces are not quite alike and it is a little wider
+  than tall. `scripts/build-layers.mjs` redraws it with even pieces: each layer's
+  pieces become the mean of their drawn copies, set exactly a symmetry step apart
+  round the emblem's true centre (49.86% 51.21%, which `styles.css` turns the
+  layers about), each keeping its own glaze and crackle. Every derived image is
+  made from that even emblem, so the layers land on themselves when they turn.
 - `public/brand/zel/zel-<mood>.png`: Zel, the mascot, for each mood (`hello`,
   `look`, `thinking`, `excited`, `curious`, `focused`, `wink`, `content`). Zel is
-  the emblem with an obsidian face on the centre star. The pilot uses `zel-hello`.
+  the emblem with an obsidian face on the centre star, a regular star like the
+  even emblem's (`src/components/ZelFace.tsx`). The pilot uses `zel-hello`.
 - `public/brand/zellige-wordmark{,-night}.svg`: moodboard wordmark, day (navy)
   and night (porcelain); gold stars in both, from `scripts/build-wordmark.mjs`.
 - `public/brand/logo/zellige-logo-{horizontal,zel-top,wordmark-top}{,-night}.png`: the
@@ -25,8 +32,10 @@ are not vector originals. The source moodboard is not shipped in the website; ev
   emblem's colour layers), `layer-{cobalt,points}-joined.webp` (the blue and the
   green each joined into one piece, an X and a diamond, for the story to show on
   their own), `glyph-{crown,cobalt,points}.webp` (each layer, joined where it has
-  one, with Zel at its centre), `emblem.webp`, `zel-mark.webp` (Zel for the header's
-  logo, beside the wordmark) and `public/favicon.png`.
+  one, with Zel at its centre), `emblem.webp` and `public/favicon.png`. The
+  header's and footer's logo, and the Zel that flies from the hero to the header,
+  are the hero's own layers stacked (`src/components/ZelMark.tsx`), turned as the
+  hero's greetings have turned them, so they always match it.
 - `public/brand/zellige-ceramic-source.png`: the approved ceramic mosaic the
   landing's texture (`src/assets/ceramic.webp`) is cut from.
 

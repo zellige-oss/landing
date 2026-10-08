@@ -1,5 +1,5 @@
 import { ArrowUp, CodeXml, Mail } from "lucide-react";
-import { zelMark } from "@/components/brand";
+import { ZelMark } from "@/components/ZelMark";
 import { Wordmark } from "@/components/Wordmark";
 import { useT } from "@/i18n";
 import { site } from "@/site";
@@ -13,7 +13,7 @@ export function Footer() {
       <div className="flex flex-col gap-5 border-t border-border pt-6 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <a href="#inicio" aria-label={t.footer.home} className="inline-flex items-center gap-1">
-            <img src={zelMark} width="530" height="512" alt="" loading="lazy" className="h-6 w-auto" />
+            <ZelMark className="zel-mark [--zel:24px]" />
             <Wordmark lazy className="h-8 w-auto" />
           </a>
           <span>{t.footer.tagline}</span>

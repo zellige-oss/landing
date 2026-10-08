@@ -12,11 +12,13 @@ export const moods: Mood[] = ["hello", "look", "thinking", "excited", "curious",
  * (scripts/build-brand.mjs). Eye coordinates are at the original mascot's scale
  * (eyes at x 521 / 723, y 622), scaled onto the star by the outer transform.
  */
-// The centre star's glaze, traced from public/brand/zellige-emblem.png (tips and inner
-// corners) and grown 2.5% so no teal shows between it and the rim.
-const STAR = "828,642 770,699 775,783 688,772 624,837 560,769 477,783 486,703 420,644 491,584 478,507 562,521 624,456 688,519 774,506 762,580";
+// The centre star, as regular as scripts/build-layers.mjs draws it: round the
+// emblem's centre (625.2, 642.2), tips 200.1 px out every eighth of a turn and inner
+// corners 145.7 px out between them, a little larger than its glaze so no teal shows
+// between it and the rim.
+const STAR = "825.3,642.2 759.9,697.9 766.7,783.7 681,776.8 625.2,842.3 569.5,776.8 483.8,783.7 490.6,697.9 425.1,642.2 490.6,586.4 483.8,500.7 569.5,507.6 625.2,442.1 681,507.6 766.7,500.7 759.9,586.4";
 // Light catching the upper-left sides, just inside the rim.
-const GLINT = "455,644 514,594 504,530 573,542 624,488";
+const GLINT = "459.3,642.5 513.7,596 508.8,524.8 579.2,530.9 625,476.5";
 // How far the open lids rest beyond the eye, per eye half-height (see .lid-* in styles.css).
 const LID_CLEAR_UP = .45;
 const LID_CLEAR_DOWN = .2;

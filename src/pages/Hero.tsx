@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ease } from "@/lib/easing";
 import { useT } from "@/i18n";
 import { Companion } from "@/components/Companion";
-import { zelFlight } from "@/components/brand";
 import { Wordmark } from "@/components/Wordmark";
 import { WhyZellige } from "@/components/WhyZellige";
 
@@ -33,21 +32,21 @@ function Emblem({ reduced }: { reduced: boolean }) {
   );
 }
 
-// A separate, hero-sized image flies to the header, scaling down only. Enlarging
-// the small header logo for takeoff loses detail, especially on high-DPI screens.
-// At either end the original hero/header takes over; the header is never scaled.
+// A separate, hero-sized copy of the header's logo flies to it, scaling down only.
+// Enlarging the small header logo for takeoff loses detail, especially on high-DPI
+// screens. The logo is the hero's own layers, turned as the hero's are (ZelMark.tsx),
+// so at either end the original hero/header takes over with nothing changing; the
+// header is never scaled.
 // Geometry is measured on load and resize only, never while scrolling.
 // Where the browser has scroll timelines with ranges, the trip is an animation on
 // the page's scroll, which the browser runs alongside scrolling itself: driven from
 // scroll events instead, it trails the finger on phones, a frame or more behind.
-// The emblem's whole Zel inside its square image (scripts/build-brand.mjs trims it).
-const ZEL_BOX = { x: 67 / 1254, y: 92 / 1254, w: 1119 / 1254, h: 1082 / 1254 };
 /** The trip takes the first half of the hero's scroll. */
 const TRIP = 0.5;
 /** Keyframes along the trip: enough that its easing reads as a curve. */
 const STEPS = 24;
 
-type Trip = { from: DOMRect; to: DOMRect; zel: HTMLElement; mark: HTMLElement; flight: HTMLImageElement };
+type Trip = { from: DOMRect; to: DOMRect; zel: HTMLElement; mark: HTMLElement; flight: HTMLElement };
 /** Where the flying Zel sits at `e` of the way (eased) with the page scrolled to `y`. */
 function transformAt({ from, to }: Trip, e: number, y: number) {
   const x = from.x + (to.x - from.x) * e;
@@ -81,26 +80,32 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
     const ranged = "ScrollTimeline" in window && CSS.supports("animation-range", "0px 1px");
     const timeline = ranged ? new ScrollTimeline({ source: document.documentElement, axis: "block" }) : null;
     // Outside the header's backdrop-filter and the hero's clipped stacking context.
-    const flight = document.createElement("img");
+    const flight = mark.cloneNode(true) as HTMLElement;
     flight.id = "zel-flight";
-    flight.src = zelFlight;
-    flight.alt = "";
-    flight.draggable = false;
-    flight.setAttribute("aria-hidden", "true");
-    flight.className = "pointer-events-none fixed top-0 left-0 z-[11] max-w-none origin-top-left opacity-0";
+    // Its face's gradients, clips and masks get ids of their own, and every reference
+    // to them follows, so the copy never borrows the header's.
+    for (const node of flight.querySelectorAll("[id]")) node.id = `${node.id}-flight`;
+    for (const node of flight.querySelectorAll("*")) {
+      for (const { name, value } of [...node.attributes]) {
+        if (value.includes("url(#")) node.setAttribute(name, value.replace(/url\(#([^)]+)\)/g, "url(#$1-flight)"));
+        else if (name.endsWith("href") && value.startsWith("#")) node.setAttribute(name, `${value}-flight`);
+      }
+    }
+    flight.className = "pointer-events-none fixed top-0 left-0 z-[11] block origin-top-left opacity-0";
     document.body.append(flight);
     let animations: Animation[] = [];
     const measure = () => {
-      // Keep the original visible until the flight image can actually be drawn.
-      if (!flight.complete || !flight.naturalWidth) return;
+      // Keep the original visible until the flight's layers can actually be drawn.
+      if ([...flight.querySelectorAll("img")].some((image) => !image.complete || !image.naturalWidth)) return;
       for (const animation of animations) animation.cancel();
       animations = [];
       const tile = zel.getBoundingClientRect();
-      // The hero's Zel in page coordinates; the header's in the viewport (it is fixed).
-      const from = new DOMRect(tile.left + tile.width * ZEL_BOX.x, tile.top + scrollY + tile.height * ZEL_BOX.y, tile.width * ZEL_BOX.w, tile.height * ZEL_BOX.h);
+      // The hero's emblem square in page coordinates; the header's in the viewport (it
+      // is fixed). Both are the emblem's whole square, so one scale maps the one to the other.
+      const from = new DOMRect(tile.left, tile.top + scrollY, tile.width, tile.height);
       const trip = { from, to: mark.getBoundingClientRect(), zel, mark, flight };
       flight.style.setProperty("width", `${from.width}px`);
-      flight.style.setProperty("height", `${from.width * trip.to.height / trip.to.width}px`);
+      flight.style.setProperty("height", `${from.height}px`);
       const top = hero.getBoundingClientRect().top + scrollY;
       const length = TRIP * hero.offsetHeight;
       last.current = -1;
@@ -127,7 +132,8 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
       ];
     };
     mark.style.setProperty("transition", "none");
-    flight.addEventListener("load", measure);
+    // Load events do not bubble, but reach the flight on their way down to its layers.
+    flight.addEventListener("load", measure, true);
     measure();
     addEventListener("resize", measure);
     addEventListener("load", measure);
@@ -137,7 +143,7 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
     return () => {
       removeEventListener("resize", measure);
       removeEventListener("load", measure);
-      flight.removeEventListener("load", measure);
+      flight.removeEventListener("load", measure, true);
       observer.disconnect();
       for (const animation of animations) animation.cancel();
       flight.remove();
