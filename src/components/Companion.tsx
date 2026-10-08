@@ -2,10 +2,8 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useZelMotion } from "@/hooks/zel-motion";
 import layerCentre from "@/assets/layer-centre.webp";
-import layerCobalt from "@/assets/layer-cobalt.webp";
 import layerCobaltJoined from "@/assets/layer-cobalt-joined.webp";
 import layerCrown from "@/assets/layer-crown.webp";
-import layerPoints from "@/assets/layer-points.webp";
 import layerPointsJoined from "@/assets/layer-points-joined.webp";
 import layerWhole from "@/assets/layer-whole.webp";
 
@@ -30,11 +28,11 @@ let blinkSeed = 0;
 const nextBlinkPhase = () => (blinkSeed = (blinkSeed + 0.6180339887) % 1);
 
 export type Layer = "centre" | "crown" | "cobalt" | "points";
-/** Each layer as the emblem splits it and, where that is four pieces, the same layer
- *  joined into one, for showing it on its own. */
-export const layers: { name: Layer; src: string; joined?: string }[] = [
-  { name: "points", src: layerPoints, joined: layerPointsJoined },
-  { name: "cobalt", src: layerCobalt, joined: layerCobaltJoined },
+/** Each layer as one piece: where the emblem splits a layer into four, its joined
+ *  piece, so whatever moves, the blue and the green move as the mini Zel they are. */
+export const layers: { name: Layer; src: string }[] = [
+  { name: "points", src: layerPointsJoined },
+  { name: "cobalt", src: layerCobaltJoined },
   { name: "crown", src: layerCrown },
   { name: "centre", src: layerCentre },
 ];
@@ -46,7 +44,6 @@ export function Companion({
   lively = false,
   motionDelay = 0,
   shadow,
-  joined = false,
 }: {
   mood: Mood;
   className?: string;
@@ -58,8 +55,6 @@ export function Companion({
   motionDelay?: number;
   /** A soft shadow under Zel, sized for where it sits (.zel-shadow-* in styles.css). */
   shadow?: "hero" | "tile";
-  /** Also lay each layer's joined piece, for the story to show a layer on its own (.zel-joined in styles.css). */
-  joined?: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
   useZelMotion(root, lively, motionDelay);
@@ -128,11 +123,10 @@ export function Companion({
       {shadow && <img src={layerWhole} width="960" height="960" alt="" draggable={false} className={`zel-shadow zel-shadow-${shadow} absolute inset-0 size-full`} />}
       {/* Square box holding the stacked emblem layers. */}
       <div className="relative aspect-square w-full">
-        {layers.map(({ name, src, joined: whole }) => (
+        {layers.map(({ name, src }) => (
           <div key={name} className={`zel-layer layer-${name} absolute inset-0 size-full`}>
             <div className="zel-piece relative size-full" data-zel-motion={name}>
-              <img src={src} width="960" height="960" alt="" draggable={false} className={cn("size-full", joined && whole && "zel-split")} />
-              {joined && whole && <img src={whole} width="960" height="960" alt="" draggable={false} className="zel-joined absolute inset-0 size-full" />}
+              <img src={src} width="960" height="960" alt="" draggable={false} className="size-full" />
             </div>
           </div>
         ))}
