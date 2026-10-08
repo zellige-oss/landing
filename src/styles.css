@@ -395,6 +395,13 @@
   .zel-mood-content .layer-cobalt .zel-piece > img { animation-delay: 0.2s; }
   .zel-mood-content .layer-points .zel-piece > img { animation-delay: 0.4s; }
 }
+/* The story's whole tile says hello with all three of its parts: the crown, the
+   blue and the green swell in turn, from Zel out, and settle. */
+@media (prefers-reduced-motion: no-preference) {
+  .tile-scroll .zel-mood-hello .layer-crown .zel-piece > img { animation: zel-swell 4s ease-in-out infinite; }
+  .tile-scroll .zel-mood-hello .layer-cobalt .zel-piece > img { animation: zel-swell 4s 0.25s ease-in-out infinite; }
+  .tile-scroll .zel-mood-hello .layer-points .zel-piece > img { animation: zel-swell 4s 0.5s ease-in-out infinite; }
+}
 /* Eight clicks of 45 degrees make a whole turn, so the loop has no jump. */
 @keyframes zel-dial {
   0%, 8% { rotate: 0deg; }
@@ -453,6 +460,10 @@
   50%, 71% { rotate: 180deg; }
   75%, 96% { rotate: 270deg; }
   100% { rotate: 360deg; }
+}
+@keyframes zel-swell {
+  0%, 30%, 100% { scale: 1; }
+  12% { scale: 1.06; }
 }
 @keyframes zel-breathe {
   0%, 100% { scale: 1; }

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { ChevronDown } from "lucide-react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
@@ -111,6 +111,15 @@ export function Story({ reduced }: { reduced: boolean }) {
   const whole = !live || (stage ?? 0) >= last;
   const lit = whole ? pointed ?? picked : undefined;
   const pick = (piece: Piece) => setPicked((value) => (value === piece ? undefined : piece));
+  // A tap or click anywhere but on a part (its row or the tile) lets the picked one go.
+  useEffect(() => {
+    if (!picked) return;
+    const release = (event: PointerEvent) => {
+      if (!(event.target instanceof Element) || !event.target.closest(".story-step, #piezas .tile")) setPicked(undefined);
+    };
+    addEventListener("pointerdown", release);
+    return () => removeEventListener("pointerdown", release);
+  }, [picked]);
   /** Scrolls to where a step has just begun. */
   function goTo(index: number) {
     const node = track.current;
