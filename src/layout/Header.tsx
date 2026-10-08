@@ -48,9 +48,9 @@ export function Header() {
       {/* The logo: Zel beside the wordmark, as in public/brand/logo/zellige-logo-horizontal.png.
           On phones Zel is a little larger than the logo's proportion so its face reads. */}
       <a className={cn("inline-flex shrink-0 items-center gap-1 sm:gap-1.5", heroMark && "pointer-events-none")} href="#inicio" aria-label={t.header.home} tabIndex={heroMark ? -1 : undefined}>
-        {/* With motion, Zel flies here from the hero as you scroll and the hero sets its
-            transform and opacity (Hero.tsx); otherwise it fades in with the wordmark. */}
-        <img id="header-zel" src={zelMark} width="530" height="512" alt="" className={cn("h-[26px] w-auto origin-top-left transition-opacity duration-300 sm:h-[31px]", heroMark && "opacity-0")} />
+        {/* The flight hands off to this unscaled logo on arrival (Hero.tsx).
+            With reduced motion it fades in with the wordmark. */}
+        <img id="header-zel" src={zelMark} width="530" height="512" alt="" className={cn("h-[26px] w-auto transition-opacity duration-300 sm:h-[31px]", heroMark && "opacity-0")} />
         <span className={cn("transition-[opacity,translate] duration-300", heroMark && "-translate-y-1 opacity-0")}><Wordmark className="h-5 w-auto sm:h-10" /></span>
       </a>
       <nav aria-label={t.header.nav} className="ml-auto flex gap-[30px] max-sm:hidden">
