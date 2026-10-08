@@ -225,12 +225,6 @@
   .tile-scroll.show-cobalt .layer-cobalt,
   .tile-scroll.show-points .layer-points,
   .tile-scroll.show-all .zel-layer:not(.layer-centre) { opacity: 1; scale: 1; }
-  /* In the story every layer is its joined piece (Companion.tsx), on its own and in
-     the whole tile alike, so whatever moves, it moves as the mini Zel it is. */
-  .zel-layer .zel-piece > img:is(.zel-split, .zel-joined) { transition: scale 0.6s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.4s ease; }
-  .zel-joined { opacity: 0; }
-  .tile-scroll .zel-joined { opacity: 1; }
-  .tile-scroll .zel-split { opacity: 0; }
   /* The assembled emblem keeps its drawn rims: it covers the layers once they have
      all landed, and gives way to them as soon as one moves. */
   .zel-whole { transition: opacity 0.3s ease; }
@@ -472,14 +466,16 @@
   from { opacity: 0; }
 }
 
-/* Hero: the emblem's layers fly in from beyond the screen and lock around Zel. */
+/* Hero: Zel appears first, then the emblem's layers fly in from beyond the screen
+   and lock around it. Each layer is one joined piece that passes under Zel, so Zel
+   comes first and the centre never shows the blue. */
 @media (prefers-reduced-motion: no-preference) {
-  .hero-intro .layer-points { animation: fly-in 1.1s 0.25s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 2.8; --spin: 24deg; }
-  .hero-intro .layer-cobalt { animation: fly-in 1.1s 0.55s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 2.1; --spin: -18deg; }
-  .hero-intro .layer-crown { animation: fly-in 1s 0.85s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 1.5; --spin: 12deg; }
-  .hero-intro .layer-centre, .hero-intro .zel-face-layer { animation: centre-in 0.7s 1.35s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: center; }
-  .hero-intro .zel-whole { animation: whole-in 0.3s 2.05s backwards; }
-  .hero-intro .zel-shadow { animation: whole-in 0.6s 1.7s backwards; }
+  .hero-intro .layer-centre, .hero-intro .zel-face-layer { animation: centre-in 0.6s 0.15s cubic-bezier(0.3, 1.5, 0.5, 1) both; transform-origin: center; }
+  .hero-intro .layer-points { animation: fly-in 1.1s 0.6s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 2.8; --spin: 24deg; }
+  .hero-intro .layer-cobalt { animation: fly-in 1.1s 0.9s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 2.1; --spin: -18deg; }
+  .hero-intro .layer-crown { animation: fly-in 1s 1.2s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; --fly: 1.5; --spin: 12deg; }
+  .hero-intro .zel-whole { animation: whole-in 0.3s 2.3s backwards; }
+  .hero-intro .zel-shadow { animation: whole-in 0.6s 1.9s backwards; }
   .hero .hero-copy { animation: arrive 0.8s 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 }
 @keyframes fly-in {

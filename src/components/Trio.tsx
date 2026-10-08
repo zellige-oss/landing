@@ -78,7 +78,7 @@ export function Trio({
       onPointerLeave={() => setHover(undefined)}
       onClick={(event) => { const piece = pieceAt(event); if (piece) onPick?.(piece); }}
     >
-      <Companion mood={mood} follow joined alt={t.zel.alt} shadow="tile" className="size-full" />
+      <Companion mood={mood} follow alt={t.zel.alt} shadow="tile" className="size-full" />
     </div>
   );
 }

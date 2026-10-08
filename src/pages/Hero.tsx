@@ -19,8 +19,8 @@ function unbroken(text: string) {
 
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
- * The emblem's layers fly in from beyond the screen and lock around Zel (CSS), and
- * Zel says hello; scrolling away lets the layers drift apart toward the story
+ * Zel appears, the emblem's layers fly in from beyond the screen and lock around
+ * it (CSS), and Zel says hello; scrolling away lets the layers drift apart toward the story
  * below, where they assemble again step by step and each one is explained.
  */
 
