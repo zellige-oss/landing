@@ -311,8 +311,8 @@ for (const [id, [fold, offset]] of Object.entries(SYMMETRY)) {
     reach.set(bucket, Math.max(reach.get(bucket) ?? 0, r));
   }
   const near = (angle) => [...reach].filter(([a]) => Math.abs(((a - angle + 540) % 360) - 180) <= 7.5).map(([, r]) => r);
-  const tip = Array.from({ length: 8 }, (_, k) => Math.max(...near(45 * k))).reduce((a, b) => a + b) / 8;
-  const valley = Array.from({ length: 8 }, (_, k) => Math.min(...near(22.5 + 45 * k))).reduce((a, b) => a + b) / 8;
+  const tip = Array.from({ length: 8 }, (_, k) => Math.max(...near(45 * k))).reduce((a, b) => a + b, 0) / 8;
+  const valley = Array.from({ length: 8 }, (_, k) => Math.min(...near(22.5 + 45 * k))).reduce((a, b) => a + b, 0) / 8;
   console.log(`centre star: tips ${tip.toFixed(1)} px, valleys ${valley.toFixed(1)} px from the centre`);
   const star = Array.from({ length: 16 }, (_, i) => fromPolar([i % 2 ? valley : tip, i * 22.5]));
   // Filled as its inner octagon and the eight tips, each convex.
