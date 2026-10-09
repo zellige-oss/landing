@@ -14,9 +14,8 @@ export function Contact() {
     <section id="contacto" aria-labelledby="contact-title" className="lattice relative mx-3 bg-night px-[26px] pt-[76px] pb-14 text-night-foreground sm:mx-[30px] sm:px-10 sm:pt-[120px] sm:pb-[104px] min-[1050px]:px-[clamp(24px,4.5vw,80px)]">
       <div aria-hidden="true" className="ceramic absolute inset-x-0 top-0 h-[34px] border-b border-brass bg-[length:136px_136px] bg-repeat-x" />
       <div data-reveal className="grid items-start sm:grid-cols-[1fr_2fr] sm:gap-x-[10%]">
-        <TileInProgress className="mb-8 w-[132px] sm:row-span-4 sm:mb-0 sm:w-[min(100%,280px)] sm:self-center sm:justify-self-center" />
-        <p className="eyebrow text-night-gold">{t.header.links.contact}</p>
-        <h2 id="contact-title" className="mt-6 text-[49px] leading-[1.02] sm:text-[clamp(46px,5.5vw,84px)]">
+        <TileInProgress className="mb-8 w-[132px] sm:row-span-2 sm:mb-0 sm:w-[min(100%,280px)] sm:self-center sm:justify-self-center" />
+        <h2 id="contact-title" className="section-title">
           {t.contact.headline.lead}<br /><em className="text-night-gold">{t.contact.headline.turn}</em>
         </h2>
         <div>

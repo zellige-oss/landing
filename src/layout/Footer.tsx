@@ -9,7 +9,7 @@ export function Footer() {
   const t = useT();
   const link = "inline-flex items-center gap-1.5 decoration-brass underline-offset-[6px] hover:text-foreground hover:underline";
   return (
-    <footer className="px-6 pt-10 pb-8 sm:px-[clamp(24px,4.5vw,80px)] min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]">
+    <footer className="px-6 pt-10 pb-8 sm:px-[clamp(24px,4.5vw,80px)] nav:pb-28 min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]">
       <div className="flex flex-col gap-5 border-t border-border pt-6 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <a href="#inicio" aria-label={t.footer.home} className="inline-flex items-center gap-1">

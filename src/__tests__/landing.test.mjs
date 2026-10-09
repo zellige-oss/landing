@@ -42,7 +42,7 @@ test('landing declares its language and responsive viewport', () => {
 test('content is prerendered, so it reads without JavaScript', () => {
   assert.match(html, /<h1[^>]*id="hero-title"[^>]*>\s*<img[^>]*alt="zellige"/);
   for (const id of ['inicio', 'piezas', 'funciones', 'contacto']) assert.match(html, new RegExp(`id="${id}"`));
-  assert.match(html, /«azulejo»/, 'The name is explained under the title');
+  assert.match(html, /«azulejo»/, 'The name explanation is available without JavaScript');
   assert.match(html, /Chat, desarrollo con agentes y agente personal,/);
 });
 
@@ -52,7 +52,7 @@ test('landing links GitHub only for the project repository, never the pilot or d
   for (const { attrs } of tags.filter(({ name }) => name === 'a')) {
     const href = decodeURIComponent(attrs.href ?? '');
     assert.doesNotMatch(href, forbidden);
-    if (github.test(href)) assert.equal(href, 'https://github.com/zellige-oss/Zellige', `Only the project repository: ${href}`);
+    if (github.test(href)) assert.match(href, /^https:\/\/github\.com\/zellige-oss\/Zellige(?:\/releases)?$/, `Only the project repository or its releases: ${href}`);
   }
   assert.doesNotMatch(html, /pilot-preview/);
 });
@@ -122,7 +122,7 @@ test('light landing palette keeps text readable across its surfaces', () => {
     const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
     return (light + 0.05) / (dark + 0.05);
   }
-  for (const surface of ['background', 'surface']) {
+  for (const surface of ['background', 'surface', 'popover']) {
     for (const text of ['foreground', 'muted-foreground', 'accent', 'gold']) {
       assert.ok(contrast(colors[text], colors[surface]) >= 4.5, `${text} on ${surface}`);
     }
@@ -152,10 +152,16 @@ test('dark landing palette keeps text readable too', () => {
   }
 });
 
-test('theme follows the system or the saved choice, set before first paint', () => {
+test('theme is dark unless the reader chose light, set before first paint', () => {
   const metas = tags.filter(({ name, attrs }) => name === 'meta' && attrs.name === 'theme-color');
-  assert.equal(metas.find(({ attrs }) => /light/.test(attrs.media ?? ''))?.attrs.content, palette(':root').background);
-  assert.equal(metas.find(({ attrs }) => /dark/.test(attrs.media ?? ''))?.attrs.content, palette('.dark').background);
+  assert.equal(metas.length, 1);
+  // The browser's bar starts dark and switches with the theme.
+  assert.equal(metas[0].attrs.content, palette('.dark').background);
+  assert.equal(metas[0].attrs['data-dark'], palette('.dark').background);
+  assert.equal(metas[0].attrs['data-light'], palette(':root').background);
+  const script = readFileSync(resolve(root, 'public/theme.js'), 'utf8');
+  assert.match(script, /saved === "light"/);
+  assert.doesNotMatch(script, /prefers-color-scheme/);
   // A blocking external script in <head>, before the stylesheet paints the page.
   const head = html.slice(0, html.indexOf('</head>'));
   assert.match(head, /<script src="\/theme\.js"><\/script>/);

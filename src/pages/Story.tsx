@@ -1,10 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { ChevronDown } from "lucide-react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
 import type { Mood } from "@/components/Companion";
 import { Trio, ZelGlyph, type Piece } from "@/components/Trio";
-import { Workings } from "@/components/Workings";
 import { useT } from "@/i18n";
 
 /** The stages of the story: one per layer, then the whole tile. */
@@ -19,6 +18,16 @@ const last = steps.length - 1;
 
 /** Where each stage begins, as a share of the story's scroll: the three layers, then the whole tile. */
 const STARTS = [0, 0.27, 0.54, 0.8];
+/** Set in sessionStorage once the story has played in this tab. */
+const SEEN = "zellige-story-seen";
+function storySeen() {
+  try {
+    return sessionStorage.getItem(SEEN) === "1";
+  } catch {
+    return false; // no storage: the story simply plays again
+  }
+}
+const ignoreChanges = () => () => {};
 const stepAt = (t: number) => Math.max(0, STARTS.filter((start) => t >= start).length - 1);
 
 /**
@@ -64,7 +73,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   // The story plays once. As soon as the reader has seen the whole tile and scrolled
   // to the end of it, it settles into a still summary (every step, the whole tile,
   // every label), so scrolling back up never rewinds it.
-  const [settled, setSettled] = useState(false);
+  const [settledHere, setSettled] = useState(false);
   // The layer under the mouse, on the tile or on its part in the text: the part
   // lights up, the rest step back and the tile lifts that layer.
   const [pointed, setPointed] = useState<Piece>();
@@ -74,6 +83,28 @@ export function Story({ reduced }: { reduced: boolean }) {
   // The story's title and where it was on screen when the story settles, to put it
   // back exactly there afterwards.
   const anchor = useRef<{ element: Element; top: number } | null>(null);
+  // When the page last jumped to a link's target, and the target to land on.
+  const jumpedAt = useRef(-Infinity);
+  const jumpTo = useRef<Element | null>(null);
+  useEffect(() => {
+    const jumped = () => { jumpedAt.current = performance.now(); };
+    if (location.hash) jumped();
+    addEventListener("hashchange", jumped);
+    return () => removeEventListener("hashchange", jumped);
+  }, []);
+  // Once seen in this tab, the story stays settled when the page is reloaded. Played
+  // again, it would be 2,000 px of scroll taller than the page the reader left, and
+  // the browser, putting the scroll back where it was, would land inside it. The
+  // prerendered page has it playing; right after hydration it settles, and the page
+  // goes back to where it was.
+  const seen = useSyncExternalStore(ignoreChanges, storySeen, () => false);
+  const settled = settledHere || (seen && !reduced);
+  const restore = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (reduced || !storySeen()) return;
+    restore.current = scrollY;
+    document.documentElement.style.setProperty("overflow-anchor", "none");
+  }, [reduced]);
   // With reduced motion the tile simply stays assembled and the steps read as a list.
   useScrollProgress(track, "through", (t) => {
     const step = stepAt(t);
@@ -81,20 +112,39 @@ export function Story({ reduced }: { reduced: boolean }) {
     if (step >= last) seenEnd.current = true;
     setAtStart(t < 0.06);
     if (t < 1 || !seenEnd.current) return;
+    // A jump to a link's target past the story runs straight through it, and the
+    // browser, scrolling smoothly toward where the target was, would overshoot once
+    // the story is shorter: the target is where to land. Otherwise the story's title
+    // stays put on screen.
+    const section = document.getElementById("piezas");
+    const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+    const past = target && section && !section.contains(target) && section.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING;
+    if (past && performance.now() - jumpedAt.current < 2000) jumpTo.current = target;
     const title = document.getElementById("piezas-title");
     if (title) anchor.current = { element: title, top: title.getBoundingClientRect().top };
     // The browser's own scroll anchoring would also make up for the lost height;
     // with ours on top, the page jumped twice as far. Only ours runs.
     document.documentElement.style.setProperty("overflow-anchor", "none");
     setSettled(true);
+    try { sessionStorage.setItem(SEEN, "1"); } catch { /* private mode: it plays again on reload */ }
   }, !reduced && !settled);
   // The story's scroll above the screen is gone: scroll by however far the title
   // moved, so what the reader is looking at stays exactly where it was.
   useLayoutEffect(() => {
     if (!settled) return;
-    const held = anchor.current;
+    const held = anchor.current, back = restore.current, jump = jumpTo.current;
     anchor.current = null;
-    if (held) {
+    restore.current = null;
+    jumpTo.current = null;
+    if (jump) {
+      // The browser's own smooth scroll may still be running toward where the target
+      // was; land on it again once that scroll is over.
+      const land = () => jump.scrollIntoView({ behavior: "instant", block: "start" });
+      land();
+      addEventListener("scrollend", land, { once: true });
+    }
+    else if (back) scrollTo({ top: back, behavior: "instant" });
+    else if (held) {
       const moved = held.element.getBoundingClientRect().top - held.top;
       if (Math.abs(moved) > 0.5) scrollBy({ top: moved, behavior: "instant" });
     }
@@ -148,9 +198,15 @@ export function Story({ reduced }: { reduced: boolean }) {
               "grid content-start gap-x-[6vw] gap-y-4 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center",
             )}
           >
-            <h2 id="piezas-title" className="text-[clamp(32px,8vw,44px)] leading-[1.02] lg:col-start-1 lg:row-start-1 lg:self-end lg:text-[clamp(44px,4.2vw,68px)]">
-              {t.story.title}
-            </h2>
+            <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
+              <h2 id="piezas-title" className="section-title">
+                {t.story.title}
+              </h2>
+              <p className="mt-4 max-w-[52ch] text-[15px] leading-[1.7] text-muted-foreground sm:text-base">
+                <strong className="font-medium text-foreground">{t.story.intro.lead}</strong>{" "}
+                {t.story.intro.body}
+              </p>
+            </div>
             <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
               <Trio
                 mood={steps[Math.min(stage ?? last, last)].mood}
@@ -210,7 +266,7 @@ export function Story({ reduced }: { reduced: boolean }) {
                         // there is no story, and every part reads in full.
                         !reduced && !current && "max-lg:py-2",
                         live && !current && "[@media(max-height:740px)]:max-lg:hidden",
-                        current && "border-brass/60 bg-popover/80 shadow-[0_14px_34px_-22px_rgb(20_43_53/0.45)]",
+                        current && "border-brass/60 bg-popover/80 shadow-[0_14px_34px_-22px_rgb(var(--shadow-ink)/0.45)]",
                       )}
                     >
                       <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-base sm:text-lg">
@@ -222,10 +278,9 @@ export function Story({ reduced }: { reduced: boolean }) {
                   );
                 })}
               </ol>
-              {/* With a mouse, the whole tile and its parts point at each other. */}
-              {whole && (
-                <p aria-hidden="true" className="mt-4 hidden text-sm text-muted-foreground lg:pointer-fine:block">{t.story.hover}</p>
-              )}
+              {/* Room under the parts, a little more than a line of text, so the whole
+                  tile's summary does not end flush against them. */}
+              {whole && <div aria-hidden="true" className="hidden h-14 lg:block" />}
               {live && (
                 <p aria-hidden="true" className={cn("mt-4 flex items-center gap-2 text-sm text-muted-foreground transition-opacity duration-500 max-lg:justify-center", !atStart && "opacity-0")}>
                   <ChevronDown className="size-4 motion-safe:animate-bounce" /> {t.story.hint}
@@ -235,7 +290,6 @@ export function Story({ reduced }: { reduced: boolean }) {
           </div>
         </div>
       </div>
-      <Workings className={gutter} />
     </section>
   );
 }

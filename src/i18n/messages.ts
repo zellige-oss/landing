@@ -13,7 +13,7 @@ const es = {
   header: {
     home: "Zellige, inicio",
     nav: "Principal",
-    links: { idea: "¿Qué es Zellige?", features: "Modelos y herramientas", contact: "Contacto" },
+    links: { home: "Inicio", idea: "¿Qué es Zellige?", features: "¿Cómo funciona?", contact: "¿Quieres colaborar?" },
     theme: "Cambiar entre modo claro y oscuro",
     themeTitle: "Modo claro / oscuro",
     menu: "Menú",
@@ -22,14 +22,15 @@ const es = {
   },
   hero: {
     why: {
-      title: "¿Por qué Zellige?",
+      title: "¿Por qué «Zellige»?",
       from: "Del árabe",
       meaning: "«azulejo».",
-      history: "De la misma raíz viene el español azulejo. En el Magreb, zellige nombra el mosaico de teselas de barro esmaltado, talladas a mano y encajadas en patrones geométricos.",
+      history: "De la misma raíz viene el español azulejo. En el Magreb, «zellige» nombra el mosaico de teselas de barro esmaltado, talladas a mano y encajadas en patrones geométricos.",
     },
     title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "en tu servidor y de código abierto." },
-    bring: { lead: "Con lo que ya usas", items: ["harness", "suscripción", "clave de API"] },
+    bring: { lead: "Conecta tu", items: ["harness", "suscripción", "clave de API"] },
     next: "Ir a la siguiente sección",
+    releases: "Ver las versiones de Zellige en GitHub",
   },
   zel: {
     alt: "Zel, la mascota de Zellige",
@@ -44,14 +45,22 @@ const es = {
     progress: "Pasos",
     goTo: "Ir al paso",
     title: "¿Qué es Zellige?",
-    hover: "Pasa el ratón por el azulejo o por cada parte para verla.",
+    intro: {
+      lead: "Zellige es un entorno de agentización personal.",
+      body: "Como en un mosaico, cada forma de usar la IA es una pieza, y Zel, en el centro, las mantiene unidas.",
+    },
     workings: {
       title: "¿Cómo funciona?",
-      body: "Monta tu propio servidor y conecta tus modelos por API o con la suscripción que ya tienes. Tailscale lo mantiene privado, y entras desde las apps de escritorio y móvil, en cualquier plataforma, o desde la web.",
-      devices: { title: "Tus dispositivos", items: ["Escritorio", "Móvil", "Web"] },
+      status: {
+        title: "En desarrollo",
+        body: "Esta página presenta las funciones previstas para Zellige. Todavía no están implementadas.",
+      },
+      body: "Usas el chat, el gestor de harness y tu agente desde las apps de escritorio y móvil, en cualquier plataforma, o desde la web. Llegan a tu propio servidor por Tailscale, que lo mantiene privado. Tu servidor guarda tus claves de API y tus suscripciones, y con ellas llama a los proveedores de inferencia que prefieras.",
+      devices: { title: "Tus dispositivos", body: "Las tres herramientas, en cualquier dispositivo", items: ["Escritorio", "Móvil", "Web"] },
       tunnel: { title: "Tailscale", body: "Red privada" },
-      server: { title: "Tu servidor", memory: "Memoria compartida" },
-      models: { title: "Tus modelos", api: ["API", "Tus claves de API"], oauth: ["OAuth", "Tu suscripción"] },
+      server: { title: "Tu servidor", body: "En tu máquina", memory: "Memoria compartida", api: ["API", "Tus claves de API"], oauth: ["OAuth", "Tus suscripciones"] },
+      calls: { title: "Inferencia", body: "Petición y respuesta" },
+      providers: { title: "Proveedores de inferencia", body: "Autoalojados o externos" },
     },
     steps: {
       crown: {
@@ -77,17 +86,15 @@ const es = {
     access: {
       tag: "Acceso a modelos",
       title: "Tu suscripción… o tu clave de API",
-      body: "Si ya pagas una suscripción, conéctala mediante OAuth. Puedes ver qué porcentaje de tu cuota has consumido, aunque no siempre cuánto uso real representa ese 100 %. El proveedor fija la cuota y puede ampliarla o reducirla. Como alternativa, usa una clave de API: pagas por los tokens de entrada y de salida, con un precio fijado de antemano para cada uno.",
-      google: "con Google",
+      body: "Conecta tu suscripción mediante OAuth o una clave de API. También puedes pagar por consumo.",
     },
     harness: {
       tag: "Harness",
       title: "Tu harness de código abierto… o el de tu suscripción",
       body: "El chat, el gestor de harness y tu agente funcionan con el harness de código abierto que elijas, o con el que incluye tu suscripción, como Claude Code o Codex CLI.",
-      more: "Y otros harness de código abierto.",
+      more: "Y en el futuro otros harness de código abierto…",
     },
-    points: ["En tu servidor", "Memoria compartida", "Cambia de modelo sin perder nada"],
-    providers: "Herramientas con inicio de sesión OAuth",
+    providers: "Servicios de acceso a modelos",
     harnesses: "Harness de código abierto",
     trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
   },
@@ -96,6 +103,7 @@ const es = {
     body: "Zellige es un proyecto abierto. Sigue el proyecto en GitHub, abre un issue con tus ideas o escríbenos.",
     repo: "Código en GitHub",
     email: "Escríbenos",
+    tile: { place: "Colocar la pieza del mosaico", remove: "Retirar la pieza del mosaico" },
   },
   footer: {
     tagline: "Chat, harness y agente personal, en tu servidor.",
@@ -117,7 +125,7 @@ const en = {
   header: {
     home: "Zellige home",
     nav: "Main navigation",
-    links: { idea: "What is Zellige?", features: "Bring your own", contact: "Contact" },
+    links: { home: "Home", idea: "What is Zellige?", features: "How it works", contact: "Contribute" },
     theme: "Toggle light and dark mode",
     themeTitle: "Light / dark mode",
     menu: "Menu",
@@ -126,14 +134,15 @@ const en = {
   },
   hero: {
     why: {
-      title: "Why Zellige?",
+      title: "Why “Zellige”?",
       from: "From the Arabic",
       meaning: "“tile.”",
-      history: "The same root gave Spanish its azulejo. Across the Maghreb, zellige names the mosaic of hand-cut glazed clay tiles set in geometric patterns.",
+      history: "The same root gave Spanish its azulejo. Across the Maghreb, “zellige” names the mosaic of hand-cut glazed clay tiles set in geometric patterns.",
     },
     title: { lead: "AI chat, coding agents and your own personal agent,", turn: "self-hosted and open source." },
-    bring: { lead: "Bring your own", items: ["harness", "subscription", "API key"] },
+    bring: { lead: "Connect your", items: ["harness", "subscription", "API key"] },
     next: "Jump to the next section",
+    releases: "View Zellige releases on GitHub",
   },
   zel: {
     alt: "Zel, the Zellige mascot",
@@ -148,14 +157,22 @@ const en = {
     progress: "Steps",
     goTo: "Go to step",
     title: "What is Zellige?",
-    hover: "Hover over the tile or any part to explore it.",
+    intro: {
+      lead: "Zellige is a personal workspace for AI agents.",
+      body: "Like a mosaic, each way of using AI is one piece, and Zel, at the centre, holds them together.",
+    },
     workings: {
-      title: "How does it work?",
-      body: "Spin up your own server and connect your models through their APIs or the subscription you already have. Tailscale keeps it private, and you can reach it from the desktop and mobile apps on any platform, or from the web.",
-      devices: { title: "Your devices", items: ["Desktop", "Mobile", "Web"] },
+      title: "How it works",
+      status: {
+        title: "Under development",
+        body: "This page presents the features planned for Zellige. They have not been implemented yet.",
+      },
+      body: "You use the chat, the harness manager and your agent from the desktop and mobile apps, on any platform, or from the web. They reach your own server over Tailscale, which keeps it private. Your server holds your API keys and subscriptions, and calls the inference providers you prefer with them.",
+      devices: { title: "Your devices", body: "All three tools, on any device", items: ["Desktop", "Mobile", "Web"] },
       tunnel: { title: "Tailscale", body: "Private network" },
-      server: { title: "Your server", memory: "Shared memory" },
-      models: { title: "Your models", api: ["API", "Your API keys"], oauth: ["OAuth", "Your subscription"] },
+      server: { title: "Your server", body: "On your machine", memory: "Shared memory", api: ["API", "Your API keys"], oauth: ["OAuth", "Your subscriptions"] },
+      calls: { title: "Inference", body: "Request and response" },
+      providers: { title: "Inference providers", body: "Self-hosted or external" },
     },
     steps: {
       crown: {
@@ -181,17 +198,15 @@ const en = {
     access: {
       tag: "Model access",
       title: "Your subscription… or your API key",
-      body: "Already paying for a subscription? Connect it through OAuth. You can see the percentage of your quota you've used, but not always how much actual usage that 100% represents. The provider sets the quota and can increase or reduce it. Alternatively, use an API key: you pay for input and output tokens, with a price specified up front for each.",
-      google: "with Google",
+      body: "Connect your subscription with OAuth or an API key. You can also pay as you go.",
     },
     harness: {
       tag: "Harness",
       title: "Your open-source harness… or the one in your subscription",
       body: "Chat, the harness manager and your agent all run on the open-source harness of your choice, or on the one bundled with your subscription, like Claude Code or Codex CLI.",
-      more: "Plus other open-source harnesses.",
+      more: "And in the future, more open-source harnesses…",
     },
-    points: ["Runs on your server", "One shared memory", "Switch models without losing a thing"],
-    providers: "Tools with OAuth sign-in",
+    providers: "Model access services",
     harnesses: "Open-source harnesses",
     trademarks: "All trademarks are the property of their respective owners.",
   },
@@ -200,6 +215,7 @@ const en = {
     body: "Zellige is an open project. Follow along on GitHub, open an issue with your ideas, or drop us a line.",
     repo: "View the code on GitHub",
     email: "Email us",
+    tile: { place: "Place the mosaic tile", remove: "Remove the mosaic tile" },
   },
   footer: {
     tagline: "AI chat, coding agents and a personal agent, on your own server.",

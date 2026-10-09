@@ -122,7 +122,7 @@ test('all paths get the landing security headers', async () => {
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'no-referrer',
     'X-Frame-Options': 'DENY',
-    'Content-Security-Policy': "default-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'",
+    'Content-Security-Policy': "default-src 'self'; connect-src 'self' https://api.github.com; img-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'",
   };
   assert.deepEqual(config.routes[0], { src: '/.*', headers, continue: true });
   assert.deepEqual(config.routes.slice(1), [
