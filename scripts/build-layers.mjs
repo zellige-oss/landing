@@ -372,6 +372,30 @@ const save = async (name, raw) => {
 // Each layer: its pieces' glaze, then the new rim out to RIM px with an antialiased
 // edge, shaded by the facing of the outward normal (the distance field's gradient).
 const profiles = rimProfiles(data, W);
+// The emblem's gold as a whole: every gold pixel of the drawing.
+const drawnGold = [];
+for (let k = 0; k < N; k += 1) {
+  if (data[k * 4 + 3] < 250) continue;
+  const r = data[k * 4], g = data[k * 4 + 1], b = data[k * 4 + 2], max = Math.max(r, g, b), min = Math.min(r, g, b);
+  if (max < 60 || (max - min) / max < 0.35) continue;
+  const [h] = hsv(k * 4);
+  if (h >= 20 && h <= 55) drawnGold.push([r, g, b]);
+}
+// Recolours `colours` in place, channel by channel, to the same mean and spread as
+// the drawing's gold: only the tone changes, not the light and shade along them.
+function toDrawnGold(colours) {
+  const moments = (list, c) => {
+    const mean = list.reduce((sum, p) => sum + p[c], 0) / list.length;
+    return [mean, Math.sqrt(list.reduce((sum, p) => sum + (p[c] - mean) ** 2, 0) / list.length)];
+  };
+  for (let c = 0; c < 3; c += 1) {
+    const [fromMean, fromSpread] = moments(colours, c), [toMean, toSpread] = moments(drawnGold, c);
+    for (const p of colours) p[c] = Math.max(0, Math.min(255, toMean + ((p[c] - fromMean) * toSpread) / fromSpread));
+  }
+}
+// The profiles are sampled where the rims catch the most light, so they run lighter
+// and yellower than the drawing's gold.
+toDrawnGold(Object.values(profiles).flat());
 async function render(name, d, glaze = art) {
   const cut = Buffer.alloc(N * 4);
   for (let k = 0; k < N; k += 1) {
@@ -430,6 +454,8 @@ for (const id of STACK) await render(names[id], fields[id], id === 1 ? data : ar
   // beads meet cleanly where they cross.
   const [byX, byY] = [crossings(true), crossings(false)];
   const across = byX.map((_, i) => [0, 1, 2].map((c) => (byX[i][c] + byX[BEAD - 1 - i][c] + byY[i][c] + byY[BEAD - 1 - i][c]) / 4));
+  // Averaged, the crossings come out duller than the drawing's gold.
+  toDrawnGold(across);
   // Signed distance to each piece (positive outside, negative inside), and its layer:
   // beads run between any two pieces, of one layer or of two.
   const ids = [1, 2, 3, 4];
