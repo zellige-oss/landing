@@ -235,29 +235,6 @@ for (let k = 0; k < N; k += 1) {
 }
 
 
-// A 4-channel image blurred by three box passes of `radius`, each way.
-function blurred4(values, radius) {
-  let a = Float32Array.from(values), b = new Float32Array(values.length);
-  const line = new Float32Array(Math.max(W, H) * 4);
-  const pass = (from, to, length, count, at) => {
-    for (let i = 0; i < count; i += 1) {
-      for (let j = 0; j < length; j += 1) for (let c = 0; c < 4; c += 1) line[j * 4 + c] = from[at(i, j) * 4 + c];
-      for (let c = 0; c < 4; c += 1) {
-        let sum = 0;
-        for (let j = -radius; j <= radius; j += 1) sum += line[Math.min(length - 1, Math.max(0, j)) * 4 + c];
-        for (let j = 0; j < length; j += 1) {
-          to[at(i, j) * 4 + c] = sum / (2 * radius + 1);
-          sum += line[Math.min(length - 1, j + radius + 1) * 4 + c] - line[Math.max(0, j - radius) * 4 + c];
-        }
-      }
-    }
-  };
-  for (let round = 0; round < 3; round += 1) {
-    pass(a, b, W, H, (i, j) => i * W + j);
-    pass(b, a, H, W, (i, j) => j * W + i);
-  }
-  return a;
-}
 // The emblem is drawn by hand: its pieces are not quite alike, it is a little wider
 // than it is tall, and its centre is a few px off. The landing turns the crown, the
 // blue and the green round Zel by their symmetry (an eighth or a quarter of a turn),
@@ -300,6 +277,8 @@ for (const [id, [fold, offset]] of Object.entries(SYMMETRY)) {
   for (const polygon of outlines[id]) fillPolygon(polygon, shaped);
   fields[id] = mitred(outlines[id], distanceTo(shaped, W, H));
 }
+// The centre star's corners, as drawn and ideal, for the warp below.
+const starPairs = [];
 // The centre star: sixteen corners round the centre, its tips (straight up and every
 // eighth of a turn) and its valleys between them at the drawn star's mean radii.
 {
@@ -315,49 +294,65 @@ for (const [id, [fold, offset]] of Object.entries(SYMMETRY)) {
   const valley = Array.from({ length: 8 }, (_, k) => Math.min(...near(22.5 + 45 * k))).reduce((a, b) => a + b, 0) / 8;
   console.log(`centre star: tips ${tip.toFixed(1)} px, valleys ${valley.toFixed(1)} px from the centre`);
   const star = Array.from({ length: 16 }, (_, i) => fromPolar([i % 2 ? valley : tip, i * 22.5]));
+  // Each corner as drawn: the drawn star's reach at that angle.
+  starPairs.push(...star.map((ideal, i) => {
+    const pick = i % 2 ? (list) => Math.min(...list) : (list) => Math.max(...list);
+    return { drawn: fromPolar([pick(near(i * 22.5)), i * 22.5]), ideal };
+  }));
   // Filled as its inner octagon and the eight tips, each convex.
   const shaped = fillPolygon(star.filter((_, i) => i % 2), new Uint8Array(N));
   for (let i = 0; i < 16; i += 2) fillPolygon([star.at(i - 1), star[i], star[i + 1]], shaped);
   fields[1] = distanceTo(shaped, W, H);
 }
-// Each piece's glaze, warped from the piece as drawn onto its ideal outline: both are
-// fanned into triangles from their centres, corner for corner, and each ideal pixel
-// takes the drawn pixel at the same place in its triangle. The drawn outline is taken
-// a few px in, clear of its rim.
-const INSET = 3;
+// The drawing itself, glaze, crackle and gold rims alike, warped smoothly so that
+// every corner of every piece lands on its ideal place: a moving-least-squares
+// (affine) warp through those corners. The corners move 10 to 20 px, so the drawing
+// keeps all its detail; it is what the landing shows at rest, and every layer's
+// glaze, so nothing changes when a layer starts to move.
+// Each piece's corners, and the centre. (Points along the sides too would pull the
+// sides of neighbouring pieces different ways, and the gold between them would ripple.)
+const controls = [
+  ...Object.values(drawnPieces).flat().flatMap(({ drawn, ideal }) => drawn.map((p, i) => [ideal[i], p])),
+  ...starPairs.map(({ drawn, ideal }) => [ideal, drawn]),
+  [CENTRE, CENTRE],
+];
 function warped(source) {
-  const result = Buffer.from(source);
-  for (const pieces of Object.values(drawnPieces)) {
-    for (const { drawn, ideal } of pieces) {
-      const dc = centroid(drawn), ic = centroid(ideal);
-      const inner = drawn.map(([x, y]) => { const d = Math.hypot(x - dc[0], y - dc[1]); return [x + ((dc[0] - x) * INSET) / d, y + ((dc[1] - y) * INSET) / d]; });
-      const xs = ideal.map(([x]) => x), ys = ideal.map(([, y]) => y);
-      for (let y = Math.floor(Math.min(...ys)); y <= Math.ceil(Math.max(...ys)); y += 1) {
-        for (let x = Math.floor(Math.min(...xs)); x <= Math.ceil(Math.max(...xs)); x += 1) {
-          // The fan triangle (centre, corner i, corner i + 1) holding this pixel.
-          let best = null;
-          for (let i = 0; i < ideal.length; i += 1) {
-            const a = ideal[i], b = ideal[(i + 1) % ideal.length];
-            const det = (a[0] - ic[0]) * (b[1] - ic[1]) - (b[0] - ic[0]) * (a[1] - ic[1]);
-            const u = ((x - ic[0]) * (b[1] - ic[1]) - (b[0] - ic[0]) * (y - ic[1])) / det;
-            const v = ((a[0] - ic[0]) * (y - ic[1]) - (x - ic[0]) * (a[1] - ic[1])) / det;
-            if (u >= -1e-9 && v >= -1e-9 && u + v <= 1 + 1e-9) { best = [i, u, v]; break; }
-          }
-          if (!best) continue;
-          const [i, u, v] = best, a = inner[i], b = inner[(i + 1) % inner.length];
-          const sx = dc[0] + u * (a[0] - dc[0]) + v * (b[0] - dc[0]), sy = dc[1] + u * (a[1] - dc[1]) + v * (b[1] - dc[1]);
-          const ux = Math.floor(sx), vy = Math.floor(sy), fx = sx - ux, fy = sy - vy, k = y * W + x;
-          for (let c = 0; c < 4; c += 1) {
-            const get = (px, py) => source[(py * W + px) * 4 + c];
-            result[k * 4 + c] = Math.round((get(ux, vy) * (1 - fx) + get(ux + 1, vy) * fx) * (1 - fy) + (get(ux, vy + 1) * (1 - fx) + get(ux + 1, vy + 1) * fx) * fy);
-          }
+  const result = Buffer.alloc(N * 4);
+  const P = controls.map(([p]) => p), Q = controls.map(([, q]) => q), weights = new Float64Array(controls.length);
+  for (let y = 0; y < H; y += 1) {
+    for (let x = 0; x < W; x += 1) {
+      // Where this ideal pixel comes from in the drawing.
+      let sw = 0, px = 0, py = 0, qx = 0, qy = 0, hit = -1;
+      for (let i = 0; i < P.length; i += 1) {
+        const dx = P[i][0] - x, dy = P[i][1] - y, d2 = dx * dx + dy * dy;
+        if (d2 < 1e-9) { hit = i; break; }
+        const w = 1 / d2;
+        weights[i] = w; sw += w; px += w * P[i][0]; py += w * P[i][1]; qx += w * Q[i][0]; qy += w * Q[i][1];
+      }
+      let sx, sy;
+      if (hit >= 0) [sx, sy] = Q[hit];
+      else {
+        px /= sw; py /= sw; qx /= sw; qy /= sw;
+        let a = 0, b = 0, d = 0, m00 = 0, m01 = 0, m10 = 0, m11 = 0;
+        for (let i = 0; i < P.length; i += 1) {
+          const w = weights[i], ux = P[i][0] - px, uy = P[i][1] - py, vx = Q[i][0] - qx, vy = Q[i][1] - qy;
+          a += w * ux * ux; b += w * ux * uy; d += w * uy * uy;
+          m00 += w * ux * vx; m01 += w * ux * vy; m10 += w * uy * vx; m11 += w * uy * vy;
         }
+        const det = a * d - b * b, ia = d / det, ib = -b / det, id = a / det;
+        const ux = x - px, uy = y - py, rx = ux * ia + uy * ib, ry = ux * ib + uy * id;
+        sx = rx * m00 + ry * m10 + qx; sy = rx * m01 + ry * m11 + qy;
+      }
+      const ix = Math.floor(sx), iy = Math.floor(sy), fx = sx - ix, fy = sy - iy, k = y * W + x;
+      if (ix < 0 || iy < 0 || ix >= W - 1 || iy >= H - 1) continue;
+      for (let c = 0; c < 4; c += 1) {
+        const at = (u, v) => source[(v * W + u) * 4 + c];
+        result[k * 4 + c] = Math.round((at(ix, iy) * (1 - fx) + at(ix + 1, iy) * fx) * (1 - fy) + (at(ix, iy + 1) * (1 - fx) + at(ix + 1, iy + 1) * fx) * fy);
       }
     }
   }
   return result;
 }
-// The glaze with its crackle, and polished (for the joined pieces), both on the ideal outlines.
 const art = warped(data);
 const polished = warped(pixels);
 
@@ -411,109 +406,12 @@ async function render(name, d, glaze = art) {
 }
 const names = { 1: 'centre', 2: 'crown', 3: 'cobalt', 4: 'points' };
 // The centre star keeps its glaze as drawn (Zel's face covers it); the others theirs, warped.
-for (const id of STACK) await render(names[id], fields[id], id === 1 ? data : art);
-// The assembled tile, laid as a zellige panel is: each piece's glaze, and between
-// two pieces one gold bead, a whole rim spanning the gap; round the outside, the
-// pieces' own rims. It covers the layers while they rest (styles.css,
-// .zel-whole), so at rest the pieces share their rims as in the drawing; once a
-// layer moves, each piece shows its own. Where a gap is wider than GAP, the glaze
-// reaches the bead.
-{
-  const GAP = 34;
-  // Signed distance to each piece (positive outside, negative inside), and its layer:
-  // beads run between any two pieces, of one layer or of two.
-  const ids = [1, 2, 3, 4];
-  const signedOf = (outside) => {
-    const inside = distanceTo(Uint8Array.from(outside, (d) => (d ? 1 : 0)), W, H);
-    return Float32Array.from(outside, (d, k) => (d ? d : -inside[k]));
-  };
-  // A convex piece's distance, exact from its sides: the farthest past any side's
-  // line (negative inside), so its edges are smooth, not stepped like a pixel mask.
-  const exact = (polygon) => {
-    const area = polygon.reduce((sum, [ax, ay], i) => { const [bx, by] = polygon[(i + 1) % polygon.length]; return sum + ax * by - bx * ay; }, 0);
-    const sides = polygon.map(([ax, ay], i) => {
-      const [bx, by] = polygon[(i + 1) % polygon.length], length = Math.hypot(bx - ax, by - ay), sign = area > 0 ? 1 : -1;
-      return [ax, ay, (sign * (by - ay)) / length, (sign * (ax - bx)) / length];
-    });
-    const field = new Float32Array(N);
-    for (let k = 0; k < N; k += 1) {
-      const x = k % W, y = (k - x) / W;
-      let d = -Infinity;
-      for (const [ax, ay, nx, ny] of sides) d = Math.max(d, (x - ax) * nx + (y - ay) * ny);
-      field[k] = d;
-    }
-    return field;
-  };
-  const pieces = [{ id: 1, signed: signedOf(fields[1]) }];
-  for (const id of [2, 3, 4]) for (const polygon of outlines[id]) pieces.push({ id, signed: exact(polygon) });
-  // Each layer's glaze, and that glaze spread out past its edge for wide gaps.
-  const glazeOf = (id) => (id === 1 ? data : art);
-  const spreadOf = Object.fromEntries(ids.map((id) => {
-    const own = new Float32Array(N * 4), source = glazeOf(id);
-    for (let k = 0; k < N; k += 1) {
-      if (fields[id][k] || kind[k] === 9) continue;
-      for (let c = 0; c < 3; c += 1) own[k * 4 + c] = source[k * 4 + c];
-      own[k * 4 + 3] = 1;
-    }
-    return [id, blurred4(own, 6)];
-  }));
-  // The gaps between pieces, told from the outside: the pieces' union closed by
-  // CLOSE px fills the gaps between them, holes where three meet included, but not
-  // the notches round the outside.
-  const CLOSE = 24;
-  const union = Uint8Array.from({ length: N }, (_, k) => (ids.some((id) => !fields[id][k]) ? 1 : 0));
-  const between = grow(grow(union, W, H, CLOSE).map((v) => 1 - v), W, H, CLOSE).map((v) => 1 - v);
-  const whole = Buffer.alloc(N * 4);
-  for (let k = 0; k < N; k += 1) {
-    const x = k % W, y = (k - x) / W;
-    let sA = Infinity, sB = Infinity, A = 0, nearest = null, second = null;
-    for (const piece of pieces) {
-      const d = piece.signed[k];
-      if (d < sA) { sB = sA; sA = d; A = piece.id; second = nearest; nearest = piece; } else if (d < sB) { sB = d; second = piece; }
-    }
-    const glaze = (c) => (sA <= 0.5 && !fields[A][k] ? glazeOf(A)[k * 4 + c] : spreadOf[A][k * 4 + c] / Math.max(1e-6, spreadOf[A][k * 4 + 3]));
-    let colour = null, alpha = 0;
-    // A piece's outward normal here, which way its rim faces.
-    const normal = (piece) => {
-      const d = piece.signed;
-      return [d[y * W + Math.min(W - 1, x + 2)] - d[y * W + Math.max(0, x - 2)], d[Math.min(H - 1, y + 2) * W + x] - d[Math.max(0, y - 2) * W + x]];
-    };
-    const [nx, ny] = normal(nearest);
-    const light = nx || ny ? facing(nx, ny) : { top: 1 };
-    if (sA <= -0.5) {
-      colour = [0, 1, 2].map(glaze);
-      alpha = 1;
-    } else if (between[k] && sA + sB <= GAP) {
-      // Between two pieces: one bead, a whole rim as the layers draw it (the same
-      // gold), spanning the gap from glaze to glaze. It is the rim of whichever of
-      // the two pieces faces the light (from the upper left), so the bead is one
-      // rod, lit along one side, as in the drawing.
-      const [mx, my] = second ? normal(second) : [-nx, -ny];
-      const lit = -nx - ny >= -mx - my;
-      const own = lit ? sA : sB, [fx, fy] = lit ? [nx, ny] : [mx, my];
-      const t = RIM * (1 - Math.min(1, Math.max(0, own / (sA + sB))));
-      const rim = rimColour(profiles, t, fx || fy ? facing(fx, fy) : { top: 1 });
-      // Its first px blends into the glaze, so the edge is smooth.
-      const edge = Math.min(1, Math.max(0, sA + 0.5));
-      colour = [0, 1, 2].map((c) => rim[c] * edge + glaze(c) * (1 - edge));
-      alpha = 1;
-    } else if (between[k]) {
-      colour = [0, 1, 2].map(glaze);
-      alpha = 1;
-    } else if (sA < RIM + 0.5) {
-      // Round the outside: the piece's own rim, as its layer draws it.
-      colour = rimColour(profiles, Math.max(0, RIM - sA), light);
-      alpha = Math.min(1, RIM + 0.5 - sA);
-    }
-    if (!colour) continue;
-    for (let c = 0; c < 3; c += 1) whole[k * 4 + c] = Math.round(colour[c]);
-    whole[k * 4 + 3] = Math.round(255 * alpha);
-  }
-  await save('whole', whole);
-  // At full size too, for scripts/build-brand.mjs to make the brand images from.
-  await mkdir(dirname(EVEN), { recursive: true });
-  await sharp(whole, { raw: { width: W, height: H, channels: 4 } }).png().toFile(EVEN);
-}
+for (const id of STACK) await render(names[id], fields[id], art);
+// The assembled tile is the warped drawing itself: its own glaze, crackle and gold.
+await save('whole', art);
+// At full size too, for scripts/build-brand.mjs to make the brand images from.
+await mkdir(dirname(EVEN), { recursive: true });
+await sharp(art, { raw: { width: W, height: H, channels: 4 } }).png().toFile(EVEN);
 
 // Joined layers, for the story, where each layer shows on its own around Zel
 // (Trio.tsx): there the blue and the green each read as one piece rather than four.
