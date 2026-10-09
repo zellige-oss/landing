@@ -24,7 +24,7 @@ const glyphs: Record<Piece, string> = { crown: glyphCrown, cobalt: glyphCobalt, 
 
 /** One layer with Zel at its centre: one way of using Zel (scripts/build-brand.mjs). */
 export function ZelGlyph({ layer, className }: { layer: Piece; className?: string }) {
-  return <img src={glyphs[layer]} alt="" width="128" height="128" className={cn("size-5 shrink-0", className)} draggable={false} />;
+  return <img src={glyphs[layer]} alt="" width="128" height="128" className={cn("zel-glyph size-5 shrink-0", className)} draggable={false} />;
 }
 
 /** The layer under a point of the tile, in -1..1 from its centre; none on Zel or outside. */

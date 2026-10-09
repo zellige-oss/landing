@@ -6,7 +6,7 @@ import { ease } from "@/lib/easing";
 import { useT } from "@/i18n";
 import { Companion } from "@/components/Companion";
 import { Wordmark } from "@/components/Wordmark";
-import { WhyZellige } from "@/components/WhyZellige";
+import { ReleaseVersion } from "@/components/ReleaseVersion";
 
 const bringIcons = [Workflow, Plug, KeyRound];
 
@@ -27,7 +27,7 @@ function Emblem({ reduced }: { reduced: boolean }) {
   const t = useT();
   return (
     <div className={cn("hero-zel tile relative mx-auto aspect-square w-[min(84vw,clamp(220px,38vh,440px))]", !reduced && "hero-intro")}>
-      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} alt={t.zel.alt} shadow="hero" className="size-full" />
+      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} restingOverlay={false} alt={t.zel.alt} shadow="hero" className="size-full" />
     </div>
   );
 }
@@ -167,12 +167,12 @@ export function Hero({ reduced }: { reduced: boolean }) {
       aria-labelledby="hero-title"
       className="hero relative isolate flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-6 pt-20 pb-14 text-center sm:pt-16"
     >
-      {/* The spark beside the wordmark opens where the name comes from. */}
+      {/* The release version stays beside the wordmark. */}
       <div className="relative z-[3] motion-safe:animate-arrive">
         <h1 id="hero-title" className="leading-none">
-          <Wordmark alt="zellige" className="mx-auto h-auto w-[min(62vw,clamp(200px,26vh,280px))] drop-shadow-[0_14px_20px_#0f3b6e26]" />
+          <Wordmark alt="zellige" className="mx-auto h-auto w-[min(62vw,clamp(200px,26vh,280px))] drop-shadow-[0_14px_20px_rgb(var(--shadow-ink)/0.15)]" />
         </h1>
-        <WhyZellige />
+        <ReleaseVersion />
       </div>
       <div className="mt-3 mb-5 sm:mt-4 sm:mb-6">
         <Emblem reduced={reduced} />
@@ -181,15 +181,15 @@ export function Hero({ reduced }: { reduced: boolean }) {
         {t.hero.title.lead} <em className="text-accent">{unbroken(t.hero.title.turn)}</em>
       </p>
       {/* Harness, subscription and API key: connect what the visitor already uses.
-          Each one leads to the section that lists them. */}
+          Labels, not links: they name the three, "¿Cómo funciona?" lists them. */}
       <p className="hero-copy relative z-[2] mt-6 flex flex-wrap items-center justify-center gap-2 text-[15px] sm:text-base">
         <span className="mr-1 font-semibold">{t.hero.bring.lead}</span>
         {t.hero.bring.items.map((item, index) => {
           const Icon = bringIcons[index];
           return (
-            <a key={item} href="#funciones" className="inline-flex items-center gap-1.5 rounded-full border border-brass/60 bg-popover/80 py-1 pr-3 pl-2 font-medium shadow-[0_8px_20px_-14px_rgb(20_43_53/0.5)] transition-colors hover:border-brass hover:bg-popover">
+            <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-brass/60 bg-popover py-1 pr-3 pl-2 font-medium shadow-[0_8px_20px_-14px_rgb(var(--shadow-ink)/0.5)]">
               <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 text-gold" />{item}
-            </a>
+            </span>
           );
         })}
       </p>
@@ -198,7 +198,7 @@ export function Hero({ reduced }: { reduced: boolean }) {
         href="#piezas"
         aria-label={t.hero.next}
         title={t.hero.next}
-        className="hero-copy absolute bottom-4 left-1/2 z-[2] grid size-10 [@media(max-height:700px)]:hidden -translate-x-1/2 place-items-center rounded-full border border-border bg-popover/80 text-muted-foreground transition-colors hover:border-brass hover:text-foreground sm:bottom-6"
+        className="hero-copy absolute bottom-4 left-1/2 z-[2] grid size-10 [@media(max-height:700px)]:hidden -translate-x-1/2 place-items-center rounded-full border border-border bg-popover text-muted-foreground transition-colors hover:border-brass hover:text-foreground sm:bottom-6"
       >
         <ChevronDown aria-hidden="true" className="size-5 motion-safe:animate-bounce" />
       </a>

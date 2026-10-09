@@ -177,7 +177,6 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
             ivory?.setAttribute("opacity", shape.ivory.toFixed(3));
           }
         }
-        const breath = Math.sin(elapsed / 6.4 * Math.PI * 4);
         for (const part of parts) {
           const pose = reaction(age - part.delay);
           // Eyes lead, then the centre, then the outer pieces. Tiles stay rigid.
@@ -190,7 +189,9 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           const wakeTurn = w ? 6 * w.shake - 4 * w.nod : 0;
           const wakeRise = w ? -10 * w.stretch + 14 * w.nod - 22 * w.jolt : 0;
           const wakeSpread = w ? 2 * w.stretch - 1.2 * w.nod + 2.6 * w.jolt : 0;
-          const rise = (-1.7 * breath + 3.5 * pose.anticipation - 16 * pose.hop + wakeRise) / 470 * 100;
+          // The idle breath is a CSS animation (.zel-lively .zel-piece in styles.css), so
+          // it stays smooth when the browser runs this loop less often.
+          const rise = (3.5 * pose.anticipation - 16 * pose.hop + wakeRise) / 470 * 100;
           const transform = `translateY(${rise.toFixed(3)}%) rotate(${(turn + wakeTurn).toFixed(3)}deg) scale(${(1 + (pose.spread + wakeSpread) * part.spread).toFixed(4)})`;
           for (const element of part.nodes) element.style.setProperty("transform", transform);
         }

@@ -43,6 +43,7 @@ export function Companion({
   follow = false,
   lively = false,
   motionDelay = 0,
+  restingOverlay = true,
   shadow,
 }: {
   mood: Mood;
@@ -53,6 +54,8 @@ export function Companion({
   /** Play the expressive motion study once the surrounding assembly has landed. */
   lively?: boolean;
   motionDelay?: number;
+  /** Cover resting layers with the single-rim artwork; the hero uses its layers throughout. */
+  restingOverlay?: boolean;
   /** A soft shadow under Zel, sized for where it sits (.zel-shadow-* in styles.css). */
   shadow?: "hero" | "tile";
 }) {
@@ -130,7 +133,7 @@ export function Companion({
             </div>
           </div>
         ))}
-        <img src={layerWhole} width="960" height="960" alt="" draggable={false} className="zel-whole absolute inset-0 size-full" />
+        {restingOverlay && <img src={layerWhole} width="960" height="960" alt="" draggable={false} className="zel-whole absolute inset-0 size-full" />}
       </div>
       <div className="zel-face-layer absolute inset-0 size-full" aria-hidden="true">
         <div className="zel-piece size-full" data-zel-motion="centre">

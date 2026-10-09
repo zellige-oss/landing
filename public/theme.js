@@ -1,14 +1,11 @@
 // Runs before first paint (external file: the CSP allows no inline scripts).
-// A saved choice wins; otherwise follow the system and keep following it.
+// Dark for everyone, unless the reader chose light with the header's switch.
 (function () {
-  var root = document.documentElement;
-  var query = matchMedia("(prefers-color-scheme: dark)");
   var saved = null;
   try { saved = localStorage.getItem("zellige-theme"); } catch { /* storage blocked */ }
-  root.classList.toggle("dark", saved ? saved === "dark" : query.matches);
-  query.addEventListener("change", function (event) {
-    var current = null;
-    try { current = localStorage.getItem("zellige-theme"); } catch { /* storage blocked */ }
-    if (!current) root.classList.toggle("dark", event.matches);
-  });
+  var light = saved === "light";
+  document.documentElement.classList.toggle("dark", !light);
+  // The browser's bar takes the page's colour (index.html keeps both).
+  var bar = document.querySelector('meta[name="theme-color"]');
+  if (bar) bar.setAttribute("content", bar.getAttribute(light ? "data-light" : "data-dark"));
 })();

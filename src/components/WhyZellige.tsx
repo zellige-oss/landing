@@ -1,30 +1,42 @@
+import { useState } from "react";
 import { useT } from "@/i18n";
 import { useDisclosure } from "@/hooks/use-disclosure";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
+import { emblem } from "@/components/brand";
+import { cn } from "@/lib/utils";
 
-/*
- * "Why Zellige?" with a gold spark, beside the hero's wordmark like the sparks over its
- * letters (below it on phones). It opens where the name comes from, as a dictionary
- * would put it, without taking room from the hero. Place it inside a relative box
- * around the wordmark.
- */
-export function WhyZellige() {
+/** The name's origin: a floating tile on desktop, an inline disclosure in the mobile menu. */
+export function WhyZellige({ variant = "floating" }: { variant?: "floating" | "menu" }) {
   const t = useT();
   const { props } = useDisclosure();
+  const [explained, setExplained] = useState(false);
+  const floating = variant === "floating";
   return (
-    <details {...props} className="group">
-      {/* Below the wordmark on phones; beside it, like its sparks, from sm. */}
-      <summary className="group/why relative mx-auto mt-2 flex w-max cursor-pointer list-none items-center gap-1.5 rounded-full px-2 py-1 text-gold sm:absolute sm:top-[6%] sm:left-full sm:mt-0 sm:ml-1 [&::-webkit-details-marker]:hidden">
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 shrink-0 fill-current drop-shadow-[0_2px_4px_rgb(176_138_74/0.45)] motion-safe:animate-[twinkle_3.2s_ease-in-out_infinite] group-open:animate-none sm:size-[18px]">
-          <path d="M12 0c.6 7 5 11.4 12 12-7 .6-11.4 5-12 12-.6-7-5-11.4-12-12 7-.6 11.4-5 12-12Z" />
-        </svg>
-        <span className="text-[14px] font-medium whitespace-nowrap underline decoration-brass/60 decoration-dotted underline-offset-4 group-hover/why:decoration-solid sm:text-[15px]">{t.hero.why.title}</span>
+    <details
+      {...props}
+      data-explained={explained || undefined}
+      onToggle={(event) => {
+        props.onToggle(event);
+        if (event.currentTarget.open) setExplained(true);
+      }}
+      className={cn("group/why", floating ? "why-floating fixed right-6 bottom-6 z-30 hidden nav:block" : "why-menu mt-2 rounded-xl border border-border bg-popover transition-colors hover:border-brass/60 open:border-brass/70")}
+    >
+      {/* In the phone menu it reads like the section links above it. */}
+      <summary className={cn("flex min-h-12 cursor-pointer list-none items-center gap-3 transition-colors [&::-webkit-details-marker]:hidden", floating ? "rounded-2xl border border-brass/60 bg-popover py-2.5 pr-4 pl-2.5 text-gold shadow-[0_10px_30px_-12px_rgb(var(--shadow-ink)/0.5)] hover:border-brass" : "px-4 py-3.5 text-lg font-medium text-foreground/85 hover:text-foreground")}>
+        <img src={emblem} alt="" width="128" height="128" className={cn("shrink-0", floating ? "size-10" : "size-7")} />
+        <span className={cn("whitespace-nowrap", floating && "text-sm font-medium")}>{t.hero.why.title}</span>
+        {floating ? (
+          <>
+            <ChevronDown aria-hidden="true" className="ml-auto size-4 rotate-180 group-open/why:hidden" />
+            <X aria-hidden="true" className="ml-auto hidden size-4 group-open/why:block" />
+          </>
+        ) : (
+          <ChevronRight aria-hidden="true" className="ml-auto size-5 text-gold transition-transform group-open/why:rotate-90" />
+        )}
       </summary>
-      {/* In the free space right of the wordmark on wide screens. Smaller ones have no
-          room to spare, so it opens over Zel, under the link, rather than pushing Zel
-          down the page. */}
-      <div className="absolute top-full left-1/2 z-20 mt-3 w-[min(88vw,360px)] -translate-x-1/2 rounded-2xl border border-border bg-popover p-5 text-left shadow-[0_18px_40px_-20px_rgb(20_43_53/0.5)] lg:top-0 lg:left-[calc(100%+11rem)] lg:mt-0 lg:w-[320px] lg:translate-x-0">
-        <p className="text-lg font-semibold text-gold">{t.hero.why.title}</p>
-        <p className="mt-3 flex flex-wrap items-baseline gap-x-2.5 text-sm">
+      <div className={cn("text-left", floating ? "absolute right-0 bottom-[calc(100%+12px)] max-h-[calc(100dvh-8rem)] w-[min(360px,calc(100vw-48px))] overflow-y-auto rounded-2xl border border-brass/50 bg-popover p-5 shadow-[0_18px_40px_-20px_rgb(var(--shadow-ink)/0.5)]" : "px-4 pb-4")}>
+        {floating && <p className="text-lg font-semibold text-gold">{t.hero.why.title}</p>}
+        <p className={cn("flex flex-wrap items-baseline gap-x-2.5 text-sm", floating && "mt-3")}>
           <span className="font-semibold">zel·li·ge</span>
           <span className="text-muted-foreground">/zɛˈliːʒ/</span>
           <span lang="ar" dir="rtl" className="text-muted-foreground">الزليج</span>
