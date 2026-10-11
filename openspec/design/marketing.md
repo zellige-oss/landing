@@ -57,7 +57,10 @@ of using Zellige. It arrives whole, then the scroll introduces its parts.
    figure follows the invitation and contact links.
 
 The header (`src/layout/Header.tsx`) pairs the wordmark with one `cta-secondary`
-GitHub link, labelled on phones too. The release version is a small text link
+GitHub link, labelled on phones too. Its border and background appear immediately
+after the first 8 px of scroll, independently of the wordmark's trip. Small screens
+and touch devices use an opaque surface without backdrop blur.
+The release version is a small text link
 beside the large hero wordmark, pointing to that release (or the releases page
 when none is available). Below it, a small construction icon accompanies the
 single status "Work in progress", independently of the GitHub action. There is no extra

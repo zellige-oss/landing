@@ -153,6 +153,17 @@
 }
 
 @layer components {
+  /* The border is immediate; touch screens use an opaque surface so scrolling
+     content never needs to be blurred behind the fixed header. */
+  .site-header { border-color: transparent; }
+  .site-header[data-scrolled="true"] {
+    @apply border-border/70 bg-background;
+  }
+  @media (min-width: 64rem) and (pointer: fine) {
+    .site-header[data-scrolled="true"] {
+      @apply bg-background/85 backdrop-blur-md;
+    }
+  }
   /* The diagram and its model/harness cards share one family of surfaces. */
   .panel {
     @apply rounded-2xl border border-brass/40 text-foreground;
