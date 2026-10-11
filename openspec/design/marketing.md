@@ -80,8 +80,10 @@ with three small tiles in the colours of Zel's parts.
   greeting with its widening eyes and the layer spin). It writes each value
   straight onto the element that uses it, so phones never restyle all of Zel.
 - `src/hooks/zel-eyes.ts`: the story's eye gestures. The ivory personal agent is
-  awake and curious, looking at its reminder and giving two small nods. Eyes, body
-  and note share one clock. The blue harness manager is mildly annoyed, with a low
+  awake and curious: it leans toward its reminder, reads it, gives two clear nods
+  and springs back into place, an "I'll take care of it" rather than a wake-up.
+  Its eyes stay open through the gesture; eyes, body and note share one clock.
+  The face and crown move together in 2D. The blue harness manager is mildly annoyed, with a low
   lid and sideways glance, then a brief spark when its work is done.
   Eye gestures pause off screen and stay still with reduced motion.
   Chat is the attentive green character, with its quick wink and a nearby typing bubble.

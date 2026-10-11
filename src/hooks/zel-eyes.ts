@@ -55,15 +55,17 @@ export function useZelEyes(root: RefObject<HTMLDivElement | null>, mood: Mood, e
       const turn = from ? ramp(seconds, 0, TURN) : 1;
       const next = eyeFrame(mood, seconds + lead);
       if (agent) {
-        const { notice, nod } = agentAttention(seconds + lead);
-        const pose = `${notice.toFixed(3)}/${nod.toFixed(3)}`;
+        const { notice, nod, hop } = agentAttention(seconds + lead);
+        const pose = `${notice.toFixed(3)}/${nod.toFixed(3)}/${hop.toFixed(3)}`;
         if (pose !== lastPose) {
           lastPose = pose;
           // Move the face and crown together; moving just the ivory image opens
-          // the seam. The other wrappers own arrival, separation and pointer lift.
-          node.style.setProperty("transform", `perspective(700px) translate(${(2 * notice).toFixed(3)}%, ${(-2.5 * notice + 1.8 * nod).toFixed(3)}%) rotateY(${(-8 * notice).toFixed(3)}deg) rotateZ(${(5 * notice - 2.5 * nod).toFixed(3)}deg)`);
-          note?.style.setProperty("translate", `0 ${(-4 * notice).toFixed(2)}px`);
-          note?.style.setProperty("scale", (1 + .035 * notice).toFixed(3));
+          // the seam. A single 2D transform adds a clear lean, two squashy nods
+          // and a small hop without compositing nested perspective layers on phones.
+          node.style.setProperty("transform", `translate(${(4 * notice).toFixed(3)}%, ${(-5 * notice + 6 * nod - 5 * hop).toFixed(3)}%) rotate(${(8 * notice - 5 * nod + 2 * hop).toFixed(3)}deg) scale(${(1 + .03 * nod).toFixed(3)}, ${(1 - .07 * nod + .03 * hop).toFixed(3)})`);
+          note?.style.setProperty("translate", `0 ${(-6 * notice - 3 * hop).toFixed(2)}px`);
+          note?.style.setProperty("rotate", `${(-3 * notice + 2 * nod).toFixed(2)}deg`);
+          note?.style.setProperty("scale", (1 + .05 * notice + .025 * nod).toFixed(3));
         }
       }
       const key = `${turn.toFixed(3)}${next?.key}`;
@@ -89,6 +91,7 @@ export function useZelEyes(root: RefObject<HTMLDivElement | null>, mood: Mood, e
       if (agent) {
         node.style.removeProperty("transform");
         note?.style.removeProperty("translate");
+        note?.style.removeProperty("rotate");
         note?.style.removeProperty("scale");
       }
     };
