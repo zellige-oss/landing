@@ -2,7 +2,8 @@
  * Zel's eye geometry, shared by the face (ZelFace.tsx) and the hero's motion
  * (hooks/zel-motion.ts). Coordinates are the face's: eyes at x 521 / 723, y 622.
  */
-import { bump, hold } from "@/lib/easing";
+import { bump, clamp, hold } from "@/lib/easing";
+import type { Mood } from "./ZelFace";
 
 export const EYE_L = 521;
 export const EYE_R = 723;
@@ -22,12 +23,12 @@ type Point = [number, number];
 const SIDE = 40;
 const END = 10;
 
-function eyeOutline(x: number): Point[] {
+function eyeOutline(x: number, rx = EYE_RX, ry = EYE_RY): Point[] {
   const gap = .3, points: Point[] = [];
   const run = (a: number, b: number, n: number) => {
     for (let i = 0; i < n; i += 1) {
       const angle = a + (b - a) * i / n;
-      points.push([x + EYE_RX * Math.cos(angle), EYE_Y + EYE_RY * Math.sin(angle)]);
+      points.push([x + rx * Math.cos(angle), EYE_Y + ry * Math.sin(angle)]);
     }
   };
   run(Math.PI + gap, 2 * Math.PI - gap, SIDE);
@@ -37,12 +38,28 @@ function eyeOutline(x: number): Point[] {
   return points;
 }
 
-/** The outline of the stroked ∩, round caps included. */
-function happyOutline(x: number): Point[] {
-  const p0: Point = [x - HAPPY_HALF_WIDTH, EYE_Y + HAPPY_END];
-  const c: Point = [x, EYE_Y - HAPPY_PEAK];
-  const p2: Point = [x + HAPPY_HALF_WIDTH, EYE_Y + HAPPY_END];
-  const w = HAPPY_STROKE / 2;
+/** A barely sloping upper lid: mildly unimpressed, with plenty of the eye still open. */
+function dryOutline(x: number): Point[] {
+  const inward = x < (EYE_L + EYE_R) / 2 ? 1 : -1;
+  return eyeOutline(x).map(([px, py]) => [px, Math.max(py, EYE_Y - 12 + inward * (px - x) * 8 / (2 * EYE_RX))]);
+}
+
+/** A four-point spark, like the ones over the wordmark, on the eye's own points so a bead can turn into it. */
+function sparkOutline(x: number): Point[] {
+  const tip = 46, waist = .36 * tip * Math.SQRT1_2;
+  // Along the straight edge from a tip to the next waist, at angle `a` from the tip.
+  const reach = (a: number) => (tip * waist) / (Math.cos(a) * waist - Math.sin(a) * (waist - tip));
+  return eyeOutline(x).map(([px, py]) => {
+    const angle = Math.atan2((py - EYE_Y) / EYE_RY, (px - x) / EYE_RX);
+    const fold = Math.abs(((angle % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2));
+    const r = reach(Math.min(fold, Math.PI / 2 - fold));
+    return [x + r * Math.cos(angle), EYE_Y + r * Math.sin(angle)];
+  });
+}
+
+/** The outline of a curve from p0 to p2, bent towards c and drawn `width` wide, round caps included. */
+function strokeOutline(p0: Point, c: Point, p2: Point, width: number): Point[] {
+  const w = width / 2;
   const at = (t: number): Point => [
     (1 - t) ** 2 * p0[0] + 2 * t * (1 - t) * c[0] + t * t * p2[0],
     (1 - t) ** 2 * p0[1] + 2 * t * (1 - t) * c[1] + t * t * p2[1],
@@ -77,6 +94,10 @@ function happyOutline(x: number): Point[] {
   return points;
 }
 
+/** The outline of the stroked ∩. */
+const happyOutline = (x: number) =>
+  strokeOutline([x - HAPPY_HALF_WIDTH, EYE_Y + HAPPY_END], [x, EYE_Y - HAPPY_PEAK], [x + HAPPY_HALF_WIDTH, EYE_Y + HAPPY_END], HAPPY_STROKE);
+
 const outlines = new Map<number, { eye: Point[]; happy: Point[] }>();
 function shapesFor(x: number) {
   let shapes = outlines.get(x);
@@ -106,3 +127,170 @@ export function greetingEye(x: number, t: number) {
   }).join("") + "Z";
   return { d, ivory: happiness };
 }
+
+/*
+ * The eyes of the story's Zel (hooks/zel-eyes.ts). Every shape an eye takes there is
+ * an outline with the same number of points in the same order, so any one turns into
+ * any other: the eyes are one pair that acts, not drawings swapped for one another.
+ */
+export type EyeShape = "open" | "happy" | "calm" | "narrow" | "shut" | "wink" | "dry" | "spark";
+// `flat` is how far the shape is a line of flat ivory rather than a glazed bead.
+const SHAPES: Record<EyeShape, { flat: number; outline: (x: number) => Point[] }> = {
+  open: { flat: 0, outline: (x) => eyeOutline(x) },
+  dry: { flat: 0, outline: dryOutline },
+  // ∩, a smile.
+  happy: { flat: 1, outline: happyOutline },
+  // ∪, closed and at ease.
+  calm: { flat: 1, outline: (x) => strokeOutline([x - 42, EYE_Y - 8], [x, EYE_Y + 44], [x + 42, EYE_Y - 8], HAPPY_STROKE) },
+  // A level bar: an eye narrowed in thought.
+  narrow: { flat: 1, outline: (x) => strokeOutline([x - 40, EYE_Y + 4], [x - 1, EYE_Y + 4], [x + 38, EYE_Y + 4], 22) },
+  // A blink: the lid's line, a little below the eye's middle.
+  shut: { flat: 1, outline: (x) => strokeOutline([x - 30, EYE_Y + 9], [x, EYE_Y + 15], [x + 30, EYE_Y + 9], 11) },
+  // A wink: the same lid as a blink, pressed a little harder, its outer end drawn up by the cheek.
+  wink: {
+    flat: 1,
+    outline: (x) => {
+      const inward = x < (EYE_L + EYE_R) / 2 ? 1 : -1;
+      return strokeOutline([x - 31, EYE_Y + 9 - 3 * inward], [x, EYE_Y + 17], [x + 31, EYE_Y + 9 + 3 * inward], 13);
+    },
+  },
+  spark: { flat: 0, outline: sparkOutline },
+};
+const shapeOutlines = new Map<string, Point[]>();
+function shapeOutline(x: number, shape: EyeShape) {
+  const key = `${shape}${x}`;
+  let outline = shapeOutlines.get(key);
+  if (!outline) shapeOutlines.set(key, outline = SHAPES[shape].outline(x));
+  return outline;
+}
+
+/** One eye at a moment: part of the way from one shape to another, a little off its place. */
+type Eye = { from: EyeShape; to: EyeShape; mix: number; dx?: number; dy?: number };
+const blink = (t: number, at: number) => bump(t, at, at + .09, at + .22);
+
+/** The agent checks its reminder, then gives two small nods: eyes, body and note
+ *  use this same clock, so pausing off screen never separates their gestures. */
+export function agentAttention(seconds: number) {
+  const t = seconds % 6.8;
+  return {
+    notice: hold(t, .45, .85, 1.5, 1.95),
+    nod: bump(t, 1.9, 2.08, 2.32) + .5 * bump(t, 2.32, 2.47, 2.7),
+  };
+}
+
+/*
+ * What the eyes do in each mood, t seconds into a loop `period` long. At 0 they hold
+ * the mood's still pose, the one its image shows (scripts/build-brand.mjs), so the
+ * page reads the same before the eyes start to act. `cue` is where the mood's own
+ * gesture begins: the look and the smile, the narrowing to focus, the wink.
+ */
+const ACTS: Partial<Record<Mood, { period: number; cue?: number; eyes: (t: number) => [Eye, Eye] }>> = {
+  look: {
+    period: 5,
+    eyes: (t) => {
+      const eye: Eye = { from: "open", to: "shut", mix: blink(t, 3.1) };
+      return [eye, eye];
+    },
+  },
+  // The ivory character smiles; now and then it opens its eyes to look at you, and smiles again.
+  hello: {
+    period: 6.4,
+    cue: 3.4,
+    eyes: (t) => {
+      const eye: Eye = { from: "happy", to: "open", mix: hold(t, 3.4, 3.62, 4.7, 4.95), dy: -6 * bump(t, 4.9, 5.02, 5.3) };
+      return [eye, eye];
+    },
+  },
+  // An attentive glance up at the note, followed by an acknowledgement.
+  curious: {
+    period: 6.8,
+    cue: .12,
+    eyes: (t) => {
+      const { notice, nod } = agentAttention(t);
+      const eye: Eye = { from: "open", to: "shut", mix: blink(t, 4.6), dx: 12 * notice, dy: -8 * notice + 3 * nod };
+      return [eye, { ...eye, dy: -7 - 6 * notice }];
+    },
+  },
+  // A mildly annoyed, dry look and a sideways glance. Finishing the build still
+  // earns a small spark; the low lid's slight slope avoids an angry scowl.
+  determined: {
+    period: 7.6,
+    cue: 4.9,
+    eyes: (t) => {
+      const proud = hold(t, 5.3, 5.48, 6.3, 6.6);
+      const eye: Eye = proud > 0
+        ? { from: "dry", to: "spark", mix: proud, dy: -5 * bump(t, 5.42, 5.56, 5.85) }
+        : { from: "dry", to: "shut", mix: blink(t, 3.4), dx: 7 * hold(t, 1.2, 1.5, 2.6, 2.9) };
+      return [eye, eye];
+    },
+  },
+  // Working something out: one eye narrowed, the other raised. It glances over,
+  // blinks, and at times narrows both to focus.
+  thinking: {
+    period: 7.2,
+    cue: 4.6,
+    eyes: (t) => {
+      const focus = hold(t, 4.6, 4.85, 5.9, 6.15);
+      const glance = 7 * hold(t, 1.2, 1.5, 2.6, 2.9);
+      const raised = 1 - focus;
+      const right: Eye = focus > 0
+        ? { from: "open", to: "narrow", mix: focus, dx: 14 * raised + glance, dy: -22 * raised }
+        : { from: "open", to: "shut", mix: blink(t, 3.4), dx: 14 + glance, dy: -22 };
+      return [{ from: "narrow", to: "narrow", mix: 0, dx: glance }, right];
+    },
+  },
+  // The green character pays attention: eyes open, blinking like anyone's. Now and then it winks,
+  // as quick as a real one: one lid drops and comes back while the other eye lifts a
+  // touch. The cue leads the wink by the time the eyes take to turn (hooks/zel-eyes.ts).
+  wink: {
+    period: 6,
+    cue: 3.28,
+    eyes: (t) => {
+      const shut = blink(t, 1.6);
+      const wink = hold(t, 3.6, 3.69, 3.97, 4.1);
+      return [
+        wink > 0 ? { from: "open", to: "wink", mix: wink } : { from: "open", to: "shut", mix: shut },
+        { from: "open", to: "shut", mix: shut, dy: -5 * wink },
+      ];
+    },
+  },
+  content: {
+    period: 5,
+    eyes: () => {
+      const eye: Eye = { from: "calm", to: "calm", mix: 0 };
+      return [eye, eye];
+    },
+  },
+};
+
+/** An eye as drawn: its outline, and how far it is flat ivory rather than glaze. */
+export type DrawnEye = { points: Point[]; flat: number };
+function drawEye(x: number, { from, to, mix, dx = 0, dy = 0 }: Eye): DrawnEye {
+  const a = shapeOutline(x, from), b = shapeOutline(x, to), k = clamp(mix);
+  return {
+    points: a.map(([ax, ay], i) => [ax + (b[i][0] - ax) * k + dx, ay + (b[i][1] - ay) * k + dy]),
+    flat: SHAPES[from].flat + (SHAPES[to].flat - SHAPES[from].flat) * k,
+  };
+}
+const eyeKey = ({ from, to, mix, dx = 0, dy = 0 }: Eye) => `${from}${to}${clamp(mix).toFixed(3)}/${dx.toFixed(1)}/${dy.toFixed(1)}`;
+
+/** Where in a mood's act its signature gesture begins (`cue` above), to play it on demand. */
+export const eyeCue = (mood: Mood) => ACTS[mood]?.cue ?? 0;
+/** Whether the story's eyes act in this mood; in the others they are the still drawing. */
+export const hasEyeAct = (mood: Mood) => mood in ACTS;
+/**
+ * The eyes of a mood `seconds` into its act: a key that changes only when they do, so
+ * a still stretch costs nothing to draw, and the pair itself.
+ */
+export function eyeFrame(mood: Mood, seconds: number) {
+  const act = ACTS[mood];
+  if (!act) return undefined;
+  const [left, right] = act.eyes(seconds % act.period);
+  return { key: eyeKey(left) + eyeKey(right), draw: (): [DrawnEye, DrawnEye] => [drawEye(EYE_L, left), drawEye(EYE_R, right)] };
+}
+/** An eye part of the way from one drawn eye to another. */
+export const mixEyes = (a: DrawnEye, b: DrawnEye, k: number): DrawnEye => ({
+  points: a.points.map(([ax, ay], i) => [ax + (b.points[i][0] - ax) * k, ay + (b.points[i][1] - ay) * k]),
+  flat: a.flat + (b.flat - a.flat) * k,
+});
+export const eyePath = (points: Point[]) => points.map(([px, py], i) => `${i ? "L" : "M"}${px.toFixed(1)} ${py.toFixed(1)}`).join("") + "Z";

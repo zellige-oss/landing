@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
-import { ChevronDown, KeyRound, Plug, Workflow } from "lucide-react";
+import { Construction, KeyRound, Plug, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ease } from "@/lib/easing";
 import { useT } from "@/i18n";
@@ -19,8 +19,8 @@ function unbroken(text: string) {
 /*
  * Centred and symmetric, like the emblem: wordmark, Zel, one line, one button.
  * Zel appears, the emblem's layers fly in from beyond the screen and lock around
- * it (CSS), and Zel says hello; scrolling away lets the layers drift apart toward the story
- * below, where they assemble again step by step and each one is explained.
+ * it (CSS), and Zel says hello. Only the wordmark travels to the header; Zel stays
+ * here and reappears in the story below, where each of its parts is explained.
  */
 
 function Emblem({ reduced }: { reduced: boolean }) {
@@ -32,30 +32,26 @@ function Emblem({ reduced }: { reduced: boolean }) {
   );
 }
 
-// A separate, hero-sized copy of the header's logo flies to it, scaling down only.
-// Enlarging the small header logo for takeoff loses detail, especially on high-DPI
-// screens. The logo is the hero's own layers, turned as the hero's are (ZelMark.tsx),
-// so at either end the original hero/header takes over with nothing changing; the
-// header is never scaled.
+// Only the wordmark moves to the header. Its full-size SVG stays sharp throughout.
 // Geometry is measured on load and resize only, never while scrolling.
 // Where the browser has scroll timelines with ranges, the trip is an animation on
 // the page's scroll, which the browser runs alongside scrolling itself: driven from
 // scroll events instead, it trails the finger on phones, a frame or more behind.
-/** The trip takes the first half of the hero's scroll. */
-const TRIP = 0.5;
+/** The wordmark settles into the header during the hero's first short scroll. */
+const TRIP = 0.3;
 /** Keyframes along the trip: enough that its easing reads as a curve. */
 const STEPS = 24;
 
-type Trip = { from: DOMRect; to: DOMRect; zel: HTMLElement; mark: HTMLElement; flight: HTMLElement };
-/** Where the flying Zel sits at `e` of the way (eased) with the page scrolled to `y`. */
-function transformAt({ from, to }: Trip, e: number, y: number) {
+type Trip = { from: DOMRect; to: DOMRect; source: HTMLElement; mark: HTMLElement; flight: HTMLElement };
+/** A direct path keeps the wordmark below the viewport's top throughout its trip. */
+function transformAt({ from, to }: Trip, e: number) {
   const x = from.x + (to.x - from.x) * e;
-  const top = from.y - y + (to.y - (from.y - y)) * e;
+  const top = from.y + (to.y - from.y) * e;
   const width = from.width + (to.width - from.width) * e;
   return `translate(${x.toFixed(1)}px, ${top.toFixed(1)}px) scale(${(width / from.width).toFixed(6)})`;
 }
 
-function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
+function useWordmarkTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
   const geometry = useRef<Trip | null>(null);
   const last = useRef(-1);
   const place = useCallback((progress: number) => {
@@ -64,46 +60,37 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
     const e = ease(progress / TRIP);
     if (e === last.current) return;
     last.current = e;
-    const { zel, mark, flight } = g;
-    zel.style.setProperty("opacity", e > 0 ? "0" : "1");
+    const { source, mark, flight } = g;
+    source.style.setProperty("opacity", e > 0 ? "0" : "1");
     mark.style.setProperty("opacity", e >= 1 ? "1" : "0");
     flight.style.setProperty("opacity", e > 0 && e < 1 ? "1" : "0");
     if (e <= 0 || e >= 1) { flight.style.removeProperty("transform"); return; }
-    flight.style.setProperty("transform", transformAt(g, e, scrollY));
+    flight.style.setProperty("transform", transformAt(g, e));
   }, []);
 
   useEffect(() => {
     const hero = section.current;
-    const zel = hero?.querySelector<HTMLElement>(".hero-zel");
-    const mark = document.getElementById("header-zel");
-    if (reduced || !hero || !zel || !mark) return;
+    const source = hero?.querySelector<HTMLImageElement>("#hero-title img");
+    const mark = document.getElementById("header-wordmark");
+    if (reduced || !hero || !source || !mark) return;
     const ranged = "ScrollTimeline" in window && CSS.supports("animation-range", "0px 1px");
     const timeline = ranged ? new ScrollTimeline({ source: document.documentElement, axis: "block" }) : null;
     // Outside the header's backdrop-filter and the hero's clipped stacking context.
-    const flight = mark.cloneNode(true) as HTMLElement;
-    flight.id = "zel-flight";
-    // Its face's gradients, clips and masks get ids of their own, and every reference
-    // to them follows, so the copy never borrows the header's.
-    for (const node of flight.querySelectorAll("[id]")) node.id = `${node.id}-flight`;
-    for (const node of flight.querySelectorAll("*")) {
-      for (const { name, value } of [...node.attributes]) {
-        if (value.includes("url(#")) node.setAttribute(name, value.replace(/url\(#([^)]+)\)/g, "url(#$1-flight)"));
-        else if (name.endsWith("href") && value.startsWith("#")) node.setAttribute(name, `${value}-flight`);
-      }
-    }
+    const flight = source.cloneNode(true) as HTMLImageElement;
+    flight.id = "wordmark-flight";
+    flight.alt = "";
+    flight.setAttribute("aria-hidden", "true");
     flight.className = "pointer-events-none fixed top-0 left-0 z-[11] block origin-top-left opacity-0";
     document.body.append(flight);
     let animations: Animation[] = [];
     const measure = () => {
-      // Keep the original visible until the flight's layers can actually be drawn.
-      if ([...flight.querySelectorAll("img")].some((image) => !image.complete || !image.naturalWidth)) return;
+      if (!flight.complete || !flight.naturalWidth) return;
       for (const animation of animations) animation.cancel();
       animations = [];
-      const tile = zel.getBoundingClientRect();
-      // The hero's emblem square in page coordinates; the header's in the viewport (it
-      // is fixed). Both are the emblem's whole square, so one scale maps the one to the other.
+      const tile = source.getBoundingClientRect();
+      // The source is in page coordinates; the fixed header is in the viewport.
       const from = new DOMRect(tile.left, tile.top + scrollY, tile.width, tile.height);
-      const trip = { from, to: mark.getBoundingClientRect(), zel, mark, flight };
+      const trip = { from, to: mark.getBoundingClientRect(), source, mark, flight };
       flight.style.setProperty("width", `${from.width}px`);
       flight.style.setProperty("height", `${from.height}px`);
       const top = hero.getBoundingClientRect().top + scrollY;
@@ -115,7 +102,7 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
         return;
       }
       const frames: Keyframe[] = Array.from({ length: STEPS + 1 }, (_, i) => ({
-        transform: transformAt(trip, ease(i / STEPS), top + (i / STEPS) * length),
+        transform: transformAt(trip, ease(i / STEPS)),
       }));
       const range = { timeline, rangeStart: `${top}px`, rangeEnd: `${top + length}px` };
       const swap = { timeline, rangeStart: `${top}px`, rangeEnd: `${top + 1}px`, fill: "both" } as const;
@@ -128,12 +115,11 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
           { opacity: 0, offset: 1 },
         ], { ...range, fill: "both" }),
         mark.animate([{ opacity: 0 }, { opacity: 1 }], { ...swap, rangeStart: `${top + length - 1}px`, rangeEnd: `${top + length}px` }),
-        zel.animate([{ opacity: 1 }, { opacity: 0 }], swap),
+        source.animate([{ opacity: 1 }, { opacity: 0 }], swap),
       ];
     };
     mark.style.setProperty("transition", "none");
-    // Load events do not bubble, but reach the flight on their way down to its layers.
-    flight.addEventListener("load", measure, true);
+    flight.addEventListener("load", measure);
     measure();
     addEventListener("resize", measure);
     addEventListener("load", measure);
@@ -143,13 +129,13 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
     return () => {
       removeEventListener("resize", measure);
       removeEventListener("load", measure);
-      flight.removeEventListener("load", measure, true);
+      flight.removeEventListener("load", measure);
       observer.disconnect();
       for (const animation of animations) animation.cancel();
       flight.remove();
       geometry.current = null;
       for (const prop of ["transition", "opacity"]) mark.style.removeProperty(prop);
-      zel.style.removeProperty("opacity");
+      source.style.removeProperty("opacity");
     };
   }, [section, reduced, place]);
   return place;
@@ -158,7 +144,7 @@ function useZelTrip(section: RefObject<HTMLElement | null>, reduced: boolean) {
 export function Hero({ reduced }: { reduced: boolean }) {
   const t = useT();
   const section = useRef<HTMLElement>(null);
-  const trip = useZelTrip(section, reduced);
+  const trip = useWordmarkTrip(section, reduced);
   useScrollProgress(section, "past", trip, !reduced);
   return (
     <section
@@ -167,12 +153,17 @@ export function Hero({ reduced }: { reduced: boolean }) {
       aria-labelledby="hero-title"
       className="hero relative isolate flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-6 pt-20 pb-14 text-center sm:pt-16"
     >
-      {/* The release version stays beside the wordmark. */}
-      <div className="relative z-[3] motion-safe:animate-arrive">
-        <h1 id="hero-title" className="leading-none">
-          <Wordmark alt="zellige" className="mx-auto h-auto w-[min(62vw,clamp(200px,26vh,280px))] drop-shadow-[0_14px_20px_rgb(var(--shadow-ink)/0.15)]" />
-        </h1>
-        <ReleaseVersion />
+      <div className="relative z-[3]">
+        <div className="relative mx-auto w-fit">
+          <h1 id="hero-title" className="leading-none">
+            <Wordmark alt="zellige" className="mx-auto h-auto w-[min(62vw,clamp(200px,26vh,280px))] drop-shadow-[0_14px_20px_rgb(var(--shadow-ink)/0.15)]" />
+          </h1>
+          <span className="absolute bottom-[21%] left-full ml-2 inline-flex"><ReleaseVersion /></span>
+        </div>
+        <p className="mt-2 flex items-center justify-center gap-2 text-xs leading-relaxed text-gold sm:text-sm">
+          <Construction aria-hidden="true" strokeWidth={1.5} className="size-3.5" />
+          <span>{t.hero.status}</span>
+        </p>
       </div>
       <div className="mt-3 mb-5 sm:mt-4 sm:mb-6">
         <Emblem reduced={reduced} />
@@ -193,15 +184,6 @@ export function Hero({ reduced }: { reduced: boolean }) {
           );
         })}
       </p>
-      {/* Next section: a quiet cue at the bottom edge. */}
-      <a
-        href="#piezas"
-        aria-label={t.hero.next}
-        title={t.hero.next}
-        className="hero-copy absolute bottom-4 left-1/2 z-[2] grid size-10 [@media(max-height:700px)]:hidden -translate-x-1/2 place-items-center rounded-full border border-border bg-popover text-muted-foreground transition-colors hover:border-brass hover:text-foreground sm:bottom-6"
-      >
-        <ChevronDown aria-hidden="true" className="size-5 motion-safe:animate-bounce" />
-      </a>
     </section>
   );
 }

@@ -1,82 +1,99 @@
-import type { ReactNode } from "react";
-import { ArrowLeftRight, Cpu, Database, KeyRound, Lock, Monitor, Plug, Server, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Cloud, Cpu, KeyRound, Lock, Monitor, Server, Workflow, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
 import { DeviceAccess } from "@/components/DeviceAccess";
-import { ProviderMark, inferenceProviders } from "@/components/providers";
+import { ProviderMark, harnesses, inferenceProviders, localModels, type Mark } from "@/components/providers";
 
-/** A small square: a mark over its name. */
-const tile = "panel-tile workings-tile flex flex-col items-center justify-center gap-1.5 px-2 py-3 text-center text-[13px] leading-tight";
-
-/** One part of the trip: the same card for all three. */
-function Node({ part, icon: Icon, title, body, children }: { part: "devices" | "server" | "providers"; icon: LucideIcon; title: string; body?: string; children: ReactNode }) {
+function Heading({ icon: Icon, title, body, compact = false }: { icon: LucideIcon; title: string; body: string; compact?: boolean }) {
   return (
-    <div className={cn("panel panel-hover workings-node relative min-w-0 p-4 sm:p-5 diagram:p-3 xl:p-5", `node-${part}`)}>
-      <div className="flex min-h-16 items-center gap-3">
-        <span aria-hidden="true" className="panel-badge size-10 shrink-0"><Icon strokeWidth={1.5} className="size-5" /></span>
-        <span className="min-w-0">
-          <span className="block text-[15px] font-semibold">{title}</span>
-          {body && <span className="block text-xs text-muted-foreground">{body}</span>}
-        </span>
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
+      <div className={cn("flex min-w-0 flex-1 items-center", compact ? "gap-2" : "gap-3")}>
+        <span aria-hidden="true" className={cn("panel-badge shrink-0", compact ? "size-8" : "size-10")}><Icon strokeWidth={1.5} className={compact ? "size-4" : "size-5"} /></span>
+        <div>
+          <h3 className={cn("font-semibold", compact ? "text-sm" : "text-base")}>{title}</h3>
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
+        </div>
       </div>
-      <div className="mt-4">{children}</div>
     </div>
   );
 }
 
-/** The way between two parts: a dashed line, down on phones and across from 900 px, with
- *  its label. A gold dot runs out along it and a teal one comes back (.wire in styles.css). */
+/** Both connections read across on desktop and down in the stacked layout. */
 function Wire({ step, title, body, icon: Icon }: { step: 1 | 2; title: string; body: string; icon: LucideIcon }) {
   return (
-    <div aria-hidden="true" className="flex flex-col items-center justify-center gap-2 py-1 text-xs text-muted-foreground diagram:w-24 diagram:px-1 diagram:py-0 diagram:text-[11px] xl:w-auto xl:px-2 xl:text-xs">
-      <span className={`wire wire-${step} relative block border-dashed border-brass max-diagram:h-8 max-diagram:border-l-2 diagram:w-full diagram:min-w-16 diagram:border-t-2`} />
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-brass/60 bg-popover px-3 py-1 font-semibold whitespace-nowrap text-foreground shadow-[0_8px_18px_-12px_rgb(var(--shadow-ink)/0.5)] diagram:px-2 xl:px-3"><Icon strokeWidth={1.75} className="size-3.5 text-gold" />{title}</span>
-      <span className="text-center xl:whitespace-nowrap">{body}</span>
-      <span className={`wire wire-${step} wire-tail relative block h-8 border-l-2 border-dashed border-brass diagram:hidden`} />
+    <div className="flex flex-col items-center justify-center gap-2 py-2 text-xs text-muted-foreground diagram:py-0">
+      <span aria-hidden="true" className={`wire wire-${step} relative block h-6 border-l border-dashed border-brass diagram:h-0 diagram:w-full diagram:border-t diagram:border-l-0`} />
+      <span className="inline-flex items-center gap-1 whitespace-nowrap font-medium text-foreground diagram:text-[11px]"><Icon aria-hidden="true" strokeWidth={1.5} className="size-3 text-gold" />{title}</span>
+      <span className="text-center text-[11px] diagram:text-[11px]">{body}</span>
+      <span aria-hidden="true" className={`wire wire-${step} wire-tail relative block h-6 border-l border-dashed border-brass diagram:hidden`} />
     </div>
   );
 }
 
-/** How Zellige is put together: you use it from your devices, which reach your server
- *  through Tailscale; your server holds your keys and subscriptions and calls the
- *  inference providers with them, and the answer comes back the same way. */
+type Choice = { name: string; mark: Mark; label?: string; note?: string };
+
+/** Named marks, visible without a disclosure and without another layer of cards. */
+function Marks({ choices, label, className, tiles = false }: { choices: Choice[]; label: string; className?: string; tiles?: boolean }) {
+  return (
+    <ul aria-label={label} className={cn("flex flex-wrap gap-x-5 gap-y-3", className)}>
+      {choices.map(({ name, label: shortName = name, note, mark }) => (
+        <li key={name} className={cn("flex min-w-0 items-center gap-2 text-xs leading-tight", tiles && "panel-tile flex-col justify-center px-2 py-3 text-center")}>
+          <ProviderMark mark={mark} className={tiles ? "size-7" : "size-5"} />
+          <span>{shortName}{note && <span className="block text-[11px] text-muted-foreground">{note}</span>}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The server boundary separates local inference from credentials used to reach external models. */
 export function Workings({ className }: { className?: string }) {
   const t = useT();
   const w = t.story.workings;
-  const providerGroups = [inferenceProviders.filter((provider) => provider.openModels), inferenceProviders.filter((provider) => !provider.openModels)];
+
   return (
-    <div data-reveal className={className}>
-      <div className="workings flex flex-col items-stretch diagram:grid diagram:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)]">
-        <Node part="devices" icon={Monitor} title={w.devices.title} body={w.devices.body}>
-          <DeviceAccess />
-        </Node>
+    <figure data-reveal aria-label={t.features.title} className={className}>
+      <div className="workings mx-auto flex max-w-[680px] flex-col diagram:grid diagram:max-w-none diagram:grid-cols-[minmax(0,1fr)_80px_minmax(0,1.15fr)_80px_minmax(0,1fr)] diagram:items-stretch">
+        <div className="panel node-devices flex min-w-0 flex-col p-5">
+          <Heading icon={Monitor} title={w.devices.title} body={w.devices.body} />
+          <div className="my-auto pt-6"><DeviceAccess /></div>
+        </div>
         <Wire step={1} icon={Lock} title={w.tunnel.title} body={w.tunnel.body} />
-        <Node part="server" icon={Server} title={w.server.title} body={w.server.body}>
-          <ul className="grid grid-cols-2 gap-2">
-            {([[KeyRound, w.server.api], [Plug, w.server.oauth]] as const).map(([Icon, [name, note]]) => (
-              <li key={name} className={tile}>
-                <Icon aria-hidden="true" strokeWidth={1.5} className="size-5 text-gold" />
-                <strong className="font-semibold">{name}</strong>
-                <span className="text-xs text-muted-foreground">{note}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="panel-tile mt-2 flex items-center justify-center gap-2 px-3 py-2 text-[13px]"><Database aria-hidden="true" strokeWidth={1.5} className="size-4 text-gold" />{w.server.memory}</p>
-        </Node>
-        <Wire step={2} icon={ArrowLeftRight} title={w.calls.title} body={w.calls.body} />
-        <Node part="providers" icon={Cpu} title={w.providers.title} body={w.providers.body}>
-          {providerGroups.map((group, index) => (
-            <div key={group[0].name}>
-              {index > 0 && <div aria-hidden="true" className="mx-auto my-3 h-px w-12 bg-brass/60" />}
-              <ul className="grid grid-cols-3 gap-2">
-                {group.map(({ name, mark }) => (
-                  <li key={name} className={cn(tile, "min-w-0 diagram:px-1 diagram:text-[11px] xl:px-2 xl:text-[13px]")}><ProviderMark mark={mark} className="size-6" />{name}</li>
-                ))}
-              </ul>
+        <div className="panel node-server min-w-0 p-5">
+          <Heading icon={Server} title={w.server.title} body={w.server.memory} />
+          <div id="harness" className="mt-5 scroll-mt-28 border-t border-border pt-4">
+            <h4 className="flex items-center gap-2 text-sm font-semibold"><Workflow aria-hidden="true" strokeWidth={1.5} className="size-4 text-gold" />{w.server.harness}</h4>
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{t.features.harness.body}</p>
+          </div>
+          <div className="model-routes mt-4 ml-2 grid gap-4 border-l border-brass/50 pl-4">
+            <div className="node-local relative before:absolute before:top-2.5 before:-left-4 before:w-3 before:border-t before:border-brass/50">
+              <h4 className="flex items-center gap-2 text-sm font-semibold"><Cpu aria-hidden="true" strokeWidth={1.5} className="size-4 shrink-0 text-part-points" />{w.local.title}</h4>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{w.local.body}</p>
             </div>
-          ))}
-        </Node>
+            <div id="acceso" className="relative scroll-mt-28 before:absolute before:top-2.5 before:-left-4 before:w-3 before:border-t before:border-brass/50">
+              <h4 className="flex items-center gap-2 text-sm font-semibold"><KeyRound aria-hidden="true" strokeWidth={1.5} className="size-4 shrink-0 text-gold" />{w.credentials.title}</h4>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{w.credentials.methods}</p>
+            </div>
+          </div>
+        </div>
+        <Wire step={2} icon={ArrowLeftRight} title={w.calls.title} body={w.calls.body} />
+        <div className="panel node-providers flex min-w-0 flex-col p-5">
+          <Heading icon={Cloud} title={w.providers.title} body={w.providers.body} />
+          <div className="my-auto pt-6">
+            <Marks choices={inferenceProviders} label={w.providers.title} className="grid grid-cols-2 gap-2 sm:grid-cols-4 diagram:grid-cols-2" tiles />
+          </div>
+        </div>
       </div>
-    </div>
+      <figcaption className="mx-auto mt-7 grid max-w-[680px] gap-5 border-t border-border/70 pt-5 diagram:max-w-none diagram:grid-cols-[1.6fr_1fr] diagram:gap-12">
+        <div>
+          <h4 className="mb-3 text-xs font-medium text-muted-foreground">{t.features.harnesses}</h4>
+          <Marks choices={harnesses} label={t.features.harnesses} />
+        </div>
+        <div>
+          <h4 className="mb-3 text-xs font-medium text-muted-foreground">{w.local.examples}</h4>
+          <Marks choices={localModels} label={w.local.examples} />
+        </div>
+      </figcaption>
+    </figure>
   );
 }

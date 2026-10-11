@@ -9,15 +9,16 @@ import glyphPoints from "@/assets/glyph-points.webp";
 /*
  * Zel is the standard emblem: Zel in the centre, and around it the colour layers,
  * each a way of using Zel:
- *   crown  (ivory kites, closest to Zel)  → chat
+ *   crown  (ivory kites, closest to Zel)  → the personal agent
  *   cobalt (blue corner squares)          → the harness manager, for building software
- *   points (outer green points)           → the personal agent
+ *   points (outer green points)           → chat
  * The scroll story shows one layer around Zel at a time, then all of them. A layer
  * the emblem splits into four shows on its own as one joined piece, and splits into
  * the emblem's pieces once the tile is whole. Motion is
  * CSS only; without JS or with reduced motion, the emblem is simply whole.
  */
 export type Piece = Exclude<Layer, "centre">;
+// Reading order: Personal agent, Harness manager, Chat.
 export const pieces: Piece[] = ["crown", "cobalt", "points"];
 
 const glyphs: Record<Piece, string> = { crown: glyphCrown, cobalt: glyphCobalt, points: glyphPoints };
@@ -42,6 +43,7 @@ export function Trio({
   onPick,
   onHover,
   lift,
+  cue,
   className,
 }: {
   mood: Mood;
@@ -53,14 +55,15 @@ export function Trio({
   onHover?: (piece: Piece | undefined) => void;
   /** A layer to lift from outside, such as the step the reader points at. */
   lift?: Piece;
+  /** Change it to make Zel's eyes play their mood's own gesture now. */
+  cue?: number;
   className?: string;
 }) {
   const t = useT();
   // Pointing at a layer of the whole tile lifts it, with Zel; the page lights up its step.
   const [hover, setHoverState] = useState<Piece>();
   const setHover = (piece: Piece | undefined) => {
-    if (piece === hover) return;
-    setHoverState(piece);
+    if (piece !== hover) setHoverState(piece);
     onHover?.(piece);
   };
   const pieceAt = (event: MouseEvent<HTMLDivElement>) => {
@@ -70,7 +73,7 @@ export function Trio({
     return show ? undefined : piece;
   };
   // A layer stays lifted only while the whole tile shows (scrolling back can hide it).
-  const lifted = show ? undefined : hover ?? lift;
+  const lifted = show ? undefined : onHover ? lift : hover ?? lift;
   return (
     <div
       className={cn("tile tile-scroll relative aspect-square", `show-${show ?? "all"}`, lifted && `lift-${lifted}`, lifted && onPick && "cursor-pointer", className)}
@@ -78,7 +81,7 @@ export function Trio({
       onPointerLeave={() => setHover(undefined)}
       onClick={(event) => { const piece = pieceAt(event); if (piece) onPick?.(piece); }}
     >
-      <Companion mood={mood} follow alt={t.zel.alt} shadow="tile" className="size-full" />
+      <Companion mood={mood} follow cue={cue} restingOverlay={false} alt={t.zel.alt} shadow="tile" className="size-full" />
     </div>
   );
 }

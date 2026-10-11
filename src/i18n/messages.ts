@@ -12,67 +12,66 @@ const es = {
   skip: "Ir al contenido",
   header: {
     home: "Zellige, inicio",
-    nav: "Principal",
-    links: { home: "Inicio", idea: "¿Qué es Zellige?", features: "¿Cómo funciona?", contact: "¿Quieres colaborar?" },
-    theme: "Cambiar entre modo claro y oscuro",
-    themeTitle: "Modo claro / oscuro",
-    menu: "Menú",
     repository: "Repositorio en GitHub",
-    code: "Código en GitHub",
   },
   hero: {
     why: {
       title: "¿Por qué «Zellige»?",
       from: "Del árabe",
       meaning: "«azulejo».",
-      history: "De la misma raíz viene el español azulejo. En el Magreb, «zellige» nombra el mosaico de teselas de barro esmaltado, talladas a mano y encajadas en patrones geométricos.",
+      history: "Como las teselas de un mosaico, las partes de Zellige encajan entre sí.",
     },
     title: { lead: "Chat, desarrollo con agentes y agente personal,", turn: "en tu servidor y de código abierto." },
     bring: { lead: "Conecta tu", items: ["harness", "suscripción", "clave de API"] },
-    next: "Ir a la siguiente sección",
+    version: "Versión",
     releases: "Ver las versiones de Zellige en GitHub",
+    status: "En construcción",
+    next: "Ir a la siguiente sección",
   },
   zel: {
     alt: "Zel, la mascota de Zellige",
   },
   layers: {
-    crown: { use: "Chat" },
+    points: { use: "Chat" },
     cobalt: { use: "Gestor de harness" },
-    points: { use: "Agente personal" },
+    crown: { use: "Agente personal" },
   },
   story: {
-    hint: "Desliza para ver cada capa",
+    hint: "Desliza para ver cada parte. Tócalas, a ver qué dicen.",
+    // What the personal agent's note says, beside it in the story.
+    reminder: { when: "Mañana, 9:00", what: "Dentista" },
     progress: "Pasos",
     goTo: "Ir al paso",
     title: "¿Qué es Zellige?",
     intro: {
       lead: "Zellige es un entorno de agentización personal.",
-      body: "Como en un mosaico, cada forma de usar la IA es una pieza, y Zel, en el centro, las mantiene unidas.",
+      body: "Este es Zel, nuestra mascota: se divide en tres partes, una por cada forma de usar Zellige.",
     },
     workings: {
       title: "¿Cómo funciona?",
-      status: {
-        title: "En desarrollo",
-        body: "Esta página presenta las funciones previstas para Zellige. Todavía no están implementadas.",
-      },
-      body: "Usas el chat, el gestor de harness y tu agente desde las apps de escritorio y móvil, en cualquier plataforma, o desde la web. Llegan a tu propio servidor por Tailscale, que lo mantiene privado. Tu servidor guarda tus claves de API y tus suscripciones, y con ellas llama a los proveedores de inferencia que prefieras.",
+      body: "Desde el escritorio, el móvil o la web, tus apps llegan a tu servidor por la red privada de Tailscale. Allí conviven tus harness y una memoria compartida. Puedes ejecutar modelos abiertos en tu máquina o conectar proveedores externos con tus suscripciones o claves de API.",
       devices: { title: "Tus dispositivos", body: "Las tres herramientas, en cualquier dispositivo", items: ["Escritorio", "Móvil", "Web"] },
       tunnel: { title: "Tailscale", body: "Red privada" },
-      server: { title: "Tu servidor", body: "En tu máquina", memory: "Memoria compartida", api: ["API", "Tus claves de API"], oauth: ["OAuth", "Tus suscripciones"] },
+      server: { title: "Tu servidor", body: "Tus herramientas y datos, bajo tu control", memory: "Memoria compartida", harness: "El harness que elijas" },
+      local: { title: "Modelos locales", body: "Versiones abiertas que ejecutas en tu máquina.", examples: "Ejemplos de familias de modelos abiertos" },
+      credentials: { title: "Tus credenciales", body: "Conecta con proveedores externos desde aquí.", methods: "Claves de API · OAuth" },
       calls: { title: "Inferencia", body: "Petición y respuesta" },
-      providers: { title: "Proveedores de inferencia", body: "Autoalojados o externos" },
+      providers: { title: "Proveedores externos", body: "Modelos abiertos o propietarios" },
     },
     steps: {
-      crown: {
+      points: {
         title: "Chat",
+        voices: ["«¿De qué hablamos hoy?»", "«Cuéntame, te escucho.»", "«Pregunta lo que quieras.»", "«¿Seguimos donde lo dejamos?»"],
         body: "Habla con el modelo que quieras a través del harness que elijas, como en cualquier chat de IA, pero sin que tus conversaciones queden encerradas en una app.",
       },
       cobalt: {
         title: "Gestor de harness",
+        voices: ["«Déjame, que lo monto yo.»", "«Dame un segundo…»", "«Compila. Siguiente.»", "«¿Con qué harness vamos hoy?»"],
         body: "Añade el harness que quieras y orquesta modelos, herramientas y agentes de programación en un mismo flujo para desarrollar software.",
       },
-      points: {
+      crown: {
         title: "Agente personal",
+        voices: ["«Tranquilo, yo me acuerdo.»", "«Eso ya está hecho.»", "«Te aviso a las nueve.»", "«¿Algún recado más?»"],
         body: "Recuerda, te avisa y hace recados por ti. Viene con un harness por defecto y puedes cambiarlo cuando quieras.",
       },
       tile: {
@@ -83,19 +82,10 @@ const es = {
   },
   features: {
     title: "Modelos y herramientas",
-    access: {
-      tag: "Acceso a modelos",
-      title: "Tu suscripción… o tu clave de API",
-      body: "Conecta tu suscripción mediante OAuth o una clave de API. También puedes pagar por consumo.",
-    },
     harness: {
-      tag: "Harness",
-      title: "Tu harness de código abierto… o el de tu suscripción",
-      body: "El chat, el gestor de harness y tu agente funcionan con el harness de código abierto que elijas, o con el que incluye tu suscripción, como Claude Code o Codex CLI.",
-      more: "Y en el futuro otros harness de código abierto…",
+      body: "El harness conecta los modelos con las herramientas de tus agentes.",
     },
-    providers: "Servicios de acceso a modelos",
-    harnesses: "Harness de código abierto",
+    harnesses: "Ejemplos de harness",
     trademarks: "Las marcas pertenecen a sus respectivos propietarios.",
   },
   contact: {
@@ -124,90 +114,79 @@ const en = {
   skip: "Skip to content",
   header: {
     home: "Zellige home",
-    nav: "Main navigation",
-    links: { home: "Home", idea: "What is Zellige?", features: "How it works", contact: "Contribute" },
-    theme: "Toggle light and dark mode",
-    themeTitle: "Light / dark mode",
-    menu: "Menu",
     repository: "Zellige on GitHub",
-    code: "View on GitHub",
   },
   hero: {
     why: {
       title: "Why “Zellige”?",
       from: "From the Arabic",
       meaning: "“tile.”",
-      history: "The same root gave Spanish its azulejo. Across the Maghreb, “zellige” names the mosaic of hand-cut glazed clay tiles set in geometric patterns.",
+      history: "Like the tiles of a mosaic, the parts of Zellige fit together.",
     },
     title: { lead: "AI chat, coding agents and your own personal agent,", turn: "self-hosted and open source." },
     bring: { lead: "Connect your", items: ["harness", "subscription", "API key"] },
-    next: "Jump to the next section",
+    version: "Version",
     releases: "View Zellige releases on GitHub",
+    status: "Work in progress",
+    next: "Jump to the next section",
   },
   zel: {
     alt: "Zel, the Zellige mascot",
   },
   layers: {
-    crown: { use: "Chat" },
+    points: { use: "Chat" },
     cobalt: { use: "Harness manager" },
-    points: { use: "Personal agent" },
+    crown: { use: "Personal agent" },
   },
   story: {
-    hint: "Scroll to see each layer",
+    hint: "Scroll to see each part. Poke them and see what they say.",
+    reminder: { when: "Tomorrow, 9:00", what: "Dentist" },
     progress: "Steps",
     goTo: "Go to step",
     title: "What is Zellige?",
     intro: {
       lead: "Zellige is a personal workspace for AI agents.",
-      body: "Like a mosaic, each way of using AI is one piece, and Zel, at the centre, holds them together.",
+      body: "Meet Zel, our mascot: it splits into three parts, one for each way of using Zellige.",
     },
     workings: {
       title: "How it works",
-      status: {
-        title: "Under development",
-        body: "This page presents the features planned for Zellige. They have not been implemented yet.",
-      },
-      body: "You use the chat, the harness manager and your agent from the desktop and mobile apps, on any platform, or from the web. They reach your own server over Tailscale, which keeps it private. Your server holds your API keys and subscriptions, and calls the inference providers you prefer with them.",
+      body: "From desktop, mobile or the web, your apps reach your server over Tailscale’s private network. Your harnesses and shared memory live there. Run open models on your own machine or connect to external providers with your subscriptions or API keys.",
       devices: { title: "Your devices", body: "All three tools, on any device", items: ["Desktop", "Mobile", "Web"] },
       tunnel: { title: "Tailscale", body: "Private network" },
-      server: { title: "Your server", body: "On your machine", memory: "Shared memory", api: ["API", "Your API keys"], oauth: ["OAuth", "Your subscriptions"] },
+      server: { title: "Your server", body: "Your tools and data, under your control", memory: "Shared memory", harness: "Your choice of harness" },
+      local: { title: "Local models", body: "Open versions running on your machine.", examples: "Example open model families" },
+      credentials: { title: "Your credentials", body: "Connect to external providers from here.", methods: "API keys · OAuth" },
       calls: { title: "Inference", body: "Request and response" },
-      providers: { title: "Inference providers", body: "Self-hosted or external" },
+      providers: { title: "External providers", body: "Open or proprietary models" },
     },
     steps: {
-      crown: {
+      points: {
         title: "Chat",
+        voices: ["“What shall we talk about today?”", "“Go on, I’m listening.”", "“Ask me anything.”", "“Shall we pick up where we left off?”"],
         body: "Talk to any model you like through the harness you bring. It works like any AI chat, except your conversations aren’t locked into one app.",
       },
       cobalt: {
         title: "Harness manager",
+        voices: ["“Leave it to me, I’ll build it.”", "“Give me a second…”", "“It builds. Next.”", "“Which harness today?”"],
         body: "Plug in whichever harnesses you like and orchestrate models, tools and coding agents in a single workflow to ship software.",
       },
-      points: {
+      crown: {
         title: "Personal agent",
+        voices: ["“Relax, I’ll remember.”", "“That’s already done.”", "“I’ll remind you at nine.”", "“Any other errands?”"],
         body: "It works for you out in the world: it remembers things, reminds you and runs errands. It comes with a default harness, and you can switch whenever you like.",
       },
       tile: {
         title: "That’s Zellige",
-        body: "Chat, harness manager and personal agent, all built around Zel and all sharing the same memory.",
+        body: "Chat, harness manager and personal agent, working as one and sharing the same memory.",
       },
     },
   },
   features: {
-    title: "Bring your own",
-    access: {
-      tag: "Model access",
-      title: "Your subscription… or your API key",
-      body: "Connect your subscription with OAuth or an API key. You can also pay as you go.",
-    },
+    title: "Models and tools",
     harness: {
-      tag: "Harness",
-      title: "Your open-source harness… or the one in your subscription",
-      body: "Chat, the harness manager and your agent all run on the open-source harness of your choice, or on the one bundled with your subscription, like Claude Code or Codex CLI.",
-      more: "And in the future, more open-source harnesses…",
+      body: "The harness connects models to the tools your agents use.",
     },
-    providers: "Model access services",
-    harnesses: "Open-source harnesses",
+    harnesses: "Example harnesses",
     trademarks: "All trademarks are the property of their respective owners.",
   },
   contact: {

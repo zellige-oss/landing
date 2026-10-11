@@ -8,7 +8,6 @@ import { Features } from "@/pages/Features";
 import { Hero } from "@/pages/Hero";
 import { Story } from "@/pages/Story";
 import { useT } from "@/i18n";
-import { WhyZellige } from "@/components/WhyZellige";
 
 export function App() {
   const t = useT();
@@ -35,7 +34,6 @@ export function App() {
         <Contact />
       </main>
       <Footer />
-      <WhyZellige />
     </>
   );
 }

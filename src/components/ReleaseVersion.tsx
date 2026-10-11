@@ -21,9 +21,9 @@ export function ReleaseVersion() {
       href={release.href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${release.version} — ${t.hero.releases}`}
-      title={`${release.version} — ${t.hero.releases}`}
-      className="absolute top-1/2 left-full ml-2 max-w-12 -translate-y-1/2 truncate font-mono text-[13px] text-gold tabular-nums underline-offset-4 hover:underline sm:ml-3 sm:max-w-24 sm:text-sm"
+      title={t.hero.releases}
+      aria-label={`${t.hero.version} ${release.version} — ${t.hero.releases}`}
+      className="rounded-sm font-mono text-xs leading-none text-muted-foreground tabular-nums underline decoration-dotted underline-offset-4 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
     >
       v{release.version}
     </a>

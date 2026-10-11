@@ -57,7 +57,7 @@ function star(cx, cy, r, tones, inner = 0.34) {
 }
 
 let seed = 11;
-function wordmark(name, navy, glints, tones) {
+function wordmark(name, navy, glints, tones, sheen) {
 // Low-poly navy facets, about one stroke wide, with faint lighter edges.
 const W = 1480, H = 760;
 seed = 11;
@@ -77,7 +77,7 @@ for (let i = 0; i < tri.length; i += 3) {
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 40 ${W} ${H - 30}" role="img" aria-label="zellige">
 <defs>
 <mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}">${layers.join('')}</mask>
-<linearGradient id="gloss" x1="0" y1="0" x2="0.15" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/><stop offset=".75" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#5d8fd8" stop-opacity=".15"/></linearGradient>
+<linearGradient id="gloss" x1="0" y1="0" x2="0.15" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/><stop offset=".75" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="${sheen}" stop-opacity=".15"/></linearGradient>
 </defs>
 <g mask="url(#m)"><rect width="${W}" height="${H}" fill="${navy[navy.length - 1]}"/>${facets}<rect width="${W}" height="${H}" fill="url(#gloss)"/></g>
 ${star(722, 136, 76, tones)}${star(838, 242, 56, tones)}
@@ -87,15 +87,19 @@ writeFileSync(out, svg);
 console.log(`Wrote ${out} (${svg.length} bytes)`);
 }
 
-// Day: deep navy facets on ivory. Night: porcelain facets (cool ivory, pearl glints). The two
+// Day: deep navy facets on ivory. Night: porcelain facets (ivory, with warm pearl glints
+// and a sand sheen: bluish ones read as a tint on the letters). The two
 // stars are gold in both, so the mark keeps one constant anchor across themes.
 // (Glazed cobalt was tried at night and rejected: too little contrast on the ink background.)
 wordmark('zellige-wordmark.svg',
   ['#081936', '#0a1f42', '#0b2147', '#071630', '#0c2550', '#06132b', '#0f2d5e', '#09193a', '#123468', '#0a1c3f'],
   ['#1d4d8f', '#1a4a8e', '#2257a8'],
   // Gold stars in both modes: the fixed anchor of the mark. A deeper gold by day, to hold on ivory.
-  ['#e2c06a', '#8f6a26', '#c9a24f', '#6e5118', '#b08a3a', '#5f4514', '#9a7529', '#d4b05a']);
+  ['#e2c06a', '#8f6a26', '#c9a24f', '#6e5118', '#b08a3a', '#5f4514', '#9a7529', '#d4b05a'],
+  // The glaze's sheen at the foot of the letters: cobalt on navy.
+  '#5d8fd8');
 wordmark('zellige-wordmark-night.svg',
   ['#f7f5ef', '#e9e5da', '#fdfcf8', '#d6d0c2', '#f1eee5', '#c9c2b2', '#faf8f2', '#e0dbcf', '#ffffff', '#ece8de'],
-  ['#ffffff', '#e8eef8', '#d8e2f1'],
-  ['#f4d993', '#b8913f', '#d9b765', '#8f6a26', '#c9a24f', '#7d5c1f', '#a9843a', '#e6c77c']);
+  ['#ffffff', '#fbf7ee', '#f3ecdd'],
+  ['#f4d993', '#b8913f', '#d9b765', '#8f6a26', '#c9a24f', '#7d5c1f', '#a9843a', '#e6c77c'],
+  '#c9b48a');
