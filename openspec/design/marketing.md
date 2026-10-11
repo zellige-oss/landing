@@ -19,7 +19,9 @@ of using Zellige. It arrives whole, then the scroll introduces its parts.
 2. **What is Zellige?** (`src/pages/Story.tsx`): the title stays in the sticky
    panel with the story. The complete Zel arrives with open eyes, turning in
    perspective from above. Its landing compresses, rebounds and settles through
-   the ceramic layers, with a brief ground shadow. Each scroll step then
+   the ceramic layers, with a brief ground shadow. On small screens and touch
+   devices, a 480 ms entrance moves the whole character in 2D, without the
+   separate layer recoil or landing shadow. Each scroll step then
    shows one layer around it: the personal agent (ivory crown), the harness manager
    (blue), then chat (green). Each part is named with its layer and Zel at its centre.
    The parts reunite at the end, with "Zellige is all of this" rising under the tile.
