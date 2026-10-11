@@ -24,11 +24,12 @@ of using Zellige. It arrives whole, then the scroll introduces its parts.
    separate layer recoil or landing shadow. Each scroll step then
    shows one layer around it: the personal agent (ivory crown), the harness manager
    (blue), then chat (green). Each part is named with its layer and Zel at its centre.
-   The parts reunite at the end, with "Zellige is all of this" rising under the tile.
-   "How does it work?" follows as its own section. Once the tile is whole, the tile and
+   Each part plays its gesture as soon as it takes the stage. Chat leads straight
+   into "How does it work?", without a second assembled tile or summary. In the
+   opening tile, the tile and
    the parts point at each other: hovering a layer lifts it, with Zel, and lights
    up its part; hovering a part lifts its layer. Clicking or tapping a layer jumps
-   to its step. "How does it work?" explains the
+   to its step, as do the three progress buttons. "How does it work?" explains the
    setup and draws it: your devices reach your server over Tailscale; the server
    runs Zellige (its three layers on one shared memory) and reaches the models by
    API or OAuth. Scrolling back retraces the story, including on return visits;

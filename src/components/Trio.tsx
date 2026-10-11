@@ -12,7 +12,7 @@ import glyphPoints from "@/assets/glyph-points.webp";
  *   crown  (ivory kites, closest to Zel)  → the personal agent
  *   cobalt (blue corner squares)          → the harness manager, for building software
  *   points (outer green points)           → chat
- * The scroll story shows one layer around Zel at a time, then all of them. A layer
+ * The scroll story introduces the whole tile, then each layer around Zel. A layer
  * the emblem splits into four shows on its own as one joined piece, and splits into
  * the emblem's pieces once the tile is whole. Motion is
  * CSS only; without JS or with reduced motion, the emblem is simply whole.
