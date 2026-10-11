@@ -100,16 +100,16 @@ test('internal section links resolve to existing ids', () => {
   }
 });
 
-// Token blocks: `:root { … }` is the light theme, `.dark { … }` the dark one.
-function palette(selector) {
-  const start = sourceCss.indexOf(`${selector} {`);
-  assert.ok(start >= 0, `Missing ${selector} token block`);
+// The landing's one palette: the `:root { … }` token block.
+function palette() {
+  const start = sourceCss.indexOf(':root {');
+  assert.ok(start >= 0, 'Missing :root token block');
   const block = sourceCss.slice(start, sourceCss.indexOf('}', start));
   return Object.fromEntries([...block.matchAll(/--([\w-]+):\s*(#[0-9a-f]{6})\b/gi)].map(([, name, value]) => [name, value]));
 }
 
-test('light landing palette keeps text readable across its surfaces', () => {
-  const colors = palette(':root');
+test('the palette keeps text readable across its surfaces', () => {
+  const colors = palette();
   function luminance(hex) {
     assert.match(hex ?? '', /^#[0-9a-f]{6}$/i);
     const rgb = hex.slice(1).match(/../g).map((channel) => {
@@ -134,39 +134,15 @@ test('light landing palette keeps text readable across its surfaces', () => {
   }
 });
 
-test('dark landing palette keeps text readable too', () => {
-  const light = palette(':root');
-  const dark = { ...light, ...palette('.dark') };
-  const lum = (hex) => hex.slice(1).match(/../g).map((c) => {
-    const v = parseInt(c, 16) / 255;
-    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  }).reduce((sum, v, k) => sum + v * [0.2126, 0.7152, 0.0722][k], 0);
-  const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
-  for (const surface of ['background', 'surface', 'popover']) {
-    for (const text of ['foreground', 'muted-foreground', 'accent', 'gold']) {
-      assert.ok(contrast(dark[text], dark[surface]) >= 4.5, `dark ${text} on ${surface}`);
-    }
-  }
-  for (const text of ['night-foreground', 'night-muted', 'night-gold']) {
-    assert.ok(contrast(dark[text], dark.night) >= 4.5, `dark ${text} on night`);
-  }
-});
-
-test('theme is dark unless the reader chose light, set before first paint', () => {
+test('one dark theme, with no script deciding it', () => {
   const metas = tags.filter(({ name, attrs }) => name === 'meta' && attrs.name === 'theme-color');
   assert.equal(metas.length, 1);
-  // The browser's bar starts dark and switches with the theme.
-  assert.equal(metas[0].attrs.content, palette('.dark').background);
-  assert.equal(metas[0].attrs['data-dark'], palette('.dark').background);
-  assert.equal(metas[0].attrs['data-light'], palette(':root').background);
-  const script = readFileSync(resolve(root, 'public/theme.js'), 'utf8');
-  assert.match(script, /saved === "light"/);
-  assert.doesNotMatch(script, /prefers-color-scheme/);
-  // A blocking external script in <head>, before the stylesheet paints the page.
-  const head = html.slice(0, html.indexOf('</head>'));
-  assert.match(head, /<script src="\/theme\.js"><\/script>/);
-  assert.match(sourceCss, /color-scheme:\s*light/);
-  assert.match(sourceCss, /\.dark \{\s*color-scheme:\s*dark/);
+  // The browser's bar takes the page's colour.
+  assert.equal(metas[0].attrs.content, palette().background);
+  assert.match(sourceCss, /:root \{\s*color-scheme:\s*dark/);
+  assert.doesNotMatch(sourceCss, /\.dark\b/);
+  assert.ok(!existsSync(resolve(root, 'public/theme.js')));
+  assert.doesNotMatch(html, /theme\.js/);
 });
 
 test('brand art: approved ceramic mosaic, emblem layers, emblem and moodboard wordmark', () => {

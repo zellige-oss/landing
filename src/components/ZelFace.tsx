@@ -1,8 +1,9 @@
-import { useId } from "react";
-import { EYE_L, EYE_R, EYE_RX, EYE_RY, EYE_Y, HAPPY_END, HAPPY_HALF_WIDTH, HAPPY_PEAK, HAPPY_STROKE, greetingEye } from "./zel-eye-shapes";
+import { useId, useState } from "react";
+import { EYE_L, EYE_R, EYE_RX, EYE_RY, EYE_Y, HAPPY_END, HAPPY_HALF_WIDTH, HAPPY_PEAK, HAPPY_STROKE, eyeFrame, eyePath, greetingEye } from "./zel-eye-shapes";
 
-export type Mood = "hello" | "look" | "thinking" | "excited" | "curious" | "focused" | "wink" | "content" | "surprised";
-// The moods with a generated image (scripts/build-brand.mjs); "surprised" only plays on the web.
+export type Mood = "hello" | "look" | "thinking" | "excited" | "curious" | "focused" | "wink" | "content" | "surprised" | "determined";
+// The moods with a generated image (scripts/build-brand.mjs); "surprised" only plays on the web,
+// and "determined" only where the eyes act (it has no still drawing of its own).
 export const moods: Mood[] = ["hello", "look", "thinking", "excited", "curious", "focused", "wink", "content"];
 
 /*
@@ -137,15 +138,24 @@ export function Eyes({ mood }: { mood: Mood }) {
 }
 
 /** The face group, in emblem coordinates (viewBox 0 0 1254 1254). */
-export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean }) {
+export function ZelFace({ mood, lively = false, acting = false }: {
+  mood: Mood;
+  lively?: boolean;
+  /** One pair of eyes that acts each mood out and turns from one into the next (hooks/zel-eyes.ts). */
+  acting?: boolean;
+}) {
   const gradient = `zel-face-${useId().replaceAll(":", "")}`;
+  // Acting eyes are drawn here once, in the still pose of the mood they start in;
+  // from then on the hook draws them, so a change of mood never swaps them.
+  const [first] = useState(mood);
+  const pose = acting ? (eyeFrame(first, 0) ?? eyeFrame(mood, 0))?.draw() : undefined;
   return (
     <>
       <defs>
         <radialGradient id={gradient} cx="40%" cy="30%" r="75%">
           <ObsidianStops />
         </radialGradient>
-        {lively && (
+        {(lively || pose) && (
           <radialGradient id={`${gradient}-glaze`} cx="42%" cy="34%" r="70%">
             <GlazeStops />
           </radialGradient>
@@ -171,6 +181,19 @@ export function ZelFace({ mood, lively = false }: { mood: Mood; lively?: boolean
               })}
             </g>
           </>
+        ) : pose ? (
+          // Both eyes look round together, as one pair.
+          <g className="companion-look">
+            {pose.map((eye, index) => {
+              const d = eyePath(eye.points);
+              return (
+                <g key={index}>
+                  <path data-zel-eye={index} d={d} fill={`url(#${gradient}-glaze)`} />
+                  <path data-zel-eye-ivory={index} d={d} fill="#f8f6ef" opacity={eye.flat} />
+                </g>
+              );
+            })}
+          </g>
         ) : <Eyes mood={mood} />}
       </g>
     </>

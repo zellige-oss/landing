@@ -7,51 +7,63 @@ allows only `'self'`. `public/locale.js` sends `/` to the browser's language.
 
 ## Narrative: four pages
 
-Zellige is a tile made of many small stones; each stone is a way of using AI,
-and Zel, the mascot, is the centre that holds them together.
+Zellige is a tile made of many small stones; each stone is a way of using AI.
+Zel, the mascot, is the whole tile: it divides into three parts, one for each way
+of using Zellige. It arrives whole, then the scroll introduces its parts.
 
 1. **Hero** (`src/pages/Hero.tsx`): the brand. Wordmark, Zel, one line
    (self-hosted and open source) and "Bring your own: harness · sub · API key"
-   ("Con lo que ya usas: harness · suscripción · clave de API" in Spanish). "Why Zellige?" beside the wordmark opens
-   where the name comes from (`src/components/WhyZellige.tsx`): the literal
-   meaning ("tile") and one line of history. It sits beside the wordmark on
-   wide screens; smaller ones have no room to spare, so it opens over Zel,
-   under the link, rather than pushing Zel down. As
-   the hero scrolls away, Zel flies, shrinking, into the header's logo.
+   ("Conecta tu harness · suscripción · clave de API" in Spanish). As
+   the hero scrolls away, only the wordmark moves into the header. Zel stays in
+   the hero, and there is no down-arrow button.
 2. **What is Zellige?** (`src/pages/Story.tsx`): the title stays in the sticky
-   panel with the story. Zel stays in the centre of the tile and each scroll step
-   shows one layer around it: chat (crown), the harness manager (blue), the
-   personal agent (green). Each part is named with its layer and Zel at its centre.
-   The whole tile comes last and briefly, with "Zellige is all of this" rising under
-   it. On wide screens "How does it work?" then fades in in the same sticky panel, in the
-   tile's place, without scrolling to it; on phones, where it is taller than the
-   screen, it follows the story. Once the tile is whole, the tile and
+   panel with the story. The complete Zel arrives with open eyes, turning in
+   perspective from above. Its landing compresses, rebounds and settles through
+   the ceramic layers, with a brief ground shadow. Each scroll step then
+   shows one layer around it: the personal agent (ivory crown), the harness manager
+   (blue), then chat (green). Each part is named with its layer and Zel at its centre.
+   The parts reunite at the end, with "Zellige is all of this" rising under the tile.
+   "How does it work?" follows as its own section. Once the tile is whole, the tile and
    the parts point at each other: hovering a layer lifts it, with Zel, and lights
    up its part; hovering a part lifts its layer. Clicking or tapping a layer jumps
    to its step. "How does it work?" explains the
    setup and draws it: your devices reach your server over Tailscale; the server
    runs Zellige (its three layers on one shared memory) and reaches the models by
-   API or OAuth. The story plays once, then settles; without JavaScript or with
-   reduced motion it is a list.
-3. **Bring your own** (`src/pages/Features.tsx`): "Bring your own" ("Modelos y herramientas" in Spanish), two cards. BYOK ·
-   BYOS: your API keys, priced per token in the open, or a subscription you already
-   pay for, signed in with OAuth (each tool's sign-in listed). Subscription usage
-   percentages are visible; how much usage the full quota represents may be unclear,
-   and the provider can increase or reduce that quota. BYOH: the
-   open-source harness you choose (pi, OpenCode, oh-my-pi, DeepSeek Harness), as
-   large tiles, or the one that comes with your subscription (Claude Code, Codex CLI). A bar below: on your server, one memory, change models without
-   losing anything. Tool marks, in their official colours, live in
-   `src/components/providers.tsx` and `src/assets/marks/`.
+   API or OAuth. Scrolling back retraces the story, including on return visits;
+   its height stays stable rather than collapsing when finished. Without JavaScript
+   or with reduced motion it is a list. On phones, each part gets its own readable
+   panel; the progress buttons also let readers move directly between the parts.
+3. **How it works** (`src/pages/Features.tsx`): a three-sentence introduction and one
+   diagram with three aligned blocks: devices, server, and external providers.
+   Devices reach the server over Tailscale. Inside its boundary, a harness and shared
+   memory lead to two routes: local open models and credentials for external inference.
+   The providers can serve open or proprietary models; openness is not a hosting location.
+   Harness and local-model examples sit in a compact shared legend below the flow,
+   within the same figure. Below 1100 px the flow stacks vertically.
+   There are no disclosures. `#harness` and `#acceso` link to visible regions. A 12 s
+   animation alternates local and external inference, with reduced-motion support.
+   Tool marks keep their official colours (`src/components/providers.tsx` and
+   `src/assets/marks/`).
 4. **Contact** (`src/pages/Contact.tsx`): the GitHub repository and the email,
-   both set in `src/site.ts`, beside a mosaic panel still being laid
-   (`src/components/TileInProgress.tsx`): it arrives whole with the section, and a
-   moment later the corner's piece, held just above its place, settles into it.
+   both set in `src/site.ts`, in compact buttons matching the header's GitHub control,
+   beside a mosaic panel still being laid
+   (`src/components/TileInProgress.tsx`): the loose corner waits beside its gap;
+   clicking it sends it along the guide into place, and clicking again lifts it out.
+   The title is white. "Why Zellige?" is an always-visible definition under the
+   mosaic: a heading between fine rules, the name's Arabic origin in larger type,
+   its meaning in gold, and a short connection to the parts of Zellige. On phones the
+   figure follows the invitation and contact links.
 
-The header (`src/layout/Header.tsx`) carries the logo (Zel beside the wordmark)
-and links named like each page's label; on phones they sit in a menu, each with a
-piece of the tile, beside an icon button to the GitHub repository. The footer
+The header (`src/layout/Header.tsx`) pairs the wordmark with one `cta-secondary`
+GitHub link, labelled on phones too. The release version is a small text link
+beside the large hero wordmark, pointing to that release (or the releases page
+when none is available). Below it, a small construction icon accompanies the
+single status "Work in progress", independently of the GitHub action. There is no extra
+releases button or disclosure.
+There are no section links in the header at any screen size. The footer
 (`src/layout/Footer.tsx`) is one line: logo, tagline, GitHub, email, back to top.
-A mosaic band (`src/components/Band.tsx`) separates the pages.
+A quiet divider (`src/components/Band.tsx`) separates the pages: a brass hairline
+with three small tiles in the colours of Zel's parts.
 
 ## Zel
 
@@ -61,9 +73,18 @@ A mosaic band (`src/components/Band.tsx`) separates the pages.
 - `src/hooks/zel-motion.ts`: the hero's living Zel (wake-up, gaze, blinks, the
   greeting with its widening eyes and the layer spin). It writes each value
   straight onto the element that uses it, so phones never restyle all of Zel.
+- `src/hooks/zel-eyes.ts`: the story's eye gestures. The ivory personal agent is
+  awake and curious, looking at its reminder and giving two small nods. Eyes, body
+  and note share one clock. The blue harness manager is mildly annoyed, with a low
+  lid and sideways glance, then a brief spark when its work is done.
+  Eye gestures pause off screen and stay still with reduced motion.
+  Chat is the attentive green character, with its quick wink and a nearby typing bubble.
+  The parts read Personal agent, Harness manager, Chat in the story and diagram.
 - `src/components/Trio.tsx`: the tile used by the story, and the glyphs that name
-  its layers: `LayerGlyph` (the layer alone, in the phone menu) and `ZelGlyph`
-  (the layer with Zel at its centre, `src/assets/glyph-*.webp`).
+  its layers: `ZelGlyph` (the layer with Zel at its centre,
+  `src/assets/glyph-*.webp`). Like the hero, the story uses the actual layer stack
+  rather than the shared-rim overlay. The selected layer, centre and face lift by
+  the same distance with identical timing, so the crown's seam never opens.
 
 ## Brand and ornament
 
@@ -76,6 +97,6 @@ the turn of a phrase keeps it and takes the accent colour.
 
 `src/__tests__/landing.test.mjs` checks the prerendered build: each page and
 anchor exists, every asset is local, no inline scripts, styles or `data:` URIs,
-contrast in both themes, hreflang pages, and links to GitHub only for the
+text contrast across the one dark palette, hreflang pages, and links to GitHub only for the
 project repository. Deployment checks live beside their scripts in
 `scripts/__tests__/`; see [deployment/vercel.md](../deployment/vercel.md).

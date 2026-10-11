@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 const path = (relative) => fileURLToPath(new URL(relative, import.meta.url));
 const emblem = path('../node_modules/.cache/zellige/emblem.png');
-const { faces } = await import(path('../.brand/brand-entry.js'));
+const { faces, storyFace } = await import(path('../.brand/brand-entry.js'));
 
 await mkdir(path('../public/brand/zel'), { recursive: true });
 for (const [mood, svg] of Object.entries(faces())) {
@@ -30,12 +30,16 @@ for (const [mood, svg] of Object.entries(faces())) {
 const zel = await sharp(path('../public/brand/zel/zel-look.png')).trim().toBuffer({ resolveWithObject: true });
 const zelRatio = zel.info.width / zel.info.height;
 // Each layer's glyph with Zel at its centre, for the story's steps and the server
-// diagram: the centre layer with Zel's face (look) on it, over the layer, as the
+// diagram: the centre layer with Zel's face on it, over the layer, as the
 // landing stacks them (the assembled emblem shares its rims, the layers do not).
 const centre = await sharp(path('../src/assets/layer-centre.webp')).resize(1254, 1254).png().toBuffer();
-const zelCentre = await sharp(await sharp(centre).composite([{ input: Buffer.from(faces().look) }]).png().toBuffer())
-  .resize(960, 960).png().toBuffer();
+// Each part has its own character, the one its step shows in the story (Story.tsx),
+// the ivory agent is curious, the harness manager is mildly unimpressed, and the
+// green chat is attentive. The story's own eyes, held in their resting poses.
+const character = { crown: 'curious', cobalt: 'determined', points: 'wink' };
 for (const piece of ['crown', 'cobalt', 'points']) {
+  const zelCentre = await sharp(await sharp(centre).composite([{ input: Buffer.from(storyFace(character[piece])) }]).png().toBuffer())
+    .resize(960, 960).png().toBuffer();
   // The joined piece where the emblem splits the layer into four, as the story shows it.
   const joined = path(`../src/assets/layer-${piece}-joined.webp`);
   const glyph = await sharp(existsSync(joined) ? joined : path(`../src/assets/layer-${piece}.webp`)).resize(960, 960)

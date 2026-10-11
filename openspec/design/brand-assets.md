@@ -33,9 +33,10 @@ are not vector originals. The source moodboard is not shipped in the website; ev
   green each joined into one piece, an X and a diamond, for the story to show on
   their own), `glyph-{crown,cobalt,points}.webp` (each layer, joined where it has
   one, with Zel at its centre), `emblem.webp` and `public/favicon.png`. The
-  header's and footer's logo, and the Zel that flies from the hero to the header,
-  are the hero's own layers stacked (`src/components/ZelMark.tsx`), turned as the
-  hero's greetings have turned them, so they always match it.
+  hero and story use the same stacked pieces with their own rims. The story does
+  not cover them with `layer-whole.webp`, whose shared seams change the appearance
+  of the face and crown. `ZelMark` uses the same stack for small mascot marks.
+  Only the wordmark moves from the hero to the header.
 - `public/brand/zellige-ceramic-source.png`: the approved ceramic mosaic the
   landing's texture (`src/assets/ceramic.webp`) is cut from.
 
@@ -53,4 +54,3 @@ Use case: background-extraction. Asset type: transparent PNG for the existing Ze
 ### Emblem
 
 Use case: background-extraction. Asset type: transparent PNG brand mark for existing Zellige app sidebar and favicon. Input image is the user's approved Zellige brand board. Isolate ONLY the default geometric ceramic Zellige star emblem shown at the upper left, next to the word zellige; NOT the mascot. Preserve the original exact eight-point modular geometry and arrangement, navy/cobalt blue top/diagonal tiles, teal left/right/bottom tiles and teal central star, ivory inner tiles, thin brass-gold seams, rich slightly cracked glazed ceramic surface. No face, no eyes, no text or lettering, no added shapes. ONE centered complete brand emblem on genuinely transparent background, frontal view, balanced 8% clear margin, no shadow or glow outside the silhouette. Preserve identity rather than reinterpret. Square canvas.
-

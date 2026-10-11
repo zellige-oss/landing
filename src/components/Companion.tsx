@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useZelMotion } from "@/hooks/zel-motion";
+import { useZelEyes } from "@/hooks/zel-eyes";
+import { hasEyeAct } from "./zel-eye-shapes";
 import layerCentre from "@/assets/layer-centre.webp";
 import layerCobaltJoined from "@/assets/layer-cobalt-joined.webp";
 import layerCrown from "@/assets/layer-crown.webp";
@@ -45,6 +47,7 @@ export function Companion({
   motionDelay = 0,
   restingOverlay = true,
   shadow,
+  cue,
 }: {
   mood: Mood;
   className?: string;
@@ -58,12 +61,19 @@ export function Companion({
   restingOverlay?: boolean;
   /** A soft shadow under Zel, sized for where it sits (.zel-shadow-* in styles.css). */
   shadow?: "hero" | "tile";
+  /** Change it to make the eyes play their mood's own gesture now. */
+  cue?: number;
 }) {
   const root = useRef<HTMLDivElement>(null);
   useZelMotion(root, lively, motionDelay);
+  // Outside the hero, the eyes act each mood out (the moods that have an act).
+  const acting = !lively && hasEyeAct(mood);
+  useZelEyes(root, mood, acting, cue);
   useEffect(() => {
     const node = root.current;
     if (lively || !follow || !node || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Acting eyes move as a pair and keep inside the face: a shorter reach.
+    const [reachX, reachY] = acting ? [30, 20] : [70, 50];
     // At most once a frame, only while Zel is on screen, and never for touch: a
     // finger is scrolling, and measuring Zel on every touch move forces the page to
     // lay out again each time, which makes scrolling stutter on phones.
@@ -76,7 +86,7 @@ export function Companion({
       const length = Math.hypot(dx, dy) || 1;
       const reach = Math.min(1, length / 400);
       // Onto the eyes themselves, not as variables on Zel: that would restyle all of it.
-      const offset = `${((dx / length) * reach * 70).toFixed(1)}px ${((dy / length) * reach * 50).toFixed(1)}px`;
+      const offset = `${((dx / length) * reach * reachX).toFixed(1)}px ${((dy / length) * reach * reachY).toFixed(1)}px`;
       for (const eyes of node!.querySelectorAll<SVGGElement>(".companion-look")) eyes.style.setProperty("translate", offset);
     }
     function look(event: PointerEvent) {
@@ -93,13 +103,14 @@ export function Companion({
       cancelAnimationFrame(frame);
       removeEventListener("pointermove", look);
     };
-  }, [follow, lively]);
+  }, [follow, lively, acting]);
   // Blinks: a short animation switched on for each blink, every few seconds, only
   // while Zel is on screen. An endless CSS animation on the SVG lids would make the
   // browser restyle and repaint the face on every frame, blinking or not.
   useEffect(() => {
     const node = root.current;
-    if (lively || !node || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Acting eyes blink as part of their act.
+    if (lively || acting || !node || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let visible = false, timer = 0, open = 0;
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
     observer.observe(node);
@@ -117,7 +128,7 @@ export function Companion({
       window.clearTimeout(open);
       node.classList.remove("zel-blinking");
     };
-  }, [lively]);
+  }, [lively, acting]);
   return (
     <div ref={root} className={cn("relative", `zel-mood-${mood}`, lively && "zel-lively", className)} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
       {/* The shadow is a still, blurred silhouette under Zel, painted once. A CSS
@@ -138,7 +149,7 @@ export function Companion({
       <div className="zel-face-layer absolute inset-0 size-full" aria-hidden="true">
         <div className="zel-piece size-full" data-zel-motion="centre">
           <svg viewBox="0 0 1254 1254" className="size-full">
-            <ZelFace mood={mood} lively={lively} />
+            <ZelFace mood={mood} lively={lively} acting={acting} />
           </svg>
         </div>
       </div>
