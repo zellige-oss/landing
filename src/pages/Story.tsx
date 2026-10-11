@@ -6,17 +6,15 @@ import type { Mood } from "@/components/Companion";
 import { Trio, ZelGlyph, type Piece } from "@/components/Trio";
 import { useT } from "@/i18n";
 
-/** The stages of the story: one per part of Zel, then the whole tile. Each part is a
+/** The stages after Zel's introduction: one per part. Each part is a
  *  character, with the face its glyph also wears (scripts/build-brand.mjs), each
  *  one with its own gesture: the personal agent notices things, the harness manager
  *  checks its work, and chat looks on and winks. All arrive with open eyes. */
-const steps: { layer?: Piece; key: Piece | "tile"; mood: Mood }[] = [
+const parts: { layer: Piece; key: Piece; mood: Mood }[] = [
   { layer: "crown", key: "crown", mood: "curious" },
   { layer: "cobalt", key: "cobalt", mood: "determined" },
   { layer: "points", key: "points", mood: "wink" },
-  { key: "tile", mood: "look" },
 ];
-const parts = steps.filter((step): step is { layer: Piece; key: Piece; mood: Mood } => !!step.layer);
 /** The agent's nod follows its gaze in useZelEyes. The harness manager spins once
  *  like a tool, and chat winks and bows. */
 const REACTIONS: Record<Exclude<Piece, "crown">, { duration: number; frames: Keyframe[] }> = {
@@ -42,10 +40,8 @@ const REACTIONS: Record<Exclude<Piece, "crown">, { duration: number; frames: Key
 };
 /** What the harness manager has just run, a new one each time it is poked. */
 const COMMANDS = ["build", "test", "lint", "deploy"];
-const last = steps.length - 1;
-
-/** Where each stage begins, as a share of the story's scroll: the three layers, then the whole tile. */
-const STARTS = [0.16, 0.4, 0.62, 0.84];
+/** A short introduction, then equal time for the agent, harness manager and chat. */
+const STARTS = [0.16, 0.44, 0.72];
 // Before the first part, Zel arrives whole. Scrolling back retraces the story.
 const stepAt = (t: number) => STARTS.filter((start) => t >= start).length - 1;
 
@@ -129,9 +125,9 @@ function useCentredSticky(panel: RefObject<HTMLElement | null>, active: boolean)
 
 /*
  * Scroll story: Zel stays in the centre of the tile and each step shows one layer
- * around it, one way of using Zel, then the whole tile and how to reach it. The
- * title stays with it. Zel arrives whole, then each part takes the stage before
- * they reunite. The four progress buttons also jump directly to each step.
+ * around it, one way of using Zel. The title stays with it. Zel arrives whole,
+ * then each part takes the stage; chat leads straight into how it works. The
+ * three progress buttons also jump directly to each part.
  */
 export function Story({ reduced }: { reduced: boolean }) {
   const t = useT();
@@ -178,19 +174,22 @@ export function Story({ reduced }: { reduced: boolean }) {
   }, live);
   useCentredSticky(panel, live);
   const stage = live ? active : null;
-  const show = stage !== null && stage >= 0 ? steps[stage].layer : undefined;
+  const show = stage !== null && stage >= 0 ? parts[stage].layer : undefined;
   const whole = !show;
-  const complete = !live || stage === last;
   const lit = whole ? pointed ?? picked : undefined;
   // The part that has the stage: shown alone by the story, or lit in the whole tile.
   const starring = show ?? lit;
+  // Entering a part plays the same response as a poke. Cancel the previous act
+  // when scrolling onward so a quick swipe never carries one part's gesture over.
+  useEffect(() => {
+    if (reduced || !show || show === "crown") return;
+    const { frames, duration } = REACTIONS[show];
+    const animation = actor.current?.animate(frames, { duration, easing: "cubic-bezier(0.3, 0, 0.3, 1)" });
+    return () => animation?.cancel();
+  }, [show, pokes, reduced]);
   function poke(piece: Piece) {
     setSaid((lines) => ({ ...lines, [piece]: lines[piece] + 1 }));
     setPokes((count) => count + 1);
-    if (!reduced && piece !== "crown") {
-      const { frames, duration } = REACTIONS[piece];
-      actor.current?.animate(frames, { duration, easing: "cubic-bezier(0.3, 0, 0.3, 1)" });
-    }
   }
   // In the whole tile a poke also picks the part, which stays lifted until the reader
   // taps elsewhere.
@@ -216,7 +215,7 @@ export function Story({ reduced }: { reduced: boolean }) {
   const gutter = "px-6 sm:px-[clamp(24px,4.5vw,80px)] min-[1800px]:mx-auto min-[1800px]:max-w-[1800px]";
   return (
     <section id="piezas" aria-labelledby="piezas-title" className="relative">
-      <div ref={track} className={cn(live && "h-[320svh]")}>
+      <div ref={track} className={cn(live && "h-[280svh]")}>
         {/* As tall as the story, held in the middle of the screen under the fixed
             header (useCentredSticky), so "Por dentro" comes straight after it. Until
             that is measured, it sits right under the header: 68 px, 76 px from sm. */}
@@ -229,7 +228,7 @@ export function Story({ reduced }: { reduced: boolean }) {
           <div
             className={cn(
               gutter,
-              "grid content-start gap-x-[6vw] gap-y-4 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center",
+              "grid content-start gap-x-[6vw] gap-y-4 [@media(max-height:640px)]:max-sm:gap-y-2 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-center",
             )}
           >
             <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
@@ -243,17 +242,17 @@ export function Story({ reduced }: { reduced: boolean }) {
             </div>
             <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
               {/* The stage: it glows in the colour of the part on it, with what that part does beside it. */}
-              <div data-part={starring} className="story-stage relative mx-auto w-[min(58vw,28svh,300px)] sm:w-[min(62vw,38svh,380px)] lg:w-[min(84%,460px,60svh)]">
+              <div data-part={starring} className="story-stage relative mx-auto w-[min(58vw,28svh,300px)] [@media(max-height:640px)]:max-sm:max-w-[22svh] sm:w-[min(62vw,38svh,380px)] lg:w-[min(84%,460px,60svh)]">
                 {/* The actor: what reacts to a poke. Alone on the stage, the part answers a
                     click anywhere on it; in the whole tile, Trio tells which part was meant. */}
                 <div ref={arrival} className="story-arrival">
                   <div ref={actor} onClick={show ? () => poke(show) : undefined} className={cn("[transform-origin:49.86%_51.21%]", show && "cursor-pointer")}>
                     <Trio
-                      mood={parts.find((step) => step.layer === starring)?.mood ?? steps[stage === null || stage < 0 ? last : stage].mood}
+                      mood={parts.find((step) => step.layer === starring)?.mood ?? "look"}
                       show={show}
                       lift={lit}
                       cue={pokes}
-                      onPick={(piece) => { if (whole) pick(piece); else goTo(steps.findIndex((step) => step.layer === piece)); }}
+                      onPick={(piece) => { if (live) goTo(parts.findIndex((step) => step.layer === piece)); else pick(piece); }}
                       onHover={setPointed}
                       className="w-full"
                     />
@@ -262,18 +261,11 @@ export function Story({ reduced }: { reduced: boolean }) {
                 </div>
                 <span aria-hidden="true" className="story-ground" />
               </div>
-              {/* The end of the story, under the whole tile rather than among its parts. */}
-              {complete && (
-                <p className="story-end mx-auto mt-4 max-w-[40ch] text-center text-[15px] leading-[1.6] text-muted-foreground sm:text-base">
-                  <strong className="block text-lg font-semibold text-foreground sm:text-xl">{t.story.steps.tile.title}</strong>
-                  {t.story.steps.tile.body}
-                </p>
-              )}
             </div>
             <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
               {live && (
                 <ol aria-label={t.story.progress} className="mb-4 flex items-center gap-2 max-lg:justify-center">
-                  {steps.map((step, index) => (
+                  {parts.map((step, index) => (
                     <li key={step.key}>
                       <button
                         type="button"
@@ -291,14 +283,14 @@ export function Story({ reduced }: { reduced: boolean }) {
               <ol className="grid gap-1">
                 {parts.map((step, index) => {
                   const current = lit ? step.layer === lit : stage === index;
-                  const quiet = lit ? !current : live && active >= 0 && !current && !complete;
+                  const quiet = lit ? !current : live && active >= 0 && !current;
                   const copy = t.story.steps[step.key];
                   return (
                     <li
                       key={step.key}
                       aria-current={stage === index ? "step" : undefined}
                       data-part={step.layer}
-                      onClick={() => { if (complete) pick(step.layer); else if (current) poke(step.layer); else goTo(index); }}
+                      onClick={() => { if (!live) pick(step.layer); else if (current) poke(step.layer); else goTo(index); }}
                       onPointerEnter={(event) => { if (event.pointerType === "mouse") setPointed(step.layer); }}
                       onPointerLeave={() => setPointed(undefined)}
                       className={cn(
@@ -306,10 +298,9 @@ export function Story({ reduced }: { reduced: boolean }) {
                         quiet && "opacity-40",
                         "cursor-pointer",
                         live && !current && !whole && "hover:opacity-80",
-                        // On phones the active part has the stage to itself. When the
-                        // tile is whole, all three names return and can be selected.
-                        // When assembled, they stay names until one is picked; with reduced
-                        // motion there is no sticky story, and every part reads in full.
+                        // On phones the active part has the stage to itself. The opening
+                        // tile shows all three names; with reduced motion there is no
+                        // sticky story, and every part reads in full.
                         !reduced && !current && "max-lg:py-1",
                         live && !whole && !current && "max-lg:hidden",
                         current && "story-step-current shadow-[0_14px_34px_-22px_rgb(var(--shadow-ink)/0.45)]",
@@ -333,10 +324,6 @@ export function Story({ reduced }: { reduced: boolean }) {
                   );
                 })}
               </ol>
-              {/* Room under the parts, a little more than a line of text, so the whole
-                  tile's summary does not end flush against them. */}
-              {complete && <div aria-hidden="true" className="hidden h-14 lg:block" />}
-
             </div>
           </div>
         </div>

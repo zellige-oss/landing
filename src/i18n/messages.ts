@@ -74,10 +74,6 @@ const es = {
         voices: ["«Tranquilo, yo me acuerdo.»", "«Eso ya está hecho.»", "«Te aviso a las nueve.»", "«¿Algún recado más?»"],
         body: "Recuerda, te avisa y hace recados por ti. Viene con un harness por defecto y puedes cambiarlo cuando quieras.",
       },
-      tile: {
-        title: "Zellige es todo esto",
-        body: "Chat, gestor de harness y agente personal, integrados y con una memoria compartida.",
-      },
     },
   },
   features: {
@@ -174,10 +170,6 @@ const en = {
         title: "Personal agent",
         voices: ["“Relax, I’ll remember.”", "“That’s already done.”", "“I’ll remind you at nine.”", "“Any other errands?”"],
         body: "It works for you out in the world: it remembers things, reminds you and runs errands. It comes with a default harness, and you can switch whenever you like.",
-      },
-      tile: {
-        title: "That’s Zellige",
-        body: "Chat, harness manager and personal agent, working as one and sharing the same memory.",
       },
     },
   },

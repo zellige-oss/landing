@@ -41,10 +41,12 @@ export function useZelEyes(root: RefObject<HTMLDivElement | null>, mood: Mood, e
       return;
     }
     const from = drawn.current;
-    const agent = mood === "curious" && !!node.closest(".tile-scroll");
+    const story = !!node.closest(".tile-scroll");
+    const agent = mood === "curious" && story;
     const note = agent ? node.closest(".story-arrival")?.querySelector<HTMLElement>("[data-agent-note]") : null;
-    // A cue not yet played starts the act at its gesture; otherwise at the still pose.
-    const lead = cue === played.current ? 0 : eyeCue(mood);
+    // A new story part starts at its gesture, as a poke does, rather than waiting
+    // through the idle portion of the loop (several seconds for harness and chat).
+    const lead = story || cue !== played.current ? eyeCue(mood) : 0;
     played.current = cue;
     let frame = 0, visible = false, previous = 0, seconds = 0, lastKey = "", lastPose = "";
     const tick = (now: number) => {
