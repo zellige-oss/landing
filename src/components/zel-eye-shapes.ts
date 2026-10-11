@@ -168,13 +168,15 @@ function shapeOutline(x: number, shape: EyeShape) {
 type Eye = { from: EyeShape; to: EyeShape; mix: number; dx?: number; dy?: number };
 const blink = (t: number, at: number) => bump(t, at, at + .09, at + .22);
 
-/** The agent checks its reminder, then gives two small nods: eyes, body and note
- *  use this same clock, so pausing off screen never separates their gestures. */
+/** "I'll take care of it": read the reminder, acknowledge it twice, then spring
+ *  back into place. Eyes, body and note share one clock, including off-screen pauses. */
 export function agentAttention(seconds: number) {
   const t = seconds % 6.8;
   return {
-    notice: hold(t, .45, .85, 1.5, 1.95),
-    nod: bump(t, 1.9, 2.08, 2.32) + .5 * bump(t, 2.32, 2.47, 2.7),
+    notice: hold(t, .08, .32, .5, .85),
+    scan: hold(t, .32, .42, .5, .6),
+    nod: bump(t, .6, .8, 1.02) + .7 * bump(t, 1.02, 1.22, 1.44),
+    hop: bump(t, 1.44, 1.66, 2.1),
   };
 }
 
@@ -201,14 +203,14 @@ const ACTS: Partial<Record<Mood, { period: number; cue?: number; eyes: (t: numbe
       return [eye, eye];
     },
   },
-  // An attentive glance up at the note, followed by an acknowledgement.
+  // Read the note and give an emphatic "got it", keeping the curious eyes open.
   curious: {
     period: 6.8,
     cue: .12,
     eyes: (t) => {
-      const { notice, nod } = agentAttention(t);
-      const eye: Eye = { from: "open", to: "shut", mix: blink(t, 4.6), dx: 12 * notice, dy: -8 * notice + 3 * nod };
-      return [eye, { ...eye, dy: -7 - 6 * notice }];
+      const { notice, scan, nod, hop } = agentAttention(t);
+      const eye: Eye = { from: "open", to: "shut", mix: blink(t, 4.6), dx: 18 * notice - 7 * scan, dy: -14 * notice + 9 * nod - 5 * hop };
+      return [eye, { ...eye, dy: -7 - 10 * notice + 7 * nod - 5 * hop }];
     },
   },
   // A mildly annoyed, dry look and a sideways glance. Finishing the build still
