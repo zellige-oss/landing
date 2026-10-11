@@ -492,6 +492,32 @@
   0%, 85% { opacity: 0; }
   100% { opacity: 1; }
 }
+/* On small screens and touch devices, the entrance moves one rigid tile in 2D.
+   Avoid flattening a 3D parent with separately animated layers and a blurred
+   landing shadow while the reader is scrolling. Release its compositor hint
+   when animationend marks the entrance as settled. */
+@media (prefers-reduced-motion: no-preference) {
+  @media (max-width: 1023px), (pointer: coarse) {
+    .story-arrival:is([data-arrival="waiting"], [data-arrival="arrived"]) { will-change: transform, opacity; }
+    .story-arrival[data-arrival="arrived"] { animation: story-arrive-compact 0.48s both; }
+    .story-arrival[data-arrival] .show-all :is(.layer-crown, .layer-cobalt, .layer-points) .zel-piece { animation: none; }
+    .story-arrival .show-all::after,
+    .story-ground { display: none; }
+  }
+}
+@keyframes story-arrive-compact {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) rotate(-5deg);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  35% { opacity: 1; }
+  72% {
+    transform: translateY(3px) rotate(1deg);
+    animation-timing-function: ease-out;
+  }
+  100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
 @keyframes part-wrench {
   0%, 18% { rotate: 0deg; }
   30%, 48% { rotate: -12deg; }

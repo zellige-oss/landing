@@ -59,7 +59,7 @@ function useStoryArrival(arrival: RefObject<HTMLDivElement | null>, reduced: boo
     if (stage.getBoundingClientRect().bottom <= 0) return;
     node.setAttribute("data-arrival", "waiting");
     const settle = (event: AnimationEvent) => {
-      if (event.target === node && event.animationName === "story-arrive") node.setAttribute("data-arrival", "settled");
+      if (event.target === node && ["story-arrive", "story-arrive-compact"].includes(event.animationName)) node.setAttribute("data-arrival", "settled");
     };
     node.addEventListener("animationend", settle);
     const observer = new IntersectionObserver(([entry]) => {
