@@ -25,7 +25,7 @@ const glyphs: Record<Piece, string> = { crown: glyphCrown, cobalt: glyphCobalt, 
 
 /** One layer with Zel at its centre: one way of using Zel (scripts/build-brand.mjs). */
 export function ZelGlyph({ layer, className }: { layer: Piece; className?: string }) {
-  return <img src={glyphs[layer]} alt="" width="128" height="128" className={cn("zel-glyph size-5 shrink-0", className)} draggable={false} />;
+  return <img src={glyphs[layer]} alt="" width="128" height="128" loading="lazy" decoding="async" className={cn("zel-glyph size-5 shrink-0", className)} draggable={false} />;
 }
 
 /** The layer under a point of the tile, in -1..1 from its centre; none on Zel or outside. */
@@ -41,7 +41,6 @@ export function Trio({
   mood,
   show,
   onPick,
-  onHover,
   lift,
   cue,
   className,
@@ -51,8 +50,6 @@ export function Trio({
   show?: Piece;
   /** Called with the layer the reader clicks or taps. */
   onPick?: (piece: Piece) => void;
-  /** Called with the layer under the mouse, or none, so the page can point at it. */
-  onHover?: (piece: Piece | undefined) => void;
   /** A layer to lift from outside, such as the step the reader points at. */
   lift?: Piece;
   /** Change it to make Zel's eyes play their mood's own gesture now. */
@@ -60,12 +57,8 @@ export function Trio({
   className?: string;
 }) {
   const t = useT();
-  // Pointing at a layer of the whole tile lifts it, with Zel; the page lights up its step.
-  const [hover, setHoverState] = useState<Piece>();
-  const setHover = (piece: Piece | undefined) => {
-    if (piece !== hover) setHoverState(piece);
-    onHover?.(piece);
-  };
+  // Pointing at a layer of the whole tile lifts it, with Zel.
+  const [hover, setHover] = useState<Piece>();
   const pieceAt = (event: MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const piece = layerAt(((event.clientX - rect.left) / rect.width) * 2 - 1, ((event.clientY - rect.top) / rect.height) * 2 - 1);
@@ -73,7 +66,7 @@ export function Trio({
     return show ? undefined : piece;
   };
   // A layer stays lifted only while the whole tile shows (scrolling back can hide it).
-  const lifted = show ? undefined : onHover ? lift : hover ?? lift;
+  const lifted = show ? undefined : hover ?? lift;
   return (
     <div
       className={cn("tile tile-scroll relative aspect-square", `show-${show ?? "all"}`, lifted && `lift-${lifted}`, lifted && onPick && "cursor-pointer", className)}

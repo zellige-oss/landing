@@ -161,7 +161,7 @@ test('brand art: approved ceramic mosaic, emblem layers, emblem and moodboard wo
 
 test('each language has its own prerendered page, linked with hreflang', () => {
   const pages = { es: readFileSync(join(dist, 'es/index.html'), 'utf8'), en: readFileSync(join(dist, 'en/index.html'), 'utf8') };
-  assert.equal(html, pages.es, 'The root serves the Spanish page until locale.js redirects');
+  assert.equal(html, pages.es, 'The root serves the Spanish page; locale.js sends other languages on');
   const titles = new Set();
   for (const [locale, page] of Object.entries(pages)) {
     assert.match(page, new RegExp(`<html lang="${locale}">`));

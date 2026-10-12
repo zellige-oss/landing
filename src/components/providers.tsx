@@ -53,7 +53,7 @@ export const inferenceProviders: { name: string; mark: Mark }[] = [
 
 /** A tool's mark, sized by its class. */
 export function ProviderMark({ mark, className }: { mark: Mark; className?: string }) {
-  if ("src" in mark) return <img src={mark.src} alt="" width="24" height="24" className={cn("shrink-0", className)} />;
+  if ("src" in mark) return <img src={mark.src} alt="" width="24" height="24" loading="lazy" decoding="async" className={cn("shrink-0", className)} />;
   return (
     <svg viewBox={mark.viewBox ?? "0 0 24 24"} fill="currentColor" fillRule="evenodd" aria-hidden="true" className={cn("shrink-0", className)}>
       {mark.paths.map((d) => <path key={d} d={d} />)}

@@ -9,6 +9,8 @@ const lang = document.documentElement.lang;
 const locale = isLocale(lang) ? lang : defaultLocale;
 const root = document.getElementById("root")!;
 const app = <StrictMode><LocaleProvider locale={locale}><App /></LocaleProvider></StrictMode>;
+// Read by the ?perf meter (public/perf.js): when the script took over the page.
+performance.mark("zellige:script");
 // Prerendered content works before (or without) JS; React then takes it over.
 if (root.firstElementChild) hydrateRoot(root, app);
 else createRoot(root).render(app);

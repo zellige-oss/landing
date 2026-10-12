@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { Construction, KeyRound, Plug, Workflow } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ease } from "@/lib/easing";
 import { useT } from "@/i18n";
 import { Companion } from "@/components/Companion";
@@ -25,9 +24,14 @@ function unbroken(text: string) {
 
 function Emblem({ reduced }: { reduced: boolean }) {
   const t = useT();
+  // Zel wakes once its layers have landed: sooner on phones, whose entrance is shorter (styles.css).
+  const [wakeAfter] = useState(() => (typeof matchMedia === "function" && matchMedia("(max-width: 1023px), (pointer: coarse)").matches ? 750 : 1400));
   return (
-    <div className={cn("hero-zel tile relative mx-auto aspect-square w-[min(84vw,clamp(220px,38vh,440px))]", !reduced && "hero-intro")}>
-      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={1400} restingOverlay={false} alt={t.zel.alt} shadow="hero" className="size-full" />
+    // The entrance is CSS, gated by prefers-reduced-motion in styles.css, so it starts
+    // with the first paint instead of waiting for the script to download and hydrate
+    // (`reduced` is only known then): on a phone that wait was seconds.
+    <div className="hero-zel tile hero-intro relative mx-auto aspect-square w-[min(84vw,clamp(220px,38vh,440px))]">
+      <Companion mood={reduced ? "hello" : "look"} follow lively={!reduced} motionDelay={wakeAfter} restingOverlay={false} alt={t.zel.alt} shadow="hero" className="size-full" />
     </div>
   );
 }

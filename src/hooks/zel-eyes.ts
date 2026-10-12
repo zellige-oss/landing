@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { Mood } from "@/components/ZelFace";
-import { agentAttention, eyeCue, eyeFrame, eyePath, mixEyes, type DrawnEye } from "@/components/zel-eye-shapes";
+import { AGENT_ERRANDS, eyeCue, eyeFrame, eyePath, mixEyes, type DrawnEye } from "@/components/zel-eye-shapes";
 import { ramp } from "@/lib/easing";
 
 /** How long the eyes take to turn from one mood's into the next's, in seconds. */
@@ -43,31 +43,29 @@ export function useZelEyes(root: RefObject<HTMLDivElement | null>, mood: Mood, e
     const from = drawn.current;
     const story = !!node.closest(".tile-scroll");
     const agent = mood === "curious" && story;
-    const note = agent ? node.closest(".story-arrival")?.querySelector<HTMLElement>("[data-agent-note]") : null;
+    // The agent's body and errands are CSS animations, which the browser runs off the
+    // main thread; its eyes read their clock, so they never drift apart. Entering the
+    // part or poking it starts the loop in the middle of the stage, about to set off, and
+    // every animation is set to the same time, so their offsets hold.
+    const errands = agent ? node.closest(".story-arrival")?.querySelector<HTMLElement>("[data-agent-errands]") : null;
+    let watch: Animation | undefined;
+    const ring = () => {
+      watch = node.getAnimations().find((animation) => "animationName" in animation && animation.animationName === "agent-body");
+      if (!watch) return;
+      for (const animation of [watch, ...(errands?.getAnimations({ subtree: true }) ?? [])]) animation.currentTime = AGENT_ERRANDS.lead * 1000;
+    };
     // A new story part starts at its gesture, as a poke does, rather than waiting
     // through the idle portion of the loop (several seconds for harness and chat).
     const lead = story || cue !== played.current ? eyeCue(mood) : 0;
     played.current = cue;
-    let frame = 0, visible = false, previous = 0, seconds = 0, lastKey = "", lastPose = "";
+    let frame = 0, visible = false, previous = 0, seconds = 0, lastKey = "";
     const tick = (now: number) => {
       if (previous) seconds += (now - previous) / 1000;
       previous = now;
       const turn = from ? ramp(seconds, 0, TURN) : 1;
-      const next = eyeFrame(mood, seconds + lead);
-      if (agent) {
-        const { notice, nod, hop } = agentAttention(seconds + lead);
-        const pose = `${notice.toFixed(3)}/${nod.toFixed(3)}/${hop.toFixed(3)}`;
-        if (pose !== lastPose) {
-          lastPose = pose;
-          // Move the face and crown together; moving just the ivory image opens
-          // the seam. A single 2D transform adds a clear lean, two squashy nods
-          // and a small hop without compositing nested perspective layers on phones.
-          node.style.setProperty("transform", `translate(${(4 * notice).toFixed(3)}%, ${(-5 * notice + 6 * nod - 5 * hop).toFixed(3)}%) rotate(${(8 * notice - 5 * nod + 2 * hop).toFixed(3)}deg) scale(${(1 + .03 * nod).toFixed(3)}, ${(1 - .07 * nod + .03 * hop).toFixed(3)})`);
-          note?.style.setProperty("translate", `0 ${(-6 * notice - 3 * hop).toFixed(2)}px`);
-          note?.style.setProperty("rotate", `${(-3 * notice + 2 * nod).toFixed(2)}deg`);
-          note?.style.setProperty("scale", (1 + .05 * notice + .025 * nod).toFixed(3));
-        }
-      }
+      if (agent && !watch) ring();
+      const clock = watch?.currentTime;
+      const next = eyeFrame(mood, typeof clock === "number" ? clock / 1000 : seconds + lead);
       const key = `${turn.toFixed(3)}${next?.key}`;
       if (next && key !== lastKey) {
         lastKey = key;
@@ -88,12 +86,6 @@ export function useZelEyes(root: RefObject<HTMLDivElement | null>, mood: Mood, e
       cancelAnimationFrame(frame);
       observer.disconnect();
       document.removeEventListener("visibilitychange", sync);
-      if (agent) {
-        node.style.removeProperty("transform");
-        note?.style.removeProperty("translate");
-        note?.style.removeProperty("rotate");
-        note?.style.removeProperty("scale");
-      }
     };
   }, [root, mood, enabled, cue]);
 }

@@ -133,10 +133,12 @@ export function greetingEye(x: number, t: number) {
  * an outline with the same number of points in the same order, so any one turns into
  * any other: the eyes are one pair that acts, not drawings swapped for one another.
  */
-export type EyeShape = "open" | "happy" | "calm" | "narrow" | "shut" | "wink" | "dry" | "spark";
+export type EyeShape = "open" | "wide" | "happy" | "calm" | "narrow" | "shut" | "wink" | "dry" | "spark";
 // `flat` is how far the shape is a line of flat ivory rather than a glazed bead.
 const SHAPES: Record<EyeShape, { flat: number; outline: (x: number) => Point[] }> = {
   open: { flat: 0, outline: (x) => eyeOutline(x) },
+  // Startled: the bead a size larger.
+  wide: { flat: 0, outline: (x) => eyeOutline(x, 35, 47) },
   dry: { flat: 0, outline: dryOutline },
   // ∩, a smile.
   happy: { flat: 1, outline: happyOutline },
@@ -168,17 +170,14 @@ function shapeOutline(x: number, shape: EyeShape) {
 type Eye = { from: EyeShape; to: EyeShape; mix: number; dx?: number; dy?: number };
 const blink = (t: number, at: number) => bump(t, at, at + .09, at + .22);
 
-/** "I'll take care of it": read the reminder, acknowledge it twice, then spring
- *  back into place. Eyes, body and note share one clock, including off-screen pauses. */
-export function agentAttention(seconds: number) {
-  const t = seconds % 6.8;
-  return {
-    notice: hold(t, .08, .32, .5, .85),
-    scan: hold(t, .32, .42, .5, .6),
-    nod: bump(t, .6, .8, 1.02) + .7 * bump(t, 1.02, 1.22, 1.44),
-    hop: bump(t, 1.44, 1.66, 2.1),
-  };
-}
+/** The personal agent's errands (styles.css: agent-body, agent-lane-*, agent-task):
+ *  three to-dos wait around the stage, and every third of the loop the agent walks
+ *  to the next one and, at `hands` seconds, gulps it, works on it a moment and leaves
+ *  it back in its place, done. `toward` is where each one lies, for the eyes. Body
+ *  and errands run in CSS; the eyes follow the same clock (hooks/zel-eyes.ts).
+ *  `lead` is where entering the part or a poke starts the loop: in the middle of
+ *  the stage, about to set off. */
+export const AGENT_ERRANDS = { period: 5.4, hands: [1.125, 2.925, 4.725], toward: [[-15, -3], [15, -6], [2, 10]], lead: .27 };
 
 /*
  * What the eyes do in each mood, t seconds into a loop `period` long. At 0 they hold
@@ -203,14 +202,25 @@ const ACTS: Partial<Record<Mood, { period: number; cue?: number; eyes: (t: numbe
       return [eye, eye];
     },
   },
-  // Read the note and give an emphatic "got it", keeping the curious eyes open.
+  // At work: the eyes go to each errand as the agent walks to it, narrow while it
+  // works on it inside, and smile at it as it comes out done.
   curious: {
-    period: 6.8,
-    cue: .12,
+    period: AGENT_ERRANDS.period,
     eyes: (t) => {
-      const { notice, scan, nod, hop } = agentAttention(t);
-      const eye: Eye = { from: "open", to: "shut", mix: blink(t, 4.6), dx: 18 * notice - 7 * scan, dy: -14 * notice + 9 * nod - 5 * hop };
-      return [eye, { ...eye, dy: -7 - 10 * notice + 7 * nod - 5 * hop }];
+      const around = (a: number, b: number, c: number, d: number) =>
+        AGENT_ERRANDS.hands.reduce((sum, h) => sum + hold(t, h + a, h + b, h + c, h + d), 0);
+      const busy = around(-.1, 0, .25, .35);
+      const glad = around(.3, .4, .7, .85);
+      let dx = 0, dy = 0;
+      AGENT_ERRANDS.hands.forEach((h, i) => {
+        const look = hold(t, h - .9, h - .7, h + .7, h + .85);
+        dx += AGENT_ERRANDS.toward[i][0] * look;
+        dy += AGENT_ERRANDS.toward[i][1] * look;
+      });
+      const eye: Eye = glad > 0 ? { from: "open", to: "happy", mix: glad, dx, dy }
+        : busy > 0 ? { from: "open", to: "narrow", mix: busy, dx, dy }
+        : { from: "open", to: "shut", mix: blink(t, 2.15) + blink(t, 4.05), dx, dy };
+      return [eye, eye];
     },
   },
   // A mildly annoyed, dry look and a sideways glance. Finishing the build still
