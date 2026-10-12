@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
-import { Check } from "lucide-react";
+import { Bell, Check, Mail, ShoppingBag } from "lucide-react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { cn } from "@/lib/utils";
 import type { Mood } from "@/components/Companion";
@@ -38,6 +38,8 @@ const REACTIONS: Record<Exclude<Piece, "crown">, { duration: number; frames: Key
     ],
   },
 };
+/** One icon per errand the personal agent sees to (story.tasks). */
+const TASK_ICONS = [Bell, Mail, ShoppingBag];
 /** What the harness manager has just run, a new one each time it is poked. */
 const COMMANDS = ["build", "test", "lint", "deploy"];
 /** A short introduction, then equal time for the agent, harness manager and chat. */
@@ -45,35 +47,53 @@ const STARTS = [0.16, 0.44, 0.72];
 // Before the first part, Zel arrives whole. Scrolling back retraces the story.
 const stepAt = (t: number) => STARTS.filter((start) => t >= start).length - 1;
 
-/** Zel drops back into the page, as one whole character, when its stage enters. */
+/** There is one Zel. It drops into its stage, as one whole character, when the stage
+ *  enters, and at that moment the hero's Zel leaves (styles.css, [data-zel="story"]):
+ *  the two are never on screen together. Scrolling back up until the stage has left
+ *  sends it home, so it follows the reader down again the next time. */
 function useStoryArrival(arrival: RefObject<HTMLDivElement | null>, reduced: boolean) {
   useEffect(() => {
     const node = arrival.current;
     const stage = node?.parentElement;
     if (reduced || !node || !stage) return;
-    // Restored scroll positions and anchor links can land after the entrance.
-    if (stage.getBoundingClientRect().bottom <= 0) return;
-    node.setAttribute("data-arrival", "waiting");
+    const page = document.documentElement;
+    const here = () => page.setAttribute("data-zel", "story");
+    // Restored scroll positions and anchor links can land after the entrance. Already
+    // in view when the script starts (a slow phone, a reload mid-page): hiding Zel only
+    // to drop it in again would read as the page flickering and starting late.
+    const box = stage.getBoundingClientRect();
+    const shown = Math.min(box.bottom, innerHeight * .92) - Math.max(box.top, 0);
+    let waiting = box.bottom > 0 && shown < box.height * .35;
+    if (waiting) node.setAttribute("data-arrival", "waiting");
+    else here();
     const settle = (event: AnimationEvent) => {
-      if (event.target === node && ["story-arrive", "story-arrive-compact"].includes(event.animationName)) node.setAttribute("data-arrival", "settled");
+      if (event.target === node && ["story-arrive", "story-drop"].includes(event.animationName)) node.setAttribute("data-arrival", "settled");
     };
     node.addEventListener("animationend", settle);
     const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting || entry.intersectionRatio < 0.35) return;
-      node.setAttribute("data-arrival", "arrived");
-      observer.disconnect();
-    }, { threshold: 0.35, rootMargin: "0px 0px -8% 0px" });
+      if (waiting && entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+        waiting = false;
+        node.setAttribute("data-arrival", "arrived");
+        here();
+      } else if (!waiting && !entry.isIntersecting && entry.boundingClientRect.top > 0) {
+        // The stage has left below: Zel is back in the hero.
+        waiting = true;
+        node.setAttribute("data-arrival", "waiting");
+        page.removeAttribute("data-zel");
+      }
+    }, { threshold: [0, 0.35], rootMargin: "0px 0px -8% 0px" });
     observer.observe(stage);
     return () => {
       observer.disconnect();
       node.removeEventListener("animationend", settle);
       node.removeAttribute("data-arrival");
+      page.removeAttribute("data-zel");
     };
   }, [arrival, reduced]);
 }
 
 /** What a part does, beside it while it has the stage: chat is typing, the harness
- *  manager has just built something, the agent keeps a note for you. */
+ *  manager has just built something, the agent goes round your errands and leaves each one done. */
 function PartProp({ part, turn }: { part: Piece; turn: number }) {
   const t = useT();
   // Each one sits by its part: the crown is small and central, the points reach the edge.
@@ -88,10 +108,28 @@ function PartProp({ part, turn }: { part: Piece; turn: number }) {
       $ {COMMANDS[turn % COMMANDS.length]} <Check strokeWidth={3} className="size-4 text-ok" />
     </div>
   );
+  // The agent's errands wait around the stage; it goes to each, takes it in and leaves it done.
   return (
-    <div aria-hidden="true" data-agent-note className={cn(place, "top-[10%] right-[-3%] gap-2.5 rounded-xl border border-brass/60 bg-popover px-3.5 py-2 text-xs leading-tight")}>
-      <i className="size-2 rounded-full bg-gold" />
-      <span><strong className="block font-semibold">{t.story.reminder.when}</strong><span className="text-muted-foreground">{t.story.reminder.what}</span></span>
+    <div aria-hidden="true" data-agent-errands className="pointer-events-none absolute inset-0 z-[2]">
+      {t.story.tasks.map(([todo, done], index) => {
+        const Icon = TASK_ICONS[index];
+        const pill = "col-start-1 row-start-1 flex items-center gap-1.5 rounded-full border py-1 pr-2.5 pl-1.5";
+        return (
+          <span key={todo} className={`agent-lane agent-lane-${index}`}>
+            {/* Two pills in one place: the to-do, and what it has become once done. */}
+            <span className="agent-task grid place-items-center text-[11px] leading-none font-medium whitespace-nowrap sm:text-xs">
+              <span className={cn("agent-todo border-dashed border-brass/60 bg-popover text-muted-foreground", pill)}>
+                <Icon strokeWidth={1.75} className="size-3.5 text-gold" />
+                {todo}
+              </span>
+              <span className={cn("agent-done border-ok bg-[color-mix(in_oklab,var(--ok)_22%,var(--popover))] text-ok", pill)}>
+                <Check strokeWidth={3} className="size-3.5" />
+                {done}
+              </span>
+            </span>
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -134,9 +172,6 @@ export function Story({ reduced }: { reduced: boolean }) {
   const track = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(-1);
-  // The layer under the mouse, on the tile or on its part in the text: the part
-  // lights up, the rest step back and the tile lifts that layer.
-  const [pointed, setPointed] = useState<Piece>();
   // The layer picked with a click or a tap once the tile is whole, which stays lifted.
   const [picked, setPicked] = useState<Piece>();
   // Poking a part makes it answer: it reacts in its own way and says its next line.
@@ -167,16 +202,38 @@ export function Story({ reduced }: { reduced: boolean }) {
     void document.fonts.ready.then(land);
     return () => { cancelled = true; cancelAnimationFrame(frame); };
   }, [reduced]);
+  // Scrolling reports every frame; React hears of it only when the step changes.
+  const step = useRef<number | undefined>(undefined);
+  // The step a click is scrolling to. Until the page gets there, the stage already
+  // shows it and ignores the steps the scroll crosses on the way.
+  const bound = useRef<number | undefined>(undefined);
+  const under = useRef(-1);
   useScrollProgress(track, "through", (progress) => {
-    setActive(stepAt(progress));
-    // The part that was under the pointer can move away while scrolling.
-    setPointed(undefined);
+    const next = stepAt(progress);
+    under.current = next;
+    if (next === bound.current) bound.current = undefined;
+    if (bound.current !== undefined || next === step.current) return;
+    step.current = next;
+    setActive(next);
   }, live);
+  // The reader taking over the scroll, or the trip ending short, hands the stage back to the scroll.
+  useEffect(() => {
+    if (!live) return;
+    const release = () => {
+      if (bound.current === undefined) return;
+      bound.current = undefined;
+      step.current = under.current;
+      setActive(under.current);
+    };
+    const events = ["wheel", "touchstart", "keydown", "scrollend"] as const;
+    for (const event of events) addEventListener(event, release, { passive: true });
+    return () => { for (const event of events) removeEventListener(event, release); };
+  }, [live]);
   useCentredSticky(panel, live);
   const stage = live ? active : null;
   const show = stage !== null && stage >= 0 ? parts[stage].layer : undefined;
   const whole = !show;
-  const lit = whole ? pointed ?? picked : undefined;
+  const lit = whole ? picked : undefined;
   // The part that has the stage: shown alone by the story, or lit in the whole tile.
   const starring = show ?? lit;
   // Entering a part plays the same response as a poke. Cancel the previous act
@@ -203,12 +260,15 @@ export function Story({ reduced }: { reduced: boolean }) {
     addEventListener("pointerdown", release);
     return () => removeEventListener("pointerdown", release);
   }, [picked]);
-  /** Scrolls to where a step has just begun. */
+  /** Shows a step at once and scrolls to where it has just begun, past the ones between. */
   function goTo(index: number) {
     const node = track.current;
     if (!node) return;
     const top = node.getBoundingClientRect().top + scrollY;
     const span = node.offsetHeight - innerHeight;
+    if (under.current !== index) bound.current = index;
+    step.current = index;
+    setActive(index);
     scrollTo({ top: top + (STARTS[index] + 0.02) * span, behavior: "smooth" });
   }
 
@@ -253,7 +313,6 @@ export function Story({ reduced }: { reduced: boolean }) {
                       lift={lit}
                       cue={pokes}
                       onPick={(piece) => { if (live) goTo(parts.findIndex((step) => step.layer === piece)); else pick(piece); }}
-                      onHover={setPointed}
                       className="w-full"
                     />
                   </div>
@@ -291,13 +350,10 @@ export function Story({ reduced }: { reduced: boolean }) {
                       aria-current={stage === index ? "step" : undefined}
                       data-part={step.layer}
                       onClick={() => { if (!live) pick(step.layer); else if (current) poke(step.layer); else goTo(index); }}
-                      onPointerEnter={(event) => { if (event.pointerType === "mouse") setPointed(step.layer); }}
-                      onPointerLeave={() => setPointed(undefined)}
                       className={cn(
                         "story-step rounded-2xl border border-transparent p-4 transition-[opacity,background-color,border-color] duration-300 sm:p-5",
                         quiet && "opacity-40",
                         "cursor-pointer",
-                        live && !current && !whole && "hover:opacity-80",
                         // On phones the active part has the stage to itself. The opening
                         // tile shows all three names; with reduced motion there is no
                         // sticky story, and every part reads in full.

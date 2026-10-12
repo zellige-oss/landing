@@ -360,6 +360,9 @@
   .tile-scroll .zel-shadow { transition: opacity 0.6s 0.4s ease; }
   /* Moving pieces get their own GPU layers, so moving them never repaints them. */
   .zel-lively .zel-piece { will-change: transform; }
+  /* The lids' soft shadow is an SVG filter, which phones redraw on the CPU each time
+     a lid or the gaze moves. The hero's Zel, whose lids move most, goes without it. */
+  .zel-lively .companion-lid { filter: none; }
   /* The hero's idle breath, 1.7 px of the emblem's 470 up and down every 3.2 s. It runs
      in CSS rather than in zel-motion.ts, whose frames a browser slows down when the
      reader is idle or the window is in the background; `translate` adds to the
@@ -458,6 +461,25 @@
   .story-arrival[data-arrival="arrived"] .show-all .layer-points .zel-piece { animation: story-piece-land 0.52s 0.68s both; }
   /* The agent's crown and face keep their seam throughout the shared gesture. */
   .tile-scroll .zel-mood-curious .zel-layer .zel-piece > img { animation: none; }
+  /* The personal agent goes to its errands; they do not come to it. Three to-dos
+     wait around the stage. Every third of the loop the agent walks over to the next,
+     gulps it, works on it a moment and leaves it back in its place as a green "done" pill; later a
+     new to-do pops up there. All of it shares one 5.4 s clock (AGENT_ERRANDS in
+     zel-eye-shapes.ts) and moves only by transform and opacity: the lane holds the
+     errand in its place and draws it into the agent, the errand itself shrinks and
+     grows back. Each errand's delay puts its gulp, at 50% of its loop, where the
+     agent reaches it. */
+  .tile-scroll.show-crown > div { animation: agent-body 5.4s infinite; }
+  .agent-lane { position: absolute; inset: 0; display: grid; place-items: center; }
+  .agent-lane-0 { animation: agent-lane-0 5.4s infinite; }
+  .agent-lane-1 { animation: agent-lane-1 5.4s infinite; }
+  .agent-lane-2 { animation: agent-lane-2 5.4s infinite; }
+  .agent-task { animation: agent-task 5.4s infinite; }
+  .agent-todo { animation: agent-todo 5.4s infinite; }
+  .agent-done { opacity: 0; animation: agent-done 5.4s infinite; }
+  .agent-lane-0, .agent-lane-0 :is(.agent-task, .agent-todo, .agent-done) { animation-delay: -1.575s; }
+  .agent-lane-1, .agent-lane-1 :is(.agent-task, .agent-todo, .agent-done) { animation-delay: -5.175s; }
+  .agent-lane-2, .agent-lane-2 :is(.agent-task, .agent-todo, .agent-done) { animation-delay: -3.375s; }
   .tile-scroll.show-cobalt > div { animation: part-wrench 3.6s cubic-bezier(0.5, 0, 0.3, 1.4) infinite; }
   .tile-scroll.show-points > div { animation: part-hop 2.8s ease-in-out infinite; }
 }
@@ -503,31 +525,119 @@
   0%, 85% { opacity: 0; }
   100% { opacity: 1; }
 }
-/* On small screens and touch devices, the entrance moves one rigid tile in 2D.
-   Avoid flattening a 3D parent with separately animated layers and a blurred
-   landing shadow while the reader is scrolling. Release its compositor hint
-   when animationend marks the entrance as settled. */
+/* On small screens and touch devices, Zel still drops in from above, as if it had
+   followed the reader down from the hero, but as one rigid tile in 2D: it falls
+   almost twice its own height, flattens as it lands and bounces once. No 3D parent
+   to flatten, no separately animated layers and no blurred landing shadow while
+   the reader is scrolling: one layer, moved by transform and opacity alone.
+   Release its compositor hint when animationend marks the entrance as settled. */
 @media (prefers-reduced-motion: no-preference) {
   @media (max-width: 1023px), (pointer: coarse) {
     .story-arrival:is([data-arrival="waiting"], [data-arrival="arrived"]) { will-change: transform, opacity; }
-    .story-arrival[data-arrival="arrived"] { animation: story-arrive-compact 0.48s both; }
+    .story-arrival[data-arrival="arrived"] { animation: story-drop 0.95s both; }
     .story-arrival[data-arrival] .show-all :is(.layer-crown, .layer-cobalt, .layer-points) .zel-piece { animation: none; }
     .story-arrival .show-all::after,
     .story-ground { display: none; }
   }
 }
-@keyframes story-arrive-compact {
+@keyframes story-drop {
+  /* The fall gathers speed and stretches the tile a little, as gravity would. */
   0% {
     opacity: 0;
-    transform: translateY(-24px) rotate(-5deg);
-    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: translateY(-180%) rotate(-14deg) scale(0.95, 1.04);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.85, 0.55);
   }
-  35% { opacity: 1; }
-  72% {
-    transform: translateY(3px) rotate(1deg);
+  12% { opacity: 1; }
+  /* It touches down, then flattens: the shift keeps its base on the floor. */
+  41% {
+    transform: translateY(0%) rotate(1deg) scale(0.97, 1.03);
+    animation-timing-function: cubic-bezier(0, 0, 0.3, 1);
+  }
+  48% {
+    transform: translateY(3%) rotate(2deg) scale(1.07, 0.91);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  /* One bounce, and a last small one to settle. */
+  65% {
+    transform: translateY(-9%) rotate(-1.5deg) scale(0.98, 1.03);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.5);
+  }
+  81% {
+    transform: translateY(1%) rotate(0.5deg) scale(1.03, 0.97);
     animation-timing-function: ease-out;
   }
-  100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  91% {
+    transform: translateY(-1.5%) rotate(0deg) scale(1, 1);
+    animation-timing-function: ease-in-out;
+  }
+  100% { opacity: 1; transform: translateY(0%) rotate(0deg) scale(1, 1); }
+}
+/* From the middle of the stage (5%, where the loop is started) to each errand in turn:
+   it arrives, gulps, chews, pops the errand out with a small jump and walks on. */
+@keyframes agent-body {
+  0% { transform: translate(1.5%, 11%); animation-timing-function: ease-out; }
+  5% { transform: translate(0%, 0%); animation-timing-function: ease-in-out; }
+  17.13% { transform: translate(-24%, -4%) rotate(-4deg); animation-timing-function: ease-in; }
+  20.83% { transform: translate(-24%, -4%) rotate(-4deg) scale(1.08, 0.93); }
+  23.03% { transform: translate(-24%, -4%) rotate(-4deg) scale(0.97, 1.04); }
+  25.23% { transform: translate(-24%, -4%) rotate(-4deg) scale(1.05, 0.96); animation-timing-function: ease-out; }
+  27.33% { transform: translate(-24%, -8%) rotate(0deg) scale(0.95, 1.07); }
+  29.43% { transform: translate(-24%, -4%) rotate(0deg) scale(1.03, 0.97); }
+  31.03% { transform: translate(-24%, -4%) rotate(0deg) scale(1, 1); animation-timing-function: ease-in-out; }
+  50.47% { transform: translate(24%, -10%) rotate(4deg); animation-timing-function: ease-in; }
+  54.17% { transform: translate(24%, -10%) rotate(4deg) scale(1.08, 0.93); }
+  56.37% { transform: translate(24%, -10%) rotate(4deg) scale(0.97, 1.04); }
+  58.57% { transform: translate(24%, -10%) rotate(4deg) scale(1.05, 0.96); animation-timing-function: ease-out; }
+  60.67% { transform: translate(24%, -14%) rotate(0deg) scale(0.95, 1.07); }
+  62.77% { transform: translate(24%, -10%) rotate(0deg) scale(1.03, 0.97); }
+  64.37% { transform: translate(24%, -10%) rotate(0deg) scale(1, 1); animation-timing-function: ease-in-out; }
+  83.80% { transform: translate(3%, 22%) rotate(4deg); animation-timing-function: ease-in; }
+  87.50% { transform: translate(3%, 22%) rotate(4deg) scale(1.08, 0.93); }
+  89.70% { transform: translate(3%, 22%) rotate(4deg) scale(0.97, 1.04); }
+  91.90% { transform: translate(3%, 22%) rotate(4deg) scale(1.05, 0.96); animation-timing-function: ease-out; }
+  94.00% { transform: translate(3%, 18%) rotate(0deg) scale(0.95, 1.07); }
+  96.10% { transform: translate(3%, 22%) rotate(0deg) scale(1.03, 0.97); }
+  97.70% { transform: translate(3%, 22%) rotate(0deg) scale(1, 1); animation-timing-function: ease-in; }
+  100% { transform: translate(1.5%, 11%); }
+}
+/* One errand's loop, with the agent's gulp at 50%: it waits in its place, is drawn
+   into the agent, stays inside while the agent works, and is left back in its place. */
+@keyframes agent-lane-0 {
+  0%, 48.5% { transform: translate(-48%, -8%); animation-timing-function: ease-in; }
+  50%, 56.5% { transform: translate(-24%, -4%); animation-timing-function: cubic-bezier(0.1, 0.7, 0.3, 1); }
+  60%, 100% { transform: translate(-48%, -8%); }
+}
+@keyframes agent-lane-1 {
+  0%, 48.5% { transform: translate(48%, -19%); animation-timing-function: ease-in; }
+  50%, 56.5% { transform: translate(24%, -10%); animation-timing-function: cubic-bezier(0.1, 0.7, 0.3, 1); }
+  60%, 100% { transform: translate(48%, -19%); }
+}
+@keyframes agent-lane-2 {
+  0%, 48.5% { transform: translate(6%, 44%); animation-timing-function: ease-in; }
+  50%, 56.5% { transform: translate(3%, 22%); animation-timing-function: cubic-bezier(0.1, 0.7, 0.3, 1); }
+  60%, 100% { transform: translate(6%, 44%); }
+}
+/* Ticked, it stays a while, fades, and a new to-do pops up in its place. */
+@keyframes agent-task {
+  0%, 48.5% { opacity: 1; transform: scale(1); }
+  49.6% { opacity: 1; transform: scale(0.4); }
+  50%, 56.5% { opacity: 0; transform: scale(0.15); }
+  57.5% { opacity: 1; transform: scale(0.45); }
+  60% { opacity: 1; transform: scale(1.14); }
+  61.5%, 80% { opacity: 1; transform: scale(1); }
+  84%, 89.9% { opacity: 0; transform: scale(0.8); }
+  90% { opacity: 0; transform: scale(0.5); }
+  94%, 100% { opacity: 1; transform: scale(1); }
+}
+@keyframes agent-todo {
+  0%, 53% { opacity: 1; }
+  53.1%, 89.9% { opacity: 0; }
+  90%, 100% { opacity: 1; }
+}
+@keyframes agent-done {
+  0%, 53% { opacity: 0; }
+  53.1%, 89.9% { opacity: 1; }
+  90%, 100% { opacity: 0; }
 }
 @keyframes part-wrench {
   0%, 18% { rotate: 0deg; }
@@ -824,7 +934,25 @@
   .hero-intro .layer-cobalt { animation: fly-in-cobalt 1.1s 0.9s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; }
   .hero-intro .layer-crown { animation: fly-in-crown 1s 1.2s cubic-bezier(0.16, 0.9, 0.24, 1.04) backwards; }
   .hero-intro .zel-shadow { animation: whole-in 0.6s 1.9s backwards; }
-  .hero .hero-copy { animation: arrive 0.8s 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  /* The headline is the page's message: it rises in at once, never held back (a delay
+     with `both` leaves it invisible until the delay is over). */
+  .hero .hero-copy { animation: arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  /* There is one Zel: when it drops into "What is Zellige?" (Story.tsx sets data-zel),
+     the hero's one leaves downwards, after it, and comes back when the reader returns. */
+  .hero-zel { transition: opacity 0.25s ease, translate 0.4s cubic-bezier(0.5, 0, 0.8, 0.5), scale 0.4s ease; }
+  :root[data-zel="story"] .hero-zel { opacity: 0; translate: 0 45%; scale: 0.9; }
+}
+/* Phones play the same entrance in about half the time: the reader is holding the
+   page, waiting to scroll. Hero.tsx starts Zel's wake-up earlier to match. */
+@media (prefers-reduced-motion: no-preference) {
+  @media (max-width: 1023px), (pointer: coarse) {
+    .hero-intro .layer-centre, .hero-intro .zel-face-layer { animation-duration: 0.45s; animation-delay: 0.05s; }
+    .hero-intro .layer-points { animation-duration: 0.75s; animation-delay: 0.25s; }
+    .hero-intro .layer-cobalt { animation-duration: 0.75s; animation-delay: 0.4s; }
+    .hero-intro .layer-crown { animation-duration: 0.7s; animation-delay: 0.55s; }
+    .hero-intro .zel-shadow { animation-duration: 0.45s; animation-delay: 1s; }
+    .hero .hero-copy { animation-duration: 0.35s; }
+  }
 }
 /* One per layer with fixed values, like the moods' keyframes: with variables the
    browser could not hand the flight to the GPU and would work out every frame on the

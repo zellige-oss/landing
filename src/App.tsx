@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useReducedMotion, useReveals } from "@/hooks/motion";
 import { ceramic } from "@/components/brand";
 import { Band } from "@/components/Band";
@@ -13,6 +14,8 @@ export function App() {
   const t = useT();
   const reduced = useReducedMotion();
   useReveals(reduced);
+  // Read by the ?perf meter (public/perf.js): the page is live once its first effects have run.
+  useEffect(() => { performance.mark("zellige:ready"); }, []);
   return (
     <>
       <a className="fixed top-2.5 left-2.5 z-20 -translate-y-[200%] bg-surface p-3.5 focus:translate-y-0" href="#contenido">{t.skip}</a>

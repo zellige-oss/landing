@@ -71,6 +71,8 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       ...piece,
       nodes: [...node.querySelectorAll<HTMLElement>(`[data-zel-motion="${piece.name}"]`)],
       tilt: 0,
+      // The transform last written, so a still layer is not written again.
+      written: "",
     }));
     const looks = [...node.querySelectorAll<SVGGElement>(".companion-look")];
     // Each lid's travel comes from its eye size class (.lid-40, ...) in styles.css.
@@ -123,6 +125,7 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
       lastLook = lastShut = "";
       for (const part of parts) {
         part.tilt = 0;
+        part.written = "";
         for (const element of part.nodes) element.style.removeProperty("transform");
       }
       gazeX = 0;
@@ -193,7 +196,10 @@ export function useZelMotion(root: RefObject<HTMLDivElement | null>, enabled: bo
           // it stays smooth when the browser runs this loop less often.
           const rise = (3.5 * pose.anticipation - 16 * pose.hop + wakeRise) / 470 * 100;
           const transform = `translateY(${rise.toFixed(3)}%) rotate(${(turn + wakeTurn).toFixed(3)}deg) scale(${(1 + (pose.spread + wakeSpread) * part.spread).toFixed(4)})`;
-          for (const element of part.nodes) element.style.setProperty("transform", transform);
+          if (transform !== part.written) {
+            part.written = transform;
+            for (const element of part.nodes) element.style.setProperty("transform", transform);
+          }
         }
       }
       frame = requestAnimationFrame(tick);

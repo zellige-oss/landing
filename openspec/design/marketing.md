@@ -3,7 +3,15 @@
 The public site at zellige.dev: a Vite + React app styled with Tailwind v4 and
 shadcn components. The build prerenders Spanish (`/`, `/es/`) and English
 (`/en/`) to static HTML and hydrates it; everything ships under a CSP that
-allows only `'self'`. `public/locale.js` sends `/` to the browser's language.
+allows only `'self'`. `/` is the Spanish page; `public/locale.js` sends readers of other languages on from it.
+
+Adding `?perf` to any address shows a frame meter (`public/perf.js`, loaded by
+`locale.js` only then). It is for reading on a real phone what a desktop cannot
+show: frames the main thread lost while the page loaded and while it scrolled,
+when the longest waits happened, when the page painted, when its script started
+and when it was live (`zellige:script` and `zellige:ready` marks), the screen's
+frame rate and whether the browser has scroll timelines. It warns when it is
+reading the dev server, which is far slower than the built site.
 
 ## Narrative: four pages
 
@@ -15,21 +23,25 @@ of using Zellige. It arrives whole, then the scroll introduces its parts.
    (self-hosted and open source) and "Bring your own: harness · sub · API key"
    ("Conecta tu harness · suscripción · clave de API" in Spanish). As
    the hero scrolls away, only the wordmark moves into the header. Zel stays in
-   the hero, and there is no down-arrow button.
+   the hero until it drops into "What is Zellige?": then the hero's Zel leaves
+   downwards, so the two are never on screen together, and it returns when the
+   reader scrolls back up. There is no down-arrow button.
 2. **What is Zellige?** (`src/pages/Story.tsx`): the title stays in the sticky
    panel with the story. The complete Zel arrives with open eyes, turning in
    perspective from above. Its landing compresses, rebounds and settles through
    the ceramic layers, with a brief ground shadow. On small screens and touch
-   devices, a 480 ms entrance moves the whole character in 2D, without the
-   separate layer recoil or landing shadow. Each scroll step then
+   devices it still drops in from above, as if it had followed the reader down
+   from the hero: the whole character falls almost twice its height in 2D,
+   flattens as it lands and bounces once (950 ms, transform and opacity only),
+   without the perspective, the separate layer recoil or the landing shadow. Each scroll step then
    shows one layer around it: the personal agent (ivory crown), the harness manager
    (blue), then chat (green). Each part is named with its layer and Zel at its centre.
    Each part plays its gesture as soon as it takes the stage. Chat leads straight
    into "How does it work?", without a second assembled tile or summary. In the
-   opening tile, the tile and
-   the parts point at each other: hovering a layer lifts it, with Zel, and lights
-   up its part; hovering a part lifts its layer. Clicking or tapping a layer jumps
-   to its step, as do the three progress buttons. "How does it work?" explains the
+   opening tile, hovering a layer lifts it, with Zel. The parts in the text do not
+   answer to hovering: only scrolling and clicking move the story. Clicking or tapping a layer jumps
+   to its step, as do the three progress buttons. The stage shows that part at once, while the page scrolls to it, instead of
+   passing through the parts between. "How does it work?" explains the
    setup and draws it: your devices reach your server over Tailscale; the server
    runs Zellige (its three layers on one shared memory) and reaches the models by
    API or OAuth. Scrolling back retraces the story, including on return visits;
@@ -79,11 +91,12 @@ with three small tiles in the colours of Zel's parts.
 - `src/hooks/zel-motion.ts`: the hero's living Zel (wake-up, gaze, blinks, the
   greeting with its widening eyes and the layer spin). It writes each value
   straight onto the element that uses it, so phones never restyle all of Zel.
-- `src/hooks/zel-eyes.ts`: the story's eye gestures. The ivory personal agent is
-  awake and curious: it leans toward its reminder, reads it, gives two clear nods
-  and springs back into place, an "I'll take care of it" rather than a wake-up.
-  Its eyes stay open through the gesture; eyes, body and note share one clock.
-  The face and crown move together in 2D. The blue harness manager is mildly annoyed, with a low
+- `src/hooks/zel-eyes.ts`: the story's eye gestures. The ivory personal agent
+  goes to its errands, without leaving the stage: three to-dos wait around it, and
+  it walks to each in turn, gulps it, works on it a moment and leaves it back in its
+  place as a different pill (a dashed to-do such as "Dentist" becomes a green "Appointment booked"); a new to-do pops up there later. Body and errands are CSS animations on one clock (`agent-body`,
+  `agent-lane-*`, `agent-task` in `styles.css`), which run off the main thread; the
+  eyes read that clock, so the three stay together. The blue harness manager is mildly annoyed, with a low
   lid and sideways glance, then a brief spark when its work is done.
   Eye gestures pause off screen and stay still with reduced motion.
   Chat is the attentive green character, with its quick wink and a nearby typing bubble.

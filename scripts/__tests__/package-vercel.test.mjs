@@ -126,6 +126,9 @@ test('all paths get the landing security headers', async () => {
   };
   assert.deepEqual(config.routes[0], { src: '/.*', headers, continue: true });
   assert.deepEqual(config.routes.slice(1), [
+    // Hashed assets never change under their name; fonts keep theirs for a month.
+    { src: '^/assets/.*', headers: { 'Cache-Control': 'public, max-age=31536000, immutable' }, continue: true },
+    { src: '^/fonts/.*', headers: { 'Cache-Control': 'public, max-age=2592000' }, continue: true },
     { src: '^/$', dest: '/index.html' },
     { src: '^/es/?$', dest: '/es/index.html' },
     { src: '^/en/?$', dest: '/en/index.html' },

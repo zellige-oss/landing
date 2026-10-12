@@ -39,7 +39,8 @@ const es = {
   story: {
     hint: "Desliza para ver cada parte. Tócalas, a ver qué dicen.",
     // What the personal agent's note says, beside it in the story.
-    reminder: { when: "Mañana, 9:00", what: "Dentista" },
+    // The errands the personal agent sees to in the story: each as it waits, and as it is left done.
+    tasks: [["Dentista", "Cita reservada"], ["Correo", "Correo enviado"], ["Compra", "Compra hecha"]],
     progress: "Pasos",
     goTo: "Ir al paso",
     title: "¿Qué es Zellige?",
@@ -136,7 +137,7 @@ const en = {
   },
   story: {
     hint: "Scroll to see each part. Poke them and see what they say.",
-    reminder: { when: "Tomorrow, 9:00", what: "Dentist" },
+    tasks: [["Dentist", "Appointment booked"], ["Email", "Email sent"], ["Groceries", "Groceries ordered"]],
     progress: "Steps",
     goTo: "Go to step",
     title: "What is Zellige?",
